@@ -1,0 +1,49 @@
+{
+  "fixture_version": "1.0",
+  "source_type": "synthetic_text",
+  "description": "人工构造的中文会议场景，仅验证语义处理；没有配套录音，不能用于 ASR 准确率或音频性能评测。",
+  "meeting": {
+    "meeting_id": "m_demo_001",
+    "title": "试点发布与验收安排",
+    "meeting_started_at": "2026-10-09T10:00:00+08:00",
+    "meeting_timezone": "Asia/Shanghai",
+    "transcript_version": "tv_demo_001",
+    "date_policy": "下周指会议日期所在自然周之后的一周；周一为自然周起点。只有日期时不补造精确时刻。",
+    "participants": [
+      {"person_id": "p001", "display_name": "张晨"},
+      {"person_id": "p002", "display_name": "李明"},
+      {"person_id": "p003", "display_name": "王芳"},
+      {"person_id": "p004", "display_name": "陈妍"},
+      {"person_id": "p005", "display_name": "王宁"}
+    ],
+    "speaker_mapping_source": "fixture_explicit_metadata"
+  },
+  "segments": [
+    {"segment_id": "s001", "speaker_person_id": "p001", "start_ms": null, "end_ms": null, "text": "今天讨论试点发布。原来考虑本周五上线，先取消。"},
+    {"segment_id": "s002", "speaker_person_id": "p002", "start_ms": null, "end_ms": null, "text": "我负责接口幂等改造，下周二交付。"},
+    {"segment_id": "s003", "speaker_person_id": "p001", "start_ms": null, "end_ms": null, "text": "如果压测通过，下周五再安排发布；目前只是候选计划。"},
+    {"segment_id": "s004", "speaker_person_id": "p003", "start_ms": null, "end_ms": null, "text": "我来补充验收用例，不过完成日期还没确定。"},
+    {"segment_id": "s005", "speaker_person_id": "p004", "start_ms": null, "end_ms": null, "text": "客户通知让老王跟进。"},
+    {"segment_id": "s006", "speaker_person_id": "p001", "start_ms": null, "end_ms": null, "text": "参会的王芳和王宁需要先确认，先不要发客户通知。"},
+    {"segment_id": "s007", "speaker_person_id": "p002", "start_ms": null, "end_ms": null, "text": "昨天提到的一万条数据改成两万条，验收以两万为准。"},
+    {"segment_id": "s008", "speaker_person_id": "p001", "start_ms": null, "end_ms": null, "text": "李明的交付调整到下周三，其余保持。"}
+  ],
+  "expected_behavior": {
+    "latest_facts": [
+      {"claim": "验收数据规模采用两万条。", "evidence_segment_ids": ["s007"]}
+    ],
+    "actions": [
+      {"task": "接口幂等改造", "owner_person_id": "p002", "due_raw": "下周三", "due_date": "2026-10-14", "candidate_state": "committed", "conditions": [], "evidence_segment_ids": ["s002", "s008"], "notes": ["原下周二日期为 2026-10-13，后被修改；保留修订记录。"]},
+      {"task": "补充验收用例", "owner_person_id": "p003", "due_raw": null, "due_date": null, "candidate_state": "committed", "conditions": [], "evidence_segment_ids": ["s004"], "notes": ["不得虚构日期；按组织执行规则要求补充或允许无日期任务。"]},
+      {"task": "安排试点发布", "owner_person_id": null, "due_raw": "下周五", "due_date": "2026-10-16", "candidate_state": "conditional", "conditions": ["压测通过"], "evidence_segment_ids": ["s003"], "notes": ["仍为候选计划，不作为确认发布决策或直接执行任务。"]}
+    ],
+    "blocked_or_canceled_candidates": [
+      {"task": "本周五上线", "candidate_state": "canceled", "evidence_segment_ids": ["s001"]},
+      {"task": "发送客户通知", "owner_raw": "老王", "owner_person_id": null, "owner_candidates": ["p003", "p005"], "candidate_state": "paused", "evidence_segment_ids": ["s005", "s006"], "notes": ["暂停当前发送行为；是否继续准备材料需另行确认，不能推断全部跟进工作均取消。"]}
+    ],
+    "must_not_claim": ["已经决定本周五发布", "已经决定下周五无条件发布", "已明确老王就是王芳", "所有参会人都已发言", "已发送客户通知"],
+    "audio_statistics": "unavailable_without_audio_timestamps",
+    "side_effects_before_review": [],
+    "date_rerun_invariant": "之后任何日期重新处理，相同会议基准和规则仍得到 2026-10-14 与 2026-10-16。"
+  }
+}

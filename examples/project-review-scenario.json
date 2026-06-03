@@ -1,0 +1,68 @@
+{
+  "scenario_id": "release-review-cross-source-001",
+  "kind": "synthetic_text_design_fixture",
+  "has_real_audio": false,
+  "project_id": "demo-payments",
+  "meeting_start": "2026-10-23T15:00:00+08:00",
+  "timezone": "Asia/Shanghai",
+  "participants": [
+    {"member_id": "m-li", "name": "李明", "role": "后端开发"},
+    {"member_id": "m-wang-fang", "name": "王芳", "role": "测试"},
+    {"member_id": "m-wang-ning", "name": "王宁", "role": "客户协作"}
+  ],
+  "sources": [
+    {
+      "source_id": "meeting-previous", "version": "v1", "kind": "approved_minutes",
+      "captured_at": "2026-10-19T17:00:00+08:00",
+      "spans": [
+        {"span_id": "prev-01", "text": "李明负责接口幂等改造，10月23日完成，完成后评估是否发布。"}
+      ]
+    },
+    {
+      "source_id": "meeting-current", "version": "v1", "kind": "transcript",
+      "captured_at": "2026-10-23T16:00:00+08:00",
+      "spans": [
+        {"span_id": "cur-01", "speaker_id": "s1", "confirmed_member_id": "m-li", "text": "幂等改造我改到下周三交，原来的今天交付做不到。"},
+        {"span_id": "cur-02", "speaker_id": "s2", "confirmed_member_id": "m-wang-fang", "text": "发布必须等压测和安全评审都通过。压测排期还没定，代码合并不代表验收通过。"},
+        {"span_id": "cur-03", "speaker_id": "s3", "confirmed_member_id": null, "text": "客户通知让老王准备，但发布确定前先不要发送。"},
+        {"span_id": "cur-04", "speaker_id": "s2", "confirmed_member_id": "m-wang-fang", "text": "下周五只是候选窗口，今天不定发布日期。"}
+      ]
+    },
+    {
+      "source_id": "task-board", "version": "snapshot-7", "kind": "task_snapshot",
+      "captured_at": "2026-10-23T16:05:00+08:00",
+      "spans": [
+        {"span_id": "task-17", "task_id": "TASK-17", "task_version": 7, "text": "接口幂等改造；负责人李明；状态完成；截止日期2026-10-23；状态说明：代码已合并，验收测试未完成。"},
+        {"span_id": "test-18", "task_id": "TASK-18", "task_version": 2, "text": "发布压测；状态未排期；负责人待分配。"},
+        {"span_id": "security-19", "task_id": "TASK-19", "task_version": 1, "text": "安全评审；状态待评审；结果未知。"}
+      ]
+    },
+    {
+      "source_id": "requirement-idempotency", "version": "v3", "kind": "requirement",
+      "captured_at": "2026-10-22T12:00:00+08:00",
+      "spans": [
+        {"span_id": "req-04", "text": "接口幂等改造验收须包括重复请求与失败重试场景。代码合并不代表这些测试已通过。"}
+      ]
+    }
+  ],
+  "expected_findings": [
+    {"id": "f-date", "type": "commitment_revision", "value": "2026-10-28", "support_spans": ["prev-01", "cur-01"], "note": "改造交付日期，不能当成发布日期。"},
+    {"id": "f-window", "type": "candidate_window", "value": "2026-10-30", "support_spans": ["cur-04"], "note": "候选窗口，正式发布日期未知。"},
+    {"id": "f-state", "type": "status_semantics_conflict", "support_spans": ["cur-02", "task-17", "req-04"], "note": "代码合并和验收完成口径不同，生成待审核修订。"},
+    {"id": "f-release", "type": "preconditions", "all_of": ["load_test_passed", "security_review_passed"], "support_spans": ["cur-02", "test-18", "security-19"]},
+    {"id": "f-owner", "type": "ambiguous_owner", "candidates": ["m-wang-fang", "m-wang-ning"], "support_spans": ["cur-03"]},
+    {"id": "f-notice", "type": "separate_prepare_and_send", "support_spans": ["cur-03"], "note": "可以提出准备任务，不能推断发送已经获批。"}
+  ],
+  "forbidden_automatic_outcomes": [
+    "将2026-10-30写成已确认发布日期",
+    "认定验收、压测或安全评审已通过",
+    "未确认就将老王映射为其中一人",
+    "未经对应审批就改变正式任务或发送客户通知"
+  ],
+  "followup_event": {
+    "event_id": "evt-load-test-pass-001", "event_time": "2026-10-28T18:00:00+08:00",
+    "source_id": "task-board", "new_version": "snapshot-8",
+    "change": {"task_id": "TASK-18", "status": "passed"},
+    "expected_behavior": "创建受影响范围的新核对运行；压测条件可记录满足，但安全评审仍未知，不自动发布或发送通知。"
+  }
+}
