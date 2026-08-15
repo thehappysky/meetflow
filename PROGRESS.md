@@ -4,7 +4,14 @@
 
 ## 当前状态
 
-v0.1 本地版本已可运行。文字/示例→协作→证据→审核→本地任务→导出已走通，Vue 构建和浏览器操作通过。GitHub 私有仓库：https://github.com/thehappysky/meetflow 。资料基线为 `baea6b8`。
+v0.1 本地会议版本已可运行；正在新增方案 A 销售会话质检。会议能力继续保留。GitHub 仓库已按用户要求改为公开：https://github.com/thehappysky/meetflow 。资料基线为 `baea6b8`。
+
+### 方案 A 本轮进度
+
+- A0 已确定实施边界，见 docs/13-sales-quality.md。
+- A1 待完成：评分卡版本、会话快照、专业协作、评分/复核/汇总 API 和测试。
+- A2 待完成：销售工作台及完整用户操作。
+- A3 待完成：回归、浏览器验证、文档与推送。
 
 ## 里程碑
 
