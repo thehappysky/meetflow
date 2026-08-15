@@ -1,6 +1,7 @@
 import pytest
 from meetflow.agents import validate_result
 from meetflow.domain import ROLE_NAMES, DomainError
+from meetflow.providers import DemoProvider
 from role_schema_probe import constrain_evidence, role_schema
 
 
@@ -16,7 +17,10 @@ def test_candidate_schema_has_no_dangling_refs_and_keeps_still_legal_fields(role
         elif isinstance(value, list):
             for child in value: visit(child)
     visit(schema)
-    result = validate_result({"claims": [{"text": "依据", "kind": "fact", "evidence": ["s1"]}]},
+    value = {"summary": "依据", "claims": [{"text": "依据", "kind": "fact", "evidence": ["s1"]}]}
+    if role == 'coordinator':
+        value['delegations'] = DemoProvider.plan([])['delegations']
+    result = validate_result(value,
                              role, {"s1": {"source_kind": "transcript"}}, [])
     assert result["claims"][0]["text"] == "依据"
 

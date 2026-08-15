@@ -1,17 +1,20 @@
 import json
 import operator
+from copy import deepcopy
+from functools import lru_cache
 from typing import Annotated, TypedDict
 
 from langgraph.graph import END, START, StateGraph
-from pydantic import ValidationError
+from pydantic import ValidationError, create_model
 
-from .domain import ROLE_NAMES, AgentResult, DomainError
+from .domain import ROLE_NAMES, AgentResult, Contract, DomainError
+from .planning import validate_plan
 from .providers import DemoProvider, LiveProvider
 from .tools import ToolGateway
 
 PROMPTS = {
-    "coordinator": "你是协作协调者。依据资料清单规划有限任务DAG。先理解会议；有历史/需求/成员资料时调查上下文；规划和风险核对后审查。每个任务ID唯一，依赖已定义且无环，审查须覆盖全部任务。你只提交delegations，不直接写业务状态。",
-    "meeting": "你是会议理解专家。只依据当前会议发言，区分事实、建议、决定、承诺、条件、否定、改期和未决问题。按需补读，不拿历史材料替代本次发言。每个结论附原文片段ID。",
+    "coordinator": "你是分析协作协调者。委派的是分析任务，不是让销售发送报价等业务操作。依据资料清单规划有限DAG：meeting理解本次会议，context调查可选历史，planner提取行动建议，risk核对条件，auditor审查前置全部分析。每个任务只填id、role、goal、depends_on；id唯一，依赖已定义且无环，必须有planner和唯一auditor，auditor须直接或间接依赖全部其他任务。只提交delegations，不写业务状态。",
+    "meeting": "你是会议理解专家。只依据当前会议发言，区分事实、建议、决定、承诺、条件、否定、改期和未决问题。按需补读，不拿历史材料替代本次发言。summary必须给出非空简短纪要，claims列出带真实原文片段ID的结论；未知信息保留待确认。",
     "context": "你是项目上下文专家。调查授权历史、需求、成员和冻结任务。核对历史安排及当前记录差异，必要时继续检索。来源不一致时保留双方，不自动认定某方正确。",
     "planner": "你是承诺与执行规划专家。读取上游和原文，形成行动建议。改期/取消必须明确关联同一任务；更新已有任务必须给target_task_id和expected_version。候选窗口不是确定日期，未知负责人保留null；没有实际会议时间不能猜相对日期。不要把准备通知等同于发送。每个action须有证据；歧义集中成questions。收到审查反馈时仅修订有问题的内容。",
     "risk": "你是风险与依赖专家。检查执行条件、状态口径、历史冲突和需求约束。代码合并不等于验收完成。风险需证据，推断明确标记建议。未读取不能说已通过。",
@@ -27,6 +30,16 @@ class SpecialistState(TypedDict, total=False):
     result: dict
 
 
+@lru_cache
+def role_result_model(role):
+    if role not in ROLE_NAMES:
+        raise ValueError('unknown role')
+    exclusive = {'actions': 'planner', 'challenges': 'auditor', 'delegations': 'coordinator'}
+    fields = {name: (field.annotation, deepcopy(field)) for name, field in AgentResult.model_fields.items()
+              if name not in exclusive or exclusive[name] == role}
+    return create_model(f'{role.title()}Submission', __base__=Contract, **fields)
+
+
 def validate_result(result, role, evidence_map, tasks):
     value = AgentResult.model_validate(result)
     if role != "coordinator" and value.delegations:
@@ -35,6 +48,10 @@ def validate_result(result, role, evidence_map, tasks):
         raise DomainError("只有执行规划角色能提交行动方案")
     if role != "auditor" and value.challenges:
         raise DomainError("只有审查角色能提交挑战")
+    if role == "coordinator":
+        validate_plan([job.model_dump() for job in value.delegations])
+    if role == "meeting" and not value.summary.strip():
+        raise DomainError("会议理解须在summary提供非空纪要，不能仅有claims或空产物")
     items = [*value.claims, *value.risks, *value.actions, *value.questions, *value.challenges]
     for item in items:
         for ref in item.evidence:
@@ -68,13 +85,14 @@ class AgentRunner:
         run = self.store.get_run(run_id)
         provider = self.provider_override or (DemoProvider() if run["mode"] == "demo" else LiveProvider(self.store.settings))
         gateway = ToolGateway(self.store, run_id, role, upstream)
-        info = {"meeting_time": run["manifest"]["meeting_time"], "timezone": run["manifest"]["timezone"]}
+        info = {"meeting_time": run["manifest"]["meeting_time"],
+                "meeting_date": run["manifest"].get("meeting_date"), "timezone": run["manifest"]["timezone"]}
         contact = run["manifest"].get("contact", {})
         info.update(salesperson=contact.get("salesperson", ""), customer=contact.get("customer", ""))
         evidence_map = self.store.source_map(run_id)
         definitions = gateway.definitions() + [{"type": "function", "function": {
             "name": "submit_result", "description": "任务完成时提交结构化结果，所有重要陈述须引用真实片段ID。",
-            "parameters": AgentResult.model_json_schema()}}]
+            "parameters": role_result_model(role).model_json_schema()}}]
 
         def reason(state):
             if state.get("steps", 0) >= self.store.settings.max_agent_steps:

@@ -6,7 +6,7 @@
 
 职责本身另做R1，见[划分依据与对照](../../docs/28-agent-role-partition-evidence.md)：三种职责重点在同串行图下各24条，关键槽位均16/24，含证据条件均10/24，没有职责赢家。拓扑比较不等于职责比较，固定模型调用微基准不等于完整自主工具Agent验证。
 
-内部另做I1（20例×4协议单次）与实际meeting工具循环探针，见[内部构造与结果](../../docs/29-agent-internals-and-ablation.md)。枚举减少一次非法ID失败，去重只证明实验封装省token；实际角色Schema首请求1449→877 token，但两种Schema均6步超限。候选未修改产品契约，不用静态体积或小基准冒充全角色质量。
+内部另做I1（20例×4协议单次）与实际meeting工具循环探针，见[内部构造与结果](../../docs/29-agent-internals-and-ablation.md)。枚举减少一次非法ID失败，去重只证明实验封装省token；实际角色Schema首请求1449→877 token，但两种Schema均6步超限。I1候选当批未改产品；后续L2将角色字段裁剪纳入产品，见[真实工具链修复](../../docs/31-live-workflow-repair.md)及独立live_workflow_summary.json，不用静态体积或小基准冒充全角色质量。
 
 ## 文件与复算
 
@@ -18,7 +18,10 @@
 | role_partition_experiment.py | 同拓扑下三组职责提示R1对照；复用计量／校验，审查提示与交接结构相同 |
 | internal_cases.py | 原12例不改，另加8个代理编写开发场景；仍非独立gold |
 | internal_experiment.py | 固定外部分工，引用解码／有效上游去重2×2对照 |
-| role_schema_probe.py | 六角色Schema体积／大枚举代价与实际AgentRunner单角色诊断；候选不改产品 |
+| role_schema_probe.py | 历史共用／角色Schema显式对照；即使产品已裁剪，shared_schema仍强制原Schema，旧轮源码保留 |
+| live_workflow_probe.py | L1／L2实际工具循环与完整动态图诊断；隔离账号库、冻结输入、源码／模型摘要和全失败 |
+| summarize_live.py | 独立输出live_workflow_summary.json，不覆盖之前固定调用实验汇总 |
+| test_live_measurement.py | 检查负责人／日期／证据错误、建议误作行动和缺报告均不能算质量通过 |
 | test_internals.py／test_role_schemas.py | 去重不变性、非法产物保留、字段语义／Schema引用完整性及探针超时透传 |
 | test_topologies.py | 交接上下文隔离、争议门控、无效产物与一致但错误的计量 |
 | test_role_partitions.py | 职责对照的阶段顺序、相同审查和交接控制变量 |
@@ -42,6 +45,8 @@
 .venv\Scripts\python.exe labs/backend_agent_audit/internal_experiment.py --model qwen3:4b --repeats 1
 .venv\Scripts\python.exe labs/backend_agent_audit/role_schema_probe.py
 .venv\Scripts\python.exe labs/backend_agent_audit/current_graph_probe.py --model qwen3:4b --profile ollama
+.venv\Scripts\python.exe labs/backend_agent_audit/live_workflow_probe.py --scope graph --model qwen2.5:7b --profile ollama_json --steps 10 --output 1536 --calls 48 --seconds 600
+.venv\Scripts\python.exe labs/backend_agent_audit/summarize_live.py
 .venv\Scripts\python.exe labs/backend_agent_audit/sqlite_writes.py
 .venv\Scripts\python.exe labs/backend_agent_audit/capacity.py
 .venv\Scripts\python.exe labs/backend_agent_audit/summarize.py

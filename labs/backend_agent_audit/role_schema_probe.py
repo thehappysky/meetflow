@@ -74,10 +74,10 @@ class ProfileProvider(TracedProvider):
 
     def complete(self, role, messages, tools, info):
         tools = copy.deepcopy(tools)
-        if self.profile == "role_schema":
-            for tool in tools:
-                if tool["function"]["name"] == "submit_result":
-                    tool["function"]["parameters"] = role_schema(role)
+        for tool in tools:
+            if tool["function"]["name"] == "submit_result":
+                tool["function"]["parameters"] = (role_schema(role) if self.profile == "role_schema"
+                                                    else AgentResult.model_json_schema())
         return super().complete(role, messages, tools, info)
 
 
