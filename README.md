@@ -20,6 +20,8 @@
 
 [开发进度](PROGRESS.md) · [变更记录](CHANGELOG.md) · [实际实现范围](docs/12-implementation-status.md) · [提交日期说明](docs/COMMIT_METADATA.md)
 
+**第一次接手代码或准备演示：**先看 [文件地图、代码架构与演示手册](docs/14-code-map-and-demo.md)。包含当前自有文件逐项用途、两条业务数据流、实际部署结构、Windows 启动、销售/会议操作路径及常见问题。
+
 ## 快速运行
 
 需要 Python 3.12+、Node.js 22.12+（推荐 24）。离线体验无需 Docker、Redis 或模型密钥。
