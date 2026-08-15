@@ -1,0 +1,126 @@
+[
+  {
+    "id": "b01_named_other",
+    "date": "2026-11-12",
+    "text": "销售李青：我明天发送报价，陈安下周一安排演示。",
+    "source": "agent-authored pre-run boundary checks, not independent human gold",
+    "expected": {
+      "actions": [
+        {
+          "title_contains": "报价",
+          "owner": "李青",
+          "due": "2026-11-13",
+          "status": "todo"
+        },
+        {
+          "title_contains": "演示",
+          "owner": "陈安",
+          "due": "2026-11-16",
+          "status": "todo"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b02_customer_date_request",
+    "date": "2026-11-12",
+    "text": "销售李青：我明天发送报价。\n客户赵总：请改到下周二。\n销售李青：好的，报价改到下周二。",
+    "source": "agent-authored pre-run boundary checks, not independent human gold",
+    "expected": {
+      "actions": [
+        {
+          "title_contains": "报价",
+          "owner": "李青",
+          "due": "2026-11-17",
+          "status": "todo"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b03_do_not_cancel",
+    "date": "2026-11-12",
+    "text": "销售李青：我明天安排演示，这项安排不用取消。",
+    "source": "agent-authored pre-run boundary checks, not independent human gold",
+    "expected": {
+      "actions": [
+        {
+          "title_contains": "演示",
+          "owner": "李青",
+          "due": "2026-11-13",
+          "status": "todo"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b04_cancel_reservation_is_future_work",
+    "date": "2026-11-12",
+    "text": "销售李青：我明天取消酒店预订。",
+    "source": "agent-authored pre-run boundary checks, not independent human gold",
+    "expected": {
+      "actions": [
+        {
+          "title_contains": "预订",
+          "owner": "李青",
+          "due": "2026-11-13",
+          "status": "todo"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b05_two_distinct_demos",
+    "date": "2026-11-12",
+    "text": "销售李青：我明天安排财务演示。\n销售陈安：我下周一安排技术演示。",
+    "source": "agent-authored pre-run boundary checks, not independent human gold",
+    "expected": {
+      "actions": [
+        {
+          "title_contains": "财务",
+          "owner": "李青",
+          "due": "2026-11-13",
+          "status": "todo"
+        },
+        {
+          "title_contains": "技术",
+          "owner": "陈安",
+          "due": "2026-11-16",
+          "status": "todo"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b06_unknown_speaker",
+    "date": "2026-11-12",
+    "text": "未知：我明天发送报价。",
+    "source": "agent-authored pre-run boundary checks, not independent human gold",
+    "expected": {
+      "actions": [
+        {
+          "title_contains": "报价",
+          "owner": null,
+          "due": "2026-11-13",
+          "status": "todo"
+        }
+      ]
+    }
+  },
+  {
+    "id": "b07_reopened_demo",
+    "date": "2026-11-12",
+    "text": "销售李青：演示已取消。\n销售李青：现在恢复演示安排，我下周一执行。",
+    "source": "agent-authored pre-run boundary checks, not independent human gold",
+    "expected": {
+      "actions": [
+        {
+          "title_contains": "演示",
+          "owner": "李青",
+          "due": "2026-11-16",
+          "status": "todo"
+        }
+      ]
+    }
+  }
+]

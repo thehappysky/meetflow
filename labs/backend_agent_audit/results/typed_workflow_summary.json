@@ -31,6 +31,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -150,6 +151,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -279,6 +281,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -406,6 +409,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -542,6 +546,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
       "template_sha256": "eade0a07cac7712787bbce23d12f9306adb4781d873d1df6e16f7840fa37afec",
       "source_hashes": {
@@ -663,6 +668,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
       "template_sha256": "eade0a07cac7712787bbce23d12f9306adb4781d873d1df6e16f7840fa37afec",
       "source_hashes": {
@@ -790,6 +796,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
       "template_sha256": "eade0a07cac7712787bbce23d12f9306adb4781d873d1df6e16f7840fa37afec",
       "source_hashes": {
@@ -911,6 +918,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
       "template_sha256": "eade0a07cac7712787bbce23d12f9306adb4781d873d1df6e16f7840fa37afec",
       "source_hashes": {
@@ -1034,6 +1042,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -1163,6 +1172,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
       "template_sha256": "ae370d884f108d16e7cc8fd5259ebc5773a0afa6e078b11f4ed7e39a27e0dfc4",
       "source_hashes": {
@@ -1301,6 +1311,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -1440,6 +1451,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -1587,6 +1599,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -1737,6 +1750,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -1888,6 +1902,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
       "template_sha256": "ae370d884f108d16e7cc8fd5259ebc5773a0afa6e078b11f4ed7e39a27e0dfc4",
       "source_hashes": {
@@ -2039,6 +2054,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
       "template_sha256": "eade0a07cac7712787bbce23d12f9306adb4781d873d1df6e16f7840fa37afec",
       "source_hashes": {
@@ -2180,6 +2196,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
       "template_sha256": "ae370d884f108d16e7cc8fd5259ebc5773a0afa6e078b11f4ed7e39a27e0dfc4",
       "source_hashes": {
@@ -2332,6 +2349,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -2479,6 +2497,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": null,
+      "prompt_revision": null,
       "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -2637,6 +2656,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": true,
+      "prompt_revision": null,
       "model_digest": "56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -2795,6 +2815,7 @@
       "abort_note": "Stopped after two completed development cases: conservative byte-bound rejected a valid-sized repair conversation; calibrate matched tokenizer before spending the frozen validation set. Extra twelve cases not reached. In-flight unconfirmed attempt may have incomplete transport usage.",
       "case_set": "acceptance_cases.json",
       "coverage_check": true,
+      "prompt_revision": null,
       "model_digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
       "template_sha256": "ae370d884f108d16e7cc8fd5259ebc5773a0afa6e078b11f4ed7e39a27e0dfc4",
       "source_hashes": {
@@ -2915,6 +2936,7 @@
       "abort_note": null,
       "case_set": "acceptance_cases.json",
       "coverage_check": true,
+      "prompt_revision": null,
       "model_digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
       "template_sha256": "ae370d884f108d16e7cc8fd5259ebc5773a0afa6e078b11f4ed7e39a27e0dfc4",
       "source_hashes": {
@@ -3408,6 +3430,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": true,
+      "prompt_revision": null,
       "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -3566,6 +3589,7 @@
       "abort_note": null,
       "case_set": "development_three",
       "coverage_check": true,
+      "prompt_revision": null,
       "model_digest": "56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -3724,6 +3748,7 @@
       "abort_note": null,
       "case_set": "acceptance_cases.json",
       "coverage_check": true,
+      "prompt_revision": null,
       "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -4234,6 +4259,7 @@
       "abort_note": null,
       "case_set": "acceptance_cases.json",
       "coverage_check": false,
+      "prompt_revision": null,
       "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -4729,6 +4755,7 @@
       "abort_note": null,
       "case_set": "acceptance_cases.json",
       "coverage_check": true,
+      "prompt_revision": "state_v2",
       "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -5239,6 +5266,7 @@
       "abort_note": null,
       "case_set": "long_validation_case.json",
       "coverage_check": true,
+      "prompt_revision": "state_v2",
       "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -5343,6 +5371,7 @@
       "abort_note": null,
       "case_set": "acceptance_cases.json",
       "coverage_check": false,
+      "prompt_revision": "state_v2",
       "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
       "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
       "source_hashes": {
@@ -5815,6 +5844,1313 @@
           "no_tool_responses": 0,
           "transport_input_tokens": 4072,
           "transport_output_tokens": 327
+        }
+      ]
+    },
+    {
+      "run": "20261114T021649659989Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "acceptance_cases.json",
+      "coverage_check": true,
+      "prompt_revision": "context_v3",
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "fc99e5f9eaaa2f6642d5e8489a3517f816187e9b4192fb2b4935aee2c55dc868",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "81b9abc853bf8208955010ab661f2a45000eeae04b102e5bb703a54a3cb7ed6a",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "0e7ac5f04b14083fabdbe4f20e8e2683d8830967ef587228015b749f1596b281",
+        "backend/meetflow/quality_workspace.py": "5a0b910b783b1bdd33a475d433e12c3f18394ca5adb4afe1942f07a122a010b1",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "a989c0463a6cf78c746689ee6da9bb472d84d259a6d248496ebe780cee808bb2",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "156f18d48f0dde00d6b337cd0dc0dfde8a140b61c5b98b2f653bc13649bd17b3",
+        "backend/meetflow/sales_workflow.py": "1ecaea8320358dfaa00bdfb1dfd67ea426f7d1536409689c58d60d1880a85ee7",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "21b06e829b221f8ee25497e4bc841c4abda9a265da35048049826ca7ba477ea0",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 15,
+      "protocol_completed": 15,
+      "quality_checked_attempts": 15,
+      "all_narrow_checks_passed": 11,
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 17.294645600020885,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 5024,
+          "output_tokens": 367,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5024,
+          "transport_output_tokens": 367
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "conditional_trial": true,
+            "required_roles": true
+          },
+          "wall_seconds": 28.419251800049096,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 4,
+            "audit": 2
+          },
+          "model_calls": 8,
+          "tool_calls": 0,
+          "input_tokens": 10210,
+          "output_tokens": 1150,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 10210,
+          "transport_output_tokens": 1150
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 4.694691000040621,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2905,
+          "output_tokens": 152,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2905,
+          "transport_output_tokens": 152
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true,
+            "required_roles": true
+          },
+          "wall_seconds": 5.284895999939181,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2932,
+          "output_tokens": 184,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2932,
+          "transport_output_tokens": 184
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 10.010813699918799,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 5131,
+          "output_tokens": 355,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5131,
+          "transport_output_tokens": 355
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": true,
+            "required_roles": true
+          },
+          "wall_seconds": 9.17421780002769,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4968,
+          "output_tokens": 312,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4968,
+          "transport_output_tokens": 312
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 21.659957999945618,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 4,
+            "audit": 2
+          },
+          "model_calls": 8,
+          "tool_calls": 0,
+          "input_tokens": 9335,
+          "output_tokens": 819,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 9335,
+          "transport_output_tokens": 819
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 16.140303199994378,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 6776,
+          "output_tokens": 644,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6776,
+          "transport_output_tokens": 644
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 21.474298000102863,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 5,
+            "audit": 2
+          },
+          "model_calls": 9,
+          "tool_calls": 0,
+          "input_tokens": 10143,
+          "output_tokens": 788,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 10143,
+          "transport_output_tokens": 788
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_0_condition": false,
+            "required_roles": true
+          },
+          "wall_seconds": 5.085907300002873,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2753,
+          "output_tokens": 169,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2753,
+          "transport_output_tokens": 169
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "required_roles": true
+          },
+          "wall_seconds": 4.677578500006348,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2901,
+          "output_tokens": 158,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2901,
+          "transport_output_tokens": 158
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 10.235820999951102,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 5031,
+          "output_tokens": 363,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5031,
+          "transport_output_tokens": 363
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 11.020005300058983,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 5268,
+          "output_tokens": 400,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5268,
+          "transport_output_tokens": 400
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 19.13202820008155,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 3,
+            "audit": 2
+          },
+          "model_calls": 7,
+          "tool_calls": 0,
+          "input_tokens": 8151,
+          "output_tokens": 685,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 8151,
+          "transport_output_tokens": 685
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": false,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 17.347181100049056,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 4
+          },
+          "model_calls": 8,
+          "tool_calls": 3,
+          "input_tokens": 11356,
+          "output_tokens": 622,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 11356,
+          "transport_output_tokens": 622
+        }
+      ]
+    },
+    {
+      "run": "20261114T022035664475Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "acceptance_cases.json",
+      "coverage_check": true,
+      "prompt_revision": "review_v3",
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "fc99e5f9eaaa2f6642d5e8489a3517f816187e9b4192fb2b4935aee2c55dc868",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "81b9abc853bf8208955010ab661f2a45000eeae04b102e5bb703a54a3cb7ed6a",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "0e7ac5f04b14083fabdbe4f20e8e2683d8830967ef587228015b749f1596b281",
+        "backend/meetflow/quality_workspace.py": "5a0b910b783b1bdd33a475d433e12c3f18394ca5adb4afe1942f07a122a010b1",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "a989c0463a6cf78c746689ee6da9bb472d84d259a6d248496ebe780cee808bb2",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "156f18d48f0dde00d6b337cd0dc0dfde8a140b61c5b98b2f653bc13649bd17b3",
+        "backend/meetflow/sales_workflow.py": "1ecaea8320358dfaa00bdfb1dfd67ea426f7d1536409689c58d60d1880a85ee7",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "21b06e829b221f8ee25497e4bc841c4abda9a265da35048049826ca7ba477ea0",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 15,
+      "protocol_completed": 15,
+      "quality_checked_attempts": 15,
+      "all_narrow_checks_passed": 3,
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": false,
+            "quote_owner": false,
+            "quote_due": false,
+            "quote_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 12.571505300002173,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5837,
+          "output_tokens": 407,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5837,
+          "transport_output_tokens": 407
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": false,
+            "quote_owner": false,
+            "quote_due": false,
+            "quote_status": false,
+            "conditional_trial": true,
+            "required_roles": true
+          },
+          "wall_seconds": 31.19047779997345,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 6,
+            "audit": 2
+          },
+          "model_calls": 10,
+          "tool_calls": 0,
+          "input_tokens": 12415,
+          "output_tokens": 1271,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 12415,
+          "transport_output_tokens": 1271
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 10.704414599924348,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4798,
+          "output_tokens": 363,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4798,
+          "transport_output_tokens": 363
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true,
+            "required_roles": true
+          },
+          "wall_seconds": 5.423436300014146,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2932,
+          "output_tokens": 184,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2932,
+          "transport_output_tokens": 184
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 12.174258999992162,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5963,
+          "output_tokens": 397,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5963,
+          "transport_output_tokens": 397
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "unknown_date_question": true,
+            "required_roles": true
+          },
+          "wall_seconds": 12.275127500062808,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5787,
+          "output_tokens": 358,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5787,
+          "transport_output_tokens": 358
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 25.61514469992835,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 7,
+            "audit": 2
+          },
+          "model_calls": 11,
+          "tool_calls": 0,
+          "input_tokens": 12086,
+          "output_tokens": 892,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 12086,
+          "transport_output_tokens": 892
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 14.60483500000555,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 3,
+            "audit": 1
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 7438,
+          "output_tokens": 520,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 7438,
+          "transport_output_tokens": 520
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 23.581487699993886,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 7,
+            "audit": 2
+          },
+          "model_calls": 11,
+          "tool_calls": 0,
+          "input_tokens": 11674,
+          "output_tokens": 803,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 11674,
+          "transport_output_tokens": 803
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_0_condition": false,
+            "required_roles": true
+          },
+          "wall_seconds": 4.987761199939996,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2753,
+          "output_tokens": 169,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2753,
+          "transport_output_tokens": 169
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "required_roles": true
+          },
+          "wall_seconds": 4.904128400026821,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2901,
+          "output_tokens": 158,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2901,
+          "transport_output_tokens": 158
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 11.444981200038455,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5847,
+          "output_tokens": 367,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5847,
+          "transport_output_tokens": 367
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 14.943956300034188,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 6098,
+          "output_tokens": 559,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6098,
+          "transport_output_tokens": 559
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_1_unique": false,
+            "action_1_owner": false,
+            "action_1_due": false,
+            "action_1_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 21.093056899961084,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 5,
+            "audit": 2
+          },
+          "model_calls": 9,
+          "tool_calls": 0,
+          "input_tokens": 9799,
+          "output_tokens": 757,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 9799,
+          "transport_output_tokens": 757
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 17.089683099999093,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 3,
+            "audit": 3
+          },
+          "model_calls": 8,
+          "tool_calls": 2,
+          "input_tokens": 10026,
+          "output_tokens": 613,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 10026,
+          "transport_output_tokens": 613
+        }
+      ]
+    },
+    {
+      "run": "20261114T022443789408Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "identity_boundary_cases.json",
+      "coverage_check": true,
+      "prompt_revision": "review_v3",
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "fc99e5f9eaaa2f6642d5e8489a3517f816187e9b4192fb2b4935aee2c55dc868",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "81b9abc853bf8208955010ab661f2a45000eeae04b102e5bb703a54a3cb7ed6a",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "0e7ac5f04b14083fabdbe4f20e8e2683d8830967ef587228015b749f1596b281",
+        "backend/meetflow/quality_workspace.py": "5a0b910b783b1bdd33a475d433e12c3f18394ca5adb4afe1942f07a122a010b1",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "a989c0463a6cf78c746689ee6da9bb472d84d259a6d248496ebe780cee808bb2",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "156f18d48f0dde00d6b337cd0dc0dfde8a140b61c5b98b2f653bc13649bd17b3",
+        "backend/meetflow/sales_workflow.py": "1ecaea8320358dfaa00bdfb1dfd67ea426f7d1536409689c58d60d1880a85ee7",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "21b06e829b221f8ee25497e4bc841c4abda9a265da35048049826ca7ba477ea0",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 7,
+      "protocol_completed": 7,
+      "quality_checked_attempts": 7,
+      "all_narrow_checks_passed": 0,
+      "results": [
+        {
+          "case": "b01_named_other",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_1_unique": false,
+            "action_1_owner": false,
+            "action_1_due": false,
+            "action_1_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 23.954665899975225,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 6,
+            "audit": 2
+          },
+          "model_calls": 10,
+          "tool_calls": 0,
+          "input_tokens": 10670,
+          "output_tokens": 819,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 10670,
+          "transport_output_tokens": 819
+        },
+        {
+          "case": "b02_customer_date_request",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 14.980157800018787,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 6649,
+          "output_tokens": 562,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6649,
+          "transport_output_tokens": 562
+        },
+        {
+          "case": "b03_do_not_cancel",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 12.12477230001241,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5899,
+          "output_tokens": 429,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5899,
+          "transport_output_tokens": 429
+        },
+        {
+          "case": "b04_cancel_reservation_is_future_work",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 10.228177499957383,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5704,
+          "output_tokens": 330,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5704,
+          "transport_output_tokens": 330
+        },
+        {
+          "case": "b05_two_distinct_demos",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_1_unique": false,
+            "action_1_owner": false,
+            "action_1_due": false,
+            "action_1_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 21.015813799924217,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 5,
+            "audit": 2
+          },
+          "model_calls": 9,
+          "tool_calls": 0,
+          "input_tokens": 9920,
+          "output_tokens": 733,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 9920,
+          "transport_output_tokens": 733
+        },
+        {
+          "case": "b06_unknown_speaker",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 11.491699500009418,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5723,
+          "output_tokens": 402,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5723,
+          "transport_output_tokens": 402
+        },
+        {
+          "case": "b07_reopened_demo",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 12.952355000074022,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 6342,
+          "output_tokens": 460,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6342,
+          "transport_output_tokens": 460
         }
       ]
     }

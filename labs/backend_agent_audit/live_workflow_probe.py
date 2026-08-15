@@ -84,6 +84,7 @@ def main(args):
     folder.mkdir(parents=True, exist_ok=False)
     cases = json.loads(args.cases_file.read_text(encoding='utf8')) if args.cases_file else CASES
     files = [Path(__file__), Path(__file__).with_name('PLAN.md'), ROOT / 'docs/32-completion-plan.md',
+             ROOT / 'docs/36-state-identity-continuation.md',
              Path(__file__).with_name('current_graph_probe.py'), Path(__file__).with_name('role_schema_probe.py'),
              Path(__file__).with_name('summarize_coverage.py'),
              *sorted((ROOT / 'backend/meetflow').rglob('*.py'))]
@@ -95,6 +96,7 @@ def main(args):
     manifest = {'status': 'running', 'scope': args.scope, 'model': args.model, 'profile': args.profile,
         'workflow': args.workflow,
         'coverage_check': not args.no_coverage,
+        'requested_revision': args.revision,
         'case_set': args.cases_file.name if args.cases_file else 'development_three', 'case_count': len(cases),
         'base_url': base_url,
         'server': httpx.get(base_url + '/api/version').json(),
@@ -119,6 +121,8 @@ def main(args):
                 # Create without inference first; freeze the same account input before enabling the local provider.
                 settings.meeting_workflow = args.workflow
                 settings.evidence_coverage = not args.no_coverage
+                if args.revision:
+                    settings.evidence_prompt_revision = args.revision
                 response = a.client.post('/api/workspace/recordings', headers=a.actors['sales.a'], json={
                     'title': f'L1 synthetic {case["id"]}', 'meeting_date': case['date'], 'transcript': case['text']})
                 response.raise_for_status(); row = response.json(); run_id = row['run_id']
@@ -181,6 +185,7 @@ if __name__ == '__main__':
     parser.add_argument('--base-url', default='http://127.0.0.1:11434')
     parser.add_argument('--cases-file', type=Path)
     parser.add_argument('--no-coverage', action='store_true')
+    parser.add_argument('--revision', choices=['state_v2', 'context_v3', 'review_v3'])
     parser.add_argument('--tokenizer', type=Path)
     parser.add_argument('--profile', choices=['ollama', 'ollama_json'], default='ollama')
     parser.add_argument('--workflow', choices=['dynamic', 'evidence_v1'], default='dynamic')

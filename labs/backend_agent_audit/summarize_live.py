@@ -29,6 +29,9 @@ def summarize(folder):
             'server': manifest['server'], 'limits': manifest['limits'], 'status': abort['status'] if abort else manifest['status'],
             'abort_note': abort['reason'] if abort else None, 'case_set': manifest.get('case_set', 'development_three'),
             'coverage_check': manifest.get('coverage_check'),
+            'prompt_revision': manifest.get('requested_revision') or next(
+                ((r.get('report') or {}).get('evidence_prompt_revision') for r in results
+                 if (r.get('report') or {}).get('evidence_prompt_revision')), None),
             'model_digest': next((m['digest'] for m in manifest['models']['models'] if m['name'] == manifest['model']), None),
             'template_sha256': hashlib.sha256(model.get('template', '').encode()).hexdigest(),
             'source_hashes': {key.replace('\\', '/'): value for key, value in manifest['source_hashes'].items()
