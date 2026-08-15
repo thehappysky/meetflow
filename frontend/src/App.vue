@@ -32,6 +32,15 @@ import SalesWorkspace from "./SalesWorkspace.vue";
 
 type Row = Record<string, any>;
 const page = ref("meetings");
+const salespersonFilter = ref("");
+const salespeople = computed(() => [
+  ...new Set(
+    meetings.value
+      .filter((m) => m.project_id === projectId.value)
+      .map((m) => m.salesperson)
+      .filter(Boolean),
+  ),
+]);
 const projects = ref<Row[]>([]),
   meetings = ref<Row[]>([]),
   tasks = ref<Row[]>([]),
@@ -52,6 +61,8 @@ const activeTab = ref("minutes"),
 const edits = reactive<Record<string, Row>>({}),
   answers = reactive<Record<string, string>>({});
 const form = reactive({
+  salesperson: "",
+  customer: "",
   title: "",
   transcript: "",
   meeting_time: "",
@@ -94,7 +105,12 @@ const filteredMeetings = computed(() =>
   meetings.value.filter(
     (item) =>
       (!projectId.value || item.project_id === projectId.value) &&
-      item.title.toLowerCase().includes(search.value.toLowerCase()),
+      (!salespersonFilter.value ||
+        item.salesperson === salespersonFilter.value) &&
+      [item.title, item.customer, item.salesperson]
+        .join(" ")
+        .toLowerCase()
+        .includes(search.value.toLowerCase()),
   ),
 );
 const filteredTasks = computed(() =>
@@ -260,7 +276,9 @@ async function createMeeting() {
   await perform(async () => {
     const payload = {
       project_id: projectId.value,
-      title: form.title || "未命名会议",
+      title: form.title || "未命名会谈",
+      salesperson: form.salesperson,
+      customer: form.customer,
       transcript: form.transcript,
       meeting_time: form.meeting_time
         ? new Date(form.meeting_time).toISOString()
@@ -288,9 +306,9 @@ async function createMeeting() {
     await openRun(result.run.id);
   });
 }
-async function loadDemo() {
+async function loadDemo(legacy = false) {
   await perform(async () => {
-    const result = await post("/demo");
+    const result = await post(legacy ? "/demo" : "/demo/sales-meeting");
     projectId.value = result.run.project_id;
     modal.value = false;
     page.value = "meetings";
@@ -420,6 +438,7 @@ async function showAgenda() {
   });
 }
 watch(projectId, () => {
+  salespersonFilter.value = "";
   if (page.value === "projects") loadSources().catch(() => {});
 });
 watch(page, () => {
@@ -446,19 +465,19 @@ onBeforeUnmount(() => subscription?.close());
       <div class="nav-caption">工作空间</div>
       <nav aria-label="主导航">
         <button
+          :class="{ active: page === 'meetings' }"
+          @click="changePage('meetings')"
+        >
+          <MessageSquareText :size="19" />会谈纪要<ChevronRight
+            class="nav-arrow"
+            :size="14"
+          />
+        </button>
+        <button
           :class="{ active: page === 'sales' }"
           @click="changePage('sales')"
         >
           <ShieldCheck :size="19" />销售质检
-        </button>
-        <button
-          :class="{ active: page === 'meetings' }"
-          @click="changePage('meetings')"
-        >
-          <MessageSquareText :size="19" />会议<ChevronRight
-            class="nav-arrow"
-            :size="14"
-          />
         </button>
         <button
           :class="{ active: page === 'tasks' }"
@@ -488,11 +507,11 @@ onBeforeUnmount(() => subscription?.close());
           >工作空间 <ChevronRight :size="13" />
           {{
             detail
-              ? "会议详情"
+              ? "会谈详情"
               : page === "sales"
                 ? "销售质检"
                 : page === "meetings"
-                  ? "会议"
+                  ? "会谈纪要"
                   : page === "tasks"
                     ? "任务看板"
                     : "项目资料"
@@ -543,7 +562,9 @@ onBeforeUnmount(() => subscription?.close());
                       )
                     : "会议实际时间待确认"
                 }}
-                · {{ currentProject }}
+                · {{ currentProject }} ·
+                {{ detail.meeting.salesperson || "销售未登记" }} ·
+                {{ detail.meeting.customer || "客户未登记" }}
               </p>
             </div>
             <span class="status" :class="detail.run.status">{{
@@ -884,31 +905,31 @@ onBeforeUnmount(() => subscription?.close());
           <div class="page-heading">
             <div>
               <div class="eyebrow">FROM CONVERSATION TO ACTION</div>
-              <h1>每一次讨论，都有下一步。</h1>
-              <p>整理会议，核对承诺，让重要的事持续向前。</p>
+              <h1>每一次客户会谈，都有记录。</h1>
+              <p>按销售和客户整理每次业务沟通，先看纪要、原文和待跟进事项。</p>
             </div>
             <button class="button primary" @click="modal = true">
-              <Plus :size="18" />新建会议
+              <Plus :size="18" />记录客户会谈
             </button>
           </div>
           <section class="welcome-card">
             <div>
               <span class="soft-label"
-                ><Sparkles :size="14" />会议协作工作台</span
+                ><Sparkles :size="14" />销售会谈档案</span
               >
-              <h2>从一份会议记录开始</h2>
+              <h2>一次业务录音，就是一场会谈</h2>
               <p>
-                导入文字，得到有原文依据的纪要、任务变化与待确认事项。<br />关联项目资料后，继续核对历史安排和执行条件。
+                登记销售与客户，导入录音或已有转写，整理讨论内容、承诺和后续安排。<br />先核对纪要，再跟进任务；销售质检作为辅助模块保留。
               </p>
               <div class="button-row">
                 <button class="button primary" @click="modal = true">
-                  <UploadCloud :size="17" />导入会议</button
+                  <UploadCloud :size="17" />导入会谈</button
                 ><button
                   class="button white"
                   :disabled="busy"
-                  @click="loadDemo"
+                  @click="loadDemo()"
                 >
-                  体验示例 <ArrowRight :size="16" />
+                  体验销售会谈 <ArrowRight :size="16" />
                 </button>
               </div>
             </div>
@@ -951,19 +972,37 @@ onBeforeUnmount(() => subscription?.close());
             </div>
           </div>
           <div class="list-heading">
-            <h2>最近会议</h2>
+            <h2>会谈记录</h2>
             <label class="search"
               ><Search :size="16" /><input
                 v-model="search"
-                placeholder="搜索会议标题"
+                placeholder="搜索客户、销售或会谈标题"
             /></label>
           </div>
           <div v-if="!filteredMeetings.length" class="card empty-state">
             <FileText :size="34" />
-            <h3>这里将留住你的讨论与决定</h3>
-            <p>导入第一场会议，或先体验一份明确标记的离线示例。</p>
-            <button class="text-button" @click="loadDemo">
+            <h3>这里将留住每次客户沟通</h3>
+            <p>登记第一场客户会谈，或先体验一份合成销售记录。</p>
+            <button class="text-button" @click="loadDemo()">
               打开示例 <ArrowRight :size="14" />
+            </button>
+          </div>
+          <div class="button-row" style="margin-bottom: 16px">
+            <label
+              >销售人员
+              <select v-model="salespersonFilter" aria-label="筛选销售人员">
+                <option value="">全部销售（含未登记）</option>
+                <option
+                  v-for="person in salespeople"
+                  :key="person"
+                  :value="person"
+                >
+                  {{ person }}
+                </option>
+              </select></label
+            >
+            <button class="text-button" @click="loadDemo(true)">
+              项目评审示例
             </button>
           </div>
           <div class="meeting-list">
@@ -976,6 +1015,9 @@ onBeforeUnmount(() => subscription?.close());
               <span class="meeting-icon"><FileText :size="22" /></span>
               <div>
                 <strong>{{ meeting.title }}</strong
+                ><small
+                  >{{ meeting.salesperson || "销售未登记" }} ·
+                  {{ meeting.customer || "客户未登记" }}</small
                 ><small
                   >{{
                     meeting.meeting_time
@@ -1136,7 +1178,7 @@ onBeforeUnmount(() => subscription?.close());
         <div class="section-title">
           <div>
             <span class="eyebrow">NEW MEETING</span>
-            <h2 id="create-title">带来讨论，带走下一步。</h2>
+            <h2 id="create-title">记录一次客户会谈</h2>
           </div>
           <button
             class="icon-button"
@@ -1146,12 +1188,28 @@ onBeforeUnmount(() => subscription?.close());
             <X :size="20" />
           </button>
         </div>
-        <p class="muted">先导入会议文字即可开始，项目资料不必一次备齐。</p>
+        <p class="muted">
+          登记销售与客户；可上传会谈录音，或导入已有转写生成纪要。
+        </p>
         <form @submit.prevent="createMeeting">
+          <div class="two-columns">
+            <label
+              >销售人员<input
+                v-model="form.salesperson"
+                maxlength="100"
+                placeholder="例如：小林"
+            /></label>
+            <label
+              >客户名称<input
+                v-model="form.customer"
+                maxlength="150"
+                placeholder="例如：星河制造"
+            /></label>
+          </div>
           <label
             >会议标题<input
               v-model="form.title"
-              placeholder="例如：本周项目例会"
+              placeholder="例如：星河制造 · 采购需求初访"
               maxlength="200"
           /></label>
           <div class="two-columns">
@@ -1198,7 +1256,7 @@ onBeforeUnmount(() => subscription?.close());
             >会议文字<textarea
               v-model="form.transcript"
               rows="9"
-              placeholder="按发言换行，例如：&#10;李明：接口改造我来跟进，下周三交付。&#10;王芳：发布前必须等压测通过。"
+              placeholder="按发言换行，例如：&#10;销售：我来准备产品资料，演示时间待确认。&#10;客户：先发资料，预算还没定。"
               :required="!audioFile"
               :disabled="!!audioFile"
               minlength="2"

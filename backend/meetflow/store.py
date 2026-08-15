@@ -4,7 +4,19 @@ import time
 
 from sqlalchemy import select, update
 
-from .database import Artifact, Audit, Meeting, Project, Report, Run, RunEvent, Source, Task, row_dict
+from .database import (
+    Artifact,
+    Audit,
+    Meeting,
+    MeetingContact,
+    Project,
+    Report,
+    Run,
+    RunEvent,
+    Source,
+    Task,
+    row_dict,
+)
 from .domain import DomainError, MeetingInput, SourceInput, digest, now, uid
 
 
@@ -66,18 +78,28 @@ class Store:
                               timezone=value.timezone)
             session.add(meeting)
             session.flush()
+            session.add(MeetingContact(meeting_id=meeting.id, salesperson=value.salesperson.strip(),
+                                       customer=value.customer.strip()))
+            session.flush()
             self.add_source(session, value.project_id,
                             SourceInput(title=value.title, kind="transcript", text=value.transcript), meeting.id)
             run = self.create_run(session, meeting, value.mode)
             self.audit(session, "meeting.created", meeting.id, {"run_id": run.id, "mode": value.mode})
-            return {"meeting": row_dict(meeting), "run": row_dict(run)}
+            return {"meeting": self.meeting_dict(session, meeting), "run": row_dict(run)}
+
+    @staticmethod
+    def meeting_dict(session, meeting):
+        contact = session.get(MeetingContact, meeting.id)
+        return {**row_dict(meeting), "salesperson": contact.salesperson if contact else "",
+                "customer": contact.customer if contact else ""}
 
     def create_run(self, session, meeting, mode):
         sources = session.scalars(select(Source).where(Source.project_id == meeting.project_id)).all()
         sources = [source for source in sources if source.meeting_id is None
                    or source.meeting_id == meeting.id or source.kind == "history"]
         tasks = session.scalars(select(Task).where(Task.project_id == meeting.project_id)).all()
-        manifest = {"sources": [row_dict(source) for source in sources],
+        manifest = {"contact": self.meeting_dict(session, meeting),
+                    "sources": [row_dict(source) for source in sources],
                     "tasks": [row_dict(task) for task in tasks], "title": meeting.title,
                     "meeting_time": meeting.meeting_time, "timezone": meeting.timezone}
         run = Run(id=uid("r_"), meeting_id=meeting.id, project_id=meeting.project_id, mode=mode,

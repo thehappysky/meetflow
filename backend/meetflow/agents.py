@@ -67,6 +67,8 @@ class AgentRunner:
         provider = self.provider_override or (DemoProvider() if run["mode"] == "demo" else LiveProvider(self.store.settings))
         gateway = ToolGateway(self.store, run_id, role, upstream)
         info = {"meeting_time": run["manifest"]["meeting_time"], "timezone": run["manifest"]["timezone"]}
+        contact = run["manifest"].get("contact", {})
+        info.update(salesperson=contact.get("salesperson", ""), customer=contact.get("customer", ""))
         evidence_map = self.store.source_map(run_id)
         definitions = gateway.definitions() + [{"type": "function", "function": {
             "name": "submit_result", "description": "任务完成时提交结构化结果，所有重要陈述须引用真实片段ID。",

@@ -32,6 +32,37 @@ def approval_request(detail, **changes):
             "edits": {}, "answers": {}, "idempotency_key": "approval-test-001", **changes}
 
 
+def test_sales_meeting_attribution_snapshot_and_export(application):
+    app, client = application
+    result = client.post("/api/demo/sales-meeting")
+    assert result.status_code == 201
+    data = result.json()
+    run_id = data["run"]["id"]
+    assert data["meeting"]["salesperson"] == "演示销售小林"
+    assert data["run"]["manifest"]["contact"]["customer"] == "星河制造（合成客户）"
+    app.state.driver.process(run_id)
+    detail = client.get(f"/api/runs/{run_id}").json()
+    assert detail["run"]["status"] == "waiting_review", detail["run"]["error"]
+    assert detail["meeting"]["salesperson"] == "演示销售小林"
+    listed = client.get("/api/meetings", params={"project_id": data["run"]["project_id"]}).json()
+    assert listed[0]["customer"] == "星河制造（合成客户）"
+    exported = client.get(f"/api/runs/{run_id}/export").text
+    assert "演示销售小林" in exported and "星河制造（合成客户）" in exported
+
+
+def test_legacy_meeting_without_contact_is_readable(application):
+    from meetflow.database import MeetingContact
+    app, client = application
+    data = client.post("/api/demo").json()
+    key = data["meeting"]["id"]
+    with app.state.store.sessions.begin() as session:
+        session.delete(session.get(MeetingContact, key))
+    detail = client.get(f"/api/runs/{data['run']['id']}")
+    assert detail.status_code == 200
+    assert detail.json()["meeting"]["salesperson"] == ""
+    assert client.get("/api/meetings").json()[0]["customer"] == ""
+
+
 def test_end_to_end_demo_review_tasks_and_checkpoint_resume(application):
     app, client = application
     run_id, detail = analyzed(app, client)

@@ -6,6 +6,18 @@ from .database import Task
 from .domain import MeetingInput, SourceInput, Span, uid
 
 
+def import_sales_meeting_demo(store):
+    project = store.create_project("销售会谈 · 合成演示")
+    return store.create_meeting(MeetingInput(
+        project_id=project["id"], title="星河制造 · 采购需求初访（合成）",
+        salesperson="演示销售小林", customer="星河制造（合成客户）", mode="demo",
+        transcript="小林：今天想了解贵司目前的采购流程。\n"
+        "客户：我们依赖表格重复录入，审批等待较长，希望先了解能否统一需求。\n"
+        "客户：预算和采购时间还没定，你们价格比另一家高，需要比较服务范围。\n"
+        "小林：我来准备产品资料和演示方案，具体演示时间待客户确认。\n"
+        "客户：可以先发资料，接口适配必须等技术同事评估，今天不确认采购。"))
+
+
 def import_demo(store):
     fixture = json.loads((Path(__file__).resolve().parents[2] / "examples/project-review-scenario.json").read_text(encoding="utf-8"))
     project = store.create_project("示例 · 支付项目发布评审")

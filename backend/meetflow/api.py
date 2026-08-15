@@ -17,6 +17,7 @@ from .database import (
     Approval,
     Audit,
     Meeting,
+    MeetingContact,
     Project,
     ProjectEvent,
     Run,
@@ -26,7 +27,7 @@ from .database import (
     make_database,
     row_dict,
 )
-from .demo import import_demo
+from .demo import import_demo, import_sales_meeting_demo
 from .domain import DomainError, MeetingInput, ReviewInput, SourceInput, TaskUpdate, now, uid
 from .orchestration import RunDriver
 from .reviews import approve, render_markdown
@@ -120,15 +121,24 @@ def create_app(settings=None, provider=None, sales_provider=None):
         schedule(result["run"]["id"])
         return result
 
+    @app.post("/api/demo/sales-meeting", status_code=201)
+    def sales_meeting_demo():
+        result = import_sales_meeting_demo(store)
+        schedule(result["run"]["id"])
+        return result
+
     @app.post("/api/meetings/audio", status_code=201)
     async def create_audio_meeting(file: Annotated[UploadFile, File()], project_id: Annotated[str, Form()],
                                    title: Annotated[str, Form()] = "录音会议",
                                    meeting_time: Annotated[str | None, Form()] = None,
                                    timezone: Annotated[str, Form()] = "Asia/Shanghai",
+                                   salesperson: Annotated[str, Form()] = "",
+                                   customer: Annotated[str, Form()] = "",
                                    mode: Annotated[str, Form()] = "demo"):
         if not audio_available(settings):
             raise DomainError("音频转写未启用：安装 audio 依赖并配置 ASR 模型后再上传；当前可粘贴会议文字", 422)
         metadata = MeetingInput(project_id=project_id, title=title, meeting_time=meeting_time,
+                                salesperson=salesperson, customer=customer,
                                 timezone=timezone, mode=mode, transcript="仅校验元数据，不保存为转写")
         if metadata.mode == "live" and not settings.live_available:
             raise DomainError("真实模型未配置", 422)
@@ -157,9 +167,12 @@ def create_app(settings=None, provider=None, sales_provider=None):
                     timezone=metadata.timezone, audio_path=str(path))
                 session.add(meeting)
                 session.flush()
+                session.add(MeetingContact(meeting_id=meeting.id, salesperson=metadata.salesperson.strip(),
+                                           customer=metadata.customer.strip()))
+                session.flush()
                 run = store.create_run(session, meeting, metadata.mode)
                 store.audit(session, "audio.uploaded", meeting.id, {"bytes": size, "extension": extension})
-                result = {"meeting": row_dict(meeting), "run": row_dict(run)}
+                result = {"meeting": store.meeting_dict(session, meeting), "run": row_dict(run)}
         except Exception:
             path.unlink(missing_ok=True)
             raise
@@ -188,7 +201,7 @@ def create_app(settings=None, provider=None, sales_provider=None):
             result = []
             for meeting in session.scalars(query.limit(100)):
                 run = session.scalar(select(Run).where(Run.meeting_id == meeting.id).order_by(Run.created_at.desc()))
-                result.append({**row_dict(meeting), "run": row_dict(run) if run else None})
+                result.append({**store.meeting_dict(session, meeting), "run": row_dict(run) if run else None})
             return result
 
     @app.get("/api/runs/{run_id}")
@@ -197,7 +210,8 @@ def create_app(settings=None, provider=None, sales_provider=None):
         with sessions() as session:
             meeting = session.get(Meeting, run["meeting_id"])
             approval = session.scalar(select(Approval).where(Approval.run_id == run_id))
-        return {"run": run, "meeting": row_dict(meeting), "report": store.latest_report(run_id),
+            meeting_value = store.meeting_dict(session, meeting)
+        return {"run": run, "meeting": meeting_value, "report": store.latest_report(run_id),
                 "evidence": store.source_map(run_id), "artifacts": store.artifacts(run_id),
                 "approval": row_dict(approval) if approval else None}
 
@@ -287,7 +301,7 @@ def create_app(settings=None, provider=None, sales_provider=None):
         if not report:
             raise DomainError("纪要尚未生成", 409)
         with sessions() as session:
-            meeting = row_dict(session.get(Meeting, run["meeting_id"]))
+            meeting = store.meeting_dict(session, session.get(Meeting, run["meeting_id"]))
             approval = session.scalar(select(Approval).where(Approval.run_id == run_id))
             approval_value = row_dict(approval) if approval else None
         content = render_markdown(meeting, run, report, approval_value, store.source_map(run_id))

@@ -19,9 +19,9 @@ def main():
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(args.url, wait_until="networkidle")
-        expect(page.get_by_role("heading", name="每一次讨论，都有下一步。")).to_be_visible()
+        expect(page.get_by_role("heading", name="每一次客户会谈，都有记录。")).to_be_visible()
         page.screenshot(path=str(output / "01-home.png"), full_page=True)
-        page.get_by_role("button", name="体验示例", exact=True).click()
+        page.get_by_role("button", name="项目评审示例", exact=True).click()
         expect(page.get_by_role("heading", name="发布评审 · 演示案例")).to_be_visible(timeout=30000)
         expect(page.get_by_text("离线规则演示", exact=True)).to_be_visible()
         expect(page.locator(".report-card")).to_be_visible(timeout=30000)
@@ -47,7 +47,7 @@ def main():
         page.locator(".task-card select").first.select_option("in_progress")
         expect(page.get_by_text("任务状态已保存，变更已留痕。", exact=True)).to_be_visible()
         page.screenshot(path=str(output / "04-tasks.png"), full_page=True)
-        page.get_by_role("button", name="会议", exact=True).click()
+        page.get_by_role("button", name="会谈纪要", exact=True).click()
         page.set_viewport_size({"width": 390, "height": 844})
         page.screenshot(path=str(output / "05-mobile.png"), full_page=True)
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Mobile horizontal overflow"

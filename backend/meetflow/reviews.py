@@ -95,6 +95,7 @@ def approve(store, run_id: str, request: ReviewInput):
 def render_markdown(meeting, run, report, approval=None, evidence=None):
     body = report["body"]
     lines = [f"# {meeting['title']}", "", f"会议时间：{meeting['meeting_time'] or '待确认'}",
+             f"销售：{meeting.get('salesperson') or '未登记'}；客户：{meeting.get('customer') or '未登记'}",
              f"状态：{'已确认任务变更' if run['status'] == 'completed' else '草稿，尚未完成任务确认'}",
              f"分析模式：{'离线规则演示（无大模型）' if run['mode'] == 'demo' else '真实模型'}", "",
              "## 纪要", "", body["summary"], "", "## 任务候选", ""]

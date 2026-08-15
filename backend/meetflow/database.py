@@ -36,6 +36,14 @@ class Meeting(Base):
     audio_path: Mapped[str | None]
 
 
+class MeetingContact(Base):
+    """Optional sales attribution; an additive table preserves existing meeting rows."""
+    __tablename__ = "meeting_contacts"
+    meeting_id: Mapped[str] = mapped_column(ForeignKey("meetings.id"), primary_key=True)
+    salesperson: Mapped[str] = mapped_column(String(100))
+    customer: Mapped[str] = mapped_column(String(150))
+
+
 class Source(Base):
     __tablename__ = "sources"
     id: Mapped[str] = mapped_column(String(80), primary_key=True)
