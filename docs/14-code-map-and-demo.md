@@ -1,5 +1,9 @@
 # MeetFlow v0.2：文件地图、代码架构与演示手册
 
+## 真实音频补充与新增文件
+
+会议音频现已用 AliMeeting Eval 24 段公开录音实际测试，本机 ASR 已配置，LLM 仍未配置。新增 `scripts/prepare_audio_benchmark.py`（断点下载、版本/哈希清单）、`scripts/run_audio_benchmark.py`（安全解包、固定抽样、真实 API 与 CER）、`requirements-audio.lock`（音频/评测环境）、`tests/test_audio_benchmark.py`（指标、越界路径及真实 WAV 解码）、`docs/15-real-audio-benchmark.md`（完整结果）。资料/模型在忽略的 data/benchmarks。下方“尚未配置/未实测 ASR”均属于此前批次快照，以新报告为准。播放演示继续用用户本地 Chrome。
+
 ## 最新主线调整：销售会谈纪要优先
 
 以下原手册保留作为上一批次快照；当前首页与第一导航已改为“会谈纪要”，销售质检为辅助模块。演示改用用户本地 Chrome；入口仍为 http://127.0.0.1:8765 。

@@ -1,0 +1,17 @@
+# Optional audio/evaluation environment verified on Windows Python 3.12.
+-r requirements.lock
+
+av==16.1.0
+ctranslate2==4.9.0
+faster-whisper==1.2.1
+filelock==4.2.10
+flatbuffers==25.12.19
+fsspec==2026.9.0
+hf-xet==1.8.0
+huggingface_hub==2.4.0
+numpy==2.5.4
+onnxruntime==1.31.1
+praatio==6.2.2
+protobuf==7.36.2
+tokenizers==0.23.3
+tqdm==4.70.1

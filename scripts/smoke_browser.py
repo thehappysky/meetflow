@@ -25,6 +25,11 @@ def main():
         expect(page.get_by_role("heading", name="发布评审 · 演示案例")).to_be_visible(timeout=30000)
         expect(page.get_by_text("离线规则演示", exact=True)).to_be_visible()
         expect(page.locator(".report-card")).to_be_visible(timeout=30000)
+        run_id = page.url.rsplit("/", 1)[-1]
+        expected_project = page.request.get(args.url + f"/api/runs/{run_id}").json()["run"]["project_id"]
+        page.reload(wait_until="networkidle")
+        expect(page.locator(".report-card")).to_be_visible(timeout=30000)
+        expect(page.get_by_label("当前项目", exact=True)).to_have_value(expected_project)
         page.locator(".report-card .text-button").first.click()
         expect(page.get_by_role("heading", name="核对原文")).to_be_visible()
         page.screenshot(path=str(output / "02-evidence.png"), full_page=True)

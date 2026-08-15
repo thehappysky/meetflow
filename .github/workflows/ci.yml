@@ -35,6 +35,10 @@ jobs:
         run: |
           npm ci
           npm run build
+      - name: Optional audio decoder compatibility without weights
+        run: |
+          python -m pip install -r requirements-audio.lock
+          python -m pytest tests/test_audio_benchmark.py -q
       - name: Browser journey
         env:
           MEETFLOW_DATA_DIR: ${{ runner.temp }}/meetflow-browser-data

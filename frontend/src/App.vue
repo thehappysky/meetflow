@@ -173,6 +173,7 @@ async function loadDetail(id: string) {
     detail.value?.report?.content_hash !== next.report?.content_hash ||
     detail.value?.run?.id !== id;
   detail.value = next;
+  projectId.value = next.run.project_id;
   if (changed && next.report) {
     selected.value = next.report.body.actions
       .filter(
