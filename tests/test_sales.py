@@ -125,6 +125,10 @@ def test_unknown_speakers_and_incomplete_text_do_not_become_negative_scores(app_
     snapshot["conversation"]["body"]["complete"] = False
     value = {"decisions": [{"rule_id": "next", "status": "unmet", "reason": "没看到", "evidence": []}]}
     assert validate_sales_result(value, "process", snapshot)["decisions"][0]["status"] == "unknown"
+    snapshot['conversation']['body']['complete'] = True
+    normalized = validate_sales_result(value, 'process', snapshot)['decisions'][0]
+    assert normalized['status'] == 'unknown' and normalized['reason_title'] == '依据不足，暂不评价'
+    snapshot['conversation']['body']['complete'] = False
     value["decisions"][0].update(status="met", evidence=["s2"])
     with pytest.raises(DomainError, match="销售身份"):
         validate_sales_result(value, "process", snapshot)

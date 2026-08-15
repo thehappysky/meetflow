@@ -1,6 +1,7 @@
 import re
 import threading
 import time
+from contextlib import nullcontext
 
 from sqlalchemy import select, update
 
@@ -108,7 +109,7 @@ class Store:
                     "sources": [row_dict(source) for source in sources],
                     "tasks": [row_dict(task) for task in tasks], "title": meeting.title,
                     "meeting_time": meeting.meeting_time, "timezone": meeting.timezone,
-                    "workflow": self.settings.meeting_workflow}
+                    "workflow": self.settings.meeting_workflow, 'coverage_check': self.settings.evidence_coverage}
         run = Run(id=uid("r_"), meeting_id=meeting.id, project_id=meeting.project_id, mode=mode,
                   manifest=manifest)
         session.add(run)
@@ -116,9 +117,9 @@ class Store:
         session.add(RunEvent(run_id=run.id, kind="queued", message="会议已保存，等待处理", payload={}))
         return run
 
-    def get_run(self, run_id):
-        with self.sessions() as session:
-            run = session.get(Run, run_id)
+    def get_run(self, run_id, session=None):
+        with nullcontext(session) if session is not None else self.sessions() as active_session:
+            run = active_session.get(Run, run_id)
             if not run:
                 raise DomainError("运行不存在", 404)
             return row_dict(run)
@@ -210,9 +211,9 @@ class Store:
             session.flush()
             return artifact.id
 
-    def latest_report(self, run_id):
-        with self.sessions() as session:
-            report = session.scalar(select(Report).where(Report.run_id == run_id)
+    def latest_report(self, run_id, session=None):
+        with nullcontext(session) if session is not None else self.sessions() as active_session:
+            report = active_session.scalar(select(Report).where(Report.run_id == run_id)
                                     .order_by(Report.revision.desc()))
             return row_dict(report) if report else None
 
@@ -230,8 +231,8 @@ class Store:
             self.audit(session, "report.created", report.id, {"hash": report.content_hash})
             return row_dict(report)
 
-    def source_map(self, run_id):
-        run = self.get_run(run_id)
+    def source_map(self, run_id, session=None):
+        run = self.get_run(run_id, session)
         return {span["id"]: {**span, "source_id": source["id"], "source_title": source["title"],
                             "source_kind": source["kind"], "source_version": source["version"]}
                 for source in run["manifest"]["sources"] for span in source["body"]["spans"]}

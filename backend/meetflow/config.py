@@ -13,8 +13,10 @@ class Settings(BaseSettings):
     model_name: str = ""
     model_api_profile: Literal["openai", "ollama", "ollama_json"] = "openai"
     model_context_window: int = 8192
+    model_tokenizer_path: str = ''
     model_timeout: float = 60
     meeting_workflow: Literal['dynamic', 'evidence_v1'] = 'dynamic'
+    evidence_coverage: bool = True
     max_model_calls: int = 48
     max_tool_calls: int = 100
     max_agent_steps: int = 10

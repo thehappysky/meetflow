@@ -3,10 +3,30 @@ import json
 import re
 from copy import deepcopy
 from difflib import SequenceMatcher
+from functools import lru_cache
 
 import httpx
 
 from .domain import AgentResult, DomainError, uid
+
+
+@lru_cache(maxsize=2)
+def load_tokenizer(path):
+    try:
+        from tokenizers import Tokenizer
+        return Tokenizer.from_file(path)
+    except Exception as exc:
+        raise DomainError('模型分词器配置不可用，请由管理员检查依赖和匹配的数据文件；不会跳过上下文检查', 422) from exc
+
+
+def context_bound(messages, tokenizer_path=''):
+    contents = [(message.get('content') or '') for message in messages]
+    if tokenizer_path:
+        tokenizer = load_tokenizer(tokenizer_path)
+        size = sum(len(tokenizer.encode(text, add_special_tokens=False).ids) for text in contents)
+    else:
+        size = sum(len(text.encode('utf8')) for text in contents)
+    return size + 32 * (len(messages) + 1)
 
 
 def tool_call(name, args):
@@ -114,6 +134,11 @@ class LiveProvider:
             else:
                 history.append(dict(original))
         base = self.settings.model_base_url.rstrip('/').removesuffix('/v1')
+        # The JSON protocol renders tool definitions in history. A conservative
+        # UTF-8 byte bound avoids relying on a server silently dropping history.
+        input_bound = context_bound(history, self.settings.model_tokenizer_path)
+        if input_bound + self.settings.max_output_tokens > self.settings.model_context_window:
+            raise DomainError('当前模型上下文不足以保留完整资料，已停止发送；请缩小本次范围或由管理员配置更大上下文', 422)
         with httpx.Client(timeout=self.settings.model_timeout, transport=self.transport) as client:
             response = client.post(base + '/api/chat', json={
                 'model': self.settings.model_name, 'messages': history, 'format': schema,

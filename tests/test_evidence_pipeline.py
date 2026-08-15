@@ -104,6 +104,18 @@ def test_completed_agent_artifacts_are_reused_after_interruption(typed_store):
     assert store.get_run(run['id'])['model_calls'] == calls
 
 
+def test_coverage_ablation_remains_multi_agent_and_freezes_configuration(typed_store):
+    store, original = typed_store
+    store.settings.evidence_coverage = False
+    run = store.create_meeting(MeetingInput(project_id=original['project_id'], mode='live',
+        transcript='销售王宁：我明天发送报价。', meeting_time='2026-11-12T15:00:00+08:00'))['run']
+    store.settings.evidence_coverage = True
+    body = EvidencePipeline(store, run['id'], TypedAdapter()).analyze()
+    assert not body['coverage_check']
+    assert {a['role'] for a in store.artifacts(run['id'])} == {'facts', 'reconcile', 'audit'}
+    assert store.get_run(run['id'])['model_calls'] == 3
+
+
 def test_mid_agent_messages_and_consumed_budget_survive_retry(typed_store):
     store, run = typed_store
 
@@ -260,6 +272,15 @@ def test_meeting_note_policy_preserves_real_customer_deliverables():
     assert '记录建议' in MEETING_NOTES
     assert '发送会议纪要' not in MEETING_NOTES
     assert '整理需求文档' not in MEETING_NOTES
+
+
+def test_revision_label_normalization_requires_exact_existing_task_and_preserves_cancel_deliverable():
+    from meetflow.evidence_pipeline import canonical_task
+    names = {'发送报价', '预订'}
+    assert canonical_task({'task': '改期发送报价', 'kind': 'revision'}, names) == '发送报价'
+    assert canonical_task({'task': '发送报价改期', 'kind': 'revision'}, names) == '发送报价'
+    assert canonical_task({'task': '取消预订', 'kind': 'commitment'}, names) == '取消预订'
+    assert canonical_task({'task': '改期发送合同', 'kind': 'revision'}, names) == '改期发送合同'
 
 
 def test_oversized_entity_history_fails_explicitly_instead_of_silently_truncating(typed_store):

@@ -23,9 +23,12 @@ def summarize(folder):
     else:
         phase = 'L1_structured_graph'
     model = json.loads((folder / 'model.json').read_text(encoding='utf-8'))
+    abort = json.loads((folder / 'abort.json').read_text(encoding='utf8')) if (folder / 'abort.json').exists() else None
     return {'run': folder.name, 'phase': phase, 'workflow': manifest.get('workflow', 'dynamic'),
             'model': manifest['model'], 'profile': profile,
-            'server': manifest['server'], 'limits': manifest['limits'], 'status': manifest['status'],
+            'server': manifest['server'], 'limits': manifest['limits'], 'status': abort['status'] if abort else manifest['status'],
+            'abort_note': abort['reason'] if abort else None, 'case_set': manifest.get('case_set', 'development_three'),
+            'coverage_check': manifest.get('coverage_check'),
             'model_digest': next((m['digest'] for m in manifest['models']['models'] if m['name'] == manifest['model']), None),
             'template_sha256': hashlib.sha256(model.get('template', '').encode()).hexdigest(),
             'source_hashes': {key.replace('\\', '/'): value for key, value in manifest['source_hashes'].items()
@@ -36,7 +39,8 @@ def summarize(folder):
             'all_narrow_checks_passed': (sum(bool(r.get('checks')) and all(r['checks'].values()) for r in results)
                                          if manifest['scope'] == 'graph' else None),
             'results': [{key: r[key] for key in ('case', 'status', 'error', 'checks', 'wall_seconds', 'roles',
-                        'model_calls', 'tool_calls', 'input_tokens', 'output_tokens', 'no_tool_responses') if key in r}
+                        'model_calls', 'tool_calls', 'input_tokens', 'output_tokens', 'no_tool_responses',
+                        'transport_input_tokens', 'transport_output_tokens') if key in r}
                         for r in results]}
 
 

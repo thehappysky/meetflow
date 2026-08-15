@@ -34,6 +34,27 @@ def check_report(case, report, artifacts, evidence):
     checks = {'report_present': True, 'dynamic_roles': {'coordinator', 'meeting', 'planner', 'auditor'} <= roles,
               'summary_present': bool(report.get('summary')),
               'action_references_exist': all(a['evidence'] and set(a['evidence']) <= set(evidence) for a in actions)}
+    if 'expected' in case:
+        expected = case['expected']
+        checks['exact_action_count'] = len(actions) == len(expected['actions'])
+        for index, wanted in enumerate(expected['actions']):
+            matching = [action for action in actions if wanted['title_contains'] in action['title']]
+            checks[f'action_{index}_unique'] = len(matching) == 1
+            for field in ('owner', 'due', 'status'):
+                if field in wanted:
+                    actual = matching[0][field] if len(matching) == 1 else None
+                    if field == 'owner' and isinstance(actual, str):
+                        actual = actual.removeprefix('销售').strip()
+                    checks[f'action_{index}_{field}'] = len(matching) == 1 and actual == wanted[field]
+            if 'condition_contains' in wanted:
+                checks[f'action_{index}_condition'] = len(matching) == 1 and any(
+                    wanted['condition_contains'] in value for value in matching[0]['conditions'])
+        if expected.get('fact_contains'):
+            checks['factual_observation_present'] = any(expected['fact_contains'] in item['text']
+                for item in [*report.get('claims', []), *report.get('risks', [])])
+        if expected.get('question_required'):
+            checks['unknown_date_question'] = bool(report.get('questions'))
+        return checks
     quotes = [a for a in actions if '报价' in a['title']]
     if case['id'] in {'explicit', 'revision'}:
         checks['one_quote'] = len(quotes) == 1
@@ -55,28 +76,34 @@ def check_report(case, report, artifacts, evidence):
 def main(args):
     folder = ROOT / 'test-results/backend-agent-audit/live-workflow' / datetime.now(UTC).strftime('%Y%m%dT%H%M%S%fZ')
     folder.mkdir(parents=True, exist_ok=False)
+    cases = json.loads(args.cases_file.read_text(encoding='utf8')) if args.cases_file else CASES
     files = [Path(__file__), Path(__file__).with_name('PLAN.md'), ROOT / 'docs/32-completion-plan.md',
              Path(__file__).with_name('current_graph_probe.py'), Path(__file__).with_name('role_schema_probe.py'),
              *sorted((ROOT / 'backend/meetflow').rglob('*.py'))]
+    if args.cases_file:
+        files.append(args.cases_file.resolve())
     base_url = args.base_url.rstrip('/')
     model_info = httpx.post(base_url + '/api/show', json={'model': args.model}, timeout=30).json()
     save(folder / 'model.json', model_info)
     manifest = {'status': 'running', 'scope': args.scope, 'model': args.model, 'profile': args.profile,
         'workflow': args.workflow,
+        'coverage_check': not args.no_coverage,
+        'case_set': args.cases_file.name if args.cases_file else 'development_three', 'case_count': len(cases),
         'base_url': base_url,
         'server': httpx.get(base_url + '/api/version').json(),
         'models': httpx.get(base_url + '/api/tags').json(),
         'limits': {'steps': args.steps, 'output': args.output, 'calls': args.calls, 'seconds': args.seconds, 'tools': 100},
         'model_timeout': args.model_timeout,
         'context': 8192, 'temperature': 0, 'seed': 2026, 'requested_think': False,
+        'tokenizer_sha256': hashlib.sha256(args.tokenizer.read_bytes()).hexdigest() if args.tokenizer else None,
         'git_head': __import__('subprocess').check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT).decode().strip(),
         'source_hashes': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
         'limitations': 'agent-authored development cases; protocol completion is not semantic accuracy or independent quality validation'}
     save(folder / 'manifest.json', manifest)
     save(folder / 'source_bundle.json', {str(p.relative_to(ROOT)): p.read_text(encoding='utf-8') for p in files})
-    save(folder / 'cases.json', CASES)
+    save(folder / 'cases.json', cases)
     results = []
-    for case in CASES[:1] if args.scope == 'meeting' else CASES:
+    for case in cases[:1] if args.scope == 'meeting' else cases:
         out = folder / case['id']; out.mkdir()
         with tempfile.TemporaryDirectory(prefix='meetflow-live-workflow-') as directory:
             fixture = access.__wrapped__(Path(directory)); a = next(fixture)
@@ -84,6 +111,7 @@ def main(args):
                 store = a.app.state.store; settings = store.settings
                 # Create without inference first; freeze the same account input before enabling the local provider.
                 settings.meeting_workflow = args.workflow
+                settings.evidence_coverage = not args.no_coverage
                 response = a.client.post('/api/workspace/recordings', headers=a.actors['sales.a'], json={
                     'title': f'L1 synthetic {case["id"]}', 'meeting_date': case['date'], 'transcript': case['text']})
                 response.raise_for_status(); row = response.json(); run_id = row['run_id']
@@ -92,6 +120,7 @@ def main(args):
                 settings.max_agent_steps = args.steps; settings.max_output_tokens = args.output
                 settings.max_model_calls = args.calls; settings.max_tool_calls = 100; settings.run_timeout = args.seconds
                 settings.model_timeout = args.model_timeout
+                settings.model_tokenizer_path = str(args.tokenizer.resolve()) if args.tokenizer else ''
                 store.update_run(run_id, mode='live')
                 provider = TracedProvider(settings, out)
                 provider.inner.transport = DeterministicTransport(out)
@@ -114,13 +143,22 @@ def main(args):
                             'artifacts': store.artifacts(run_id)}
                     item['checks'] = check_report(case, item['report'], item['artifacts'], store.source_map(run_id))
                     if args.workflow == 'evidence_v1' and item['report']:
-                        item['checks']['dynamic_roles'] = {'facts', 'coverage', 'reconcile', 'audit'} <= {a['role'] for a in item['artifacts']}
+                        required = {'facts', 'reconcile', 'audit'} | (set() if args.no_coverage else {'coverage'})
+                        item['checks']['dynamic_roles'] = required <= {a['role'] for a in item['artifacts']}
                 run = store.get_run(run_id)
                 item.update(case=case['id'], wall_seconds=time.perf_counter() - start,
                             roles=dict(Counter(c['role'] for c in provider.calls)),
-                            no_tool_responses=sum(not c.get('response', {}).get('tool_calls') for c in provider.calls),
+                            no_tool_responses=sum(c.get('status') == 'completed' and not c.get('response', {}).get('tool_calls')
+                                                  for c in provider.calls),
                             **{key: run[key] for key in ('model_calls', 'tool_calls', 'input_tokens', 'output_tokens')})
+                wire_responses = out / 'wire_response.jsonl'
+                if wire_responses.exists():
+                    replies = [json.loads(line)['body'] for line in wire_responses.read_text(encoding='utf8').splitlines()]
+                    item['transport_input_tokens'] = sum(reply.get('prompt_eval_count', 0) for reply in replies)
+                    item['transport_output_tokens'] = sum(reply.get('eval_count', 0) for reply in replies)
+                    item['transport_requests'] = len(replies)
                 save(out / 'result.json', item); results.append(item)
+                save(out / 'loaded_models.json', httpx.get(base_url + '/api/ps').json())
                 save(folder / 'results.json', results)
                 print(json.dumps({'folder': str(folder), **{key: value for key, value in item.items()
                     if key not in {'report', 'result', 'artifacts'}}}, ensure_ascii=True), flush=True)
@@ -134,6 +172,9 @@ if __name__ == '__main__':
     parser.add_argument('--scope', choices=['meeting', 'graph'], default='meeting')
     parser.add_argument('--model', default='qwen2.5:7b')
     parser.add_argument('--base-url', default='http://127.0.0.1:11434')
+    parser.add_argument('--cases-file', type=Path)
+    parser.add_argument('--no-coverage', action='store_true')
+    parser.add_argument('--tokenizer', type=Path)
     parser.add_argument('--profile', choices=['ollama', 'ollama_json'], default='ollama')
     parser.add_argument('--workflow', choices=['dynamic', 'evidence_v1'], default='dynamic')
     parser.add_argument('--steps', type=int, default=6)

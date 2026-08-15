@@ -16,6 +16,17 @@ from .tools import normalize_date
 # Exact policy labels deliberately do not match sending minutes or documenting a requirement.
 MEETING_NOTES = {'记录建议', '记下建议', '记录讨论', '记录意见', '记下意见'}
 
+
+def canonical_task(mention, names):
+    """Remove revision labels only when the exact underlying task already exists."""
+    name = mention['task']
+    if mention['kind'] != 'revision':
+        return name
+    candidates = [name.removeprefix(prefix) for prefix in ('改期', '延期', '推迟') if name.startswith(prefix)]
+    candidates += [name.removesuffix(suffix) for suffix in ('改期', '延期') if name.endswith(suffix)]
+    matches = set(candidates) & names
+    return next(iter(matches)) if len(matches) == 1 else name
+
 class Mention(Contract):
     task: str = Field(min_length=1, max_length=160, description='同一事项用简短稳定名称，报价与试用分开')
     quote: str = Field(min_length=1, max_length=1600, description='逐字原话，不能改写')
@@ -126,7 +137,7 @@ class IncompleteReview(DomainError):
         super().__init__(f'仅补以下字段，已核查字段保留：{missing}')
 
 
-def pages_for(spans, limit=1600):
+def pages_for(spans, limit=600):
     """All text is represented, including a single span larger than a page."""
     pages, current, size = [], [], 0
     for span in spans:
@@ -182,7 +193,8 @@ class EvidencePipeline:
         if cached is not None:
             return schema.model_validate(cached)
         definitions = []
-        tools = [('read_evidence', {'ref': {'type': 'string', 'enum': list(self.evidence)}})]
+        local_refs = list(dict.fromkeys(s['id'] for s in initial.get('spans', []))) or list(initial.get('evidence', {}))
+        tools = [('read_evidence', {'ref': {'type': 'string', 'enum': local_refs}})]
         if len(self.pages) > 1:
             tools.append(('read_page', {'page': {'type': 'integer', 'minimum': 0, 'maximum': len(self.pages) - 1}}))
         if role not in {'facts', 'coverage'}:
@@ -219,6 +231,8 @@ class EvidencePipeline:
         if role == 'audit':
             properties = definitions[-1]['function']['parameters']['$defs']['FieldAudit']['properties']
             properties['item']['enum'] = list(range(len(initial['items'])))
+            definitions[-1]['function']['parameters']['properties']['verdicts'].update(
+                minItems=len(initial['items']), maxItems=len(initial['items']))
             if initial.get('evidence'):
                 properties['evidence']['items']['enum'] = list(initial['evidence'])
         definitions = [definitions[-1], *definitions[:-1]]
@@ -440,12 +454,13 @@ class EvidencePipeline:
         for index, page in enumerate(self.pages):
             value = self.agent('facts', Extracted, {'page': index, 'pages': len(self.pages), 'spans': page},
                                self.validate_extracted, key=f'evidence:facts:{index}')
-            initial_observations = value.observations
-            value = self.agent('coverage', Extracted, {'page': index, 'pages': len(self.pages), 'spans': page,
-                                'initial_extraction': value.model_dump()}, self.validate_extracted,
-                                key=f'evidence:coverage:{index}')
-            combined = {(item.ref, item.quote): item for item in [*initial_observations, *value.observations]}
-            value.observations = list(combined.values())
+            if self.run['manifest'].get('coverage_check', True):
+                initial_observations = value.observations
+                value = self.agent('coverage', Extracted, {'page': index, 'pages': len(self.pages), 'spans': page,
+                                    'initial_extraction': value.model_dump()}, self.validate_extracted,
+                                    key=f'evidence:coverage:{index}')
+                combined = {(item.ref, item.quote): item for item in [*initial_observations, *value.observations]}
+                value.observations = list(combined.values())
             extracted.append(value)
             positions = {span['id']: n for n, span in enumerate(page)}
             ordered = sorted(value.mentions, key=lambda item: (positions.get(item.ref, len(page)),
@@ -453,10 +468,11 @@ class EvidencePipeline:
             for number, item in enumerate(ordered):
                 mentions[f'p{index}m{number}'] = item.model_dump()
         by_task = {}
+        names = {mention['task'] for mention in mentions.values()}
         for key, mention in mentions.items():
             if mention['task'] in MEETING_NOTES:
                 continue
-            by_task.setdefault(mention['task'], {})[key] = mention
+            by_task.setdefault(canonical_task(mention, names), {})[key] = mention
         items, problems = [], []
         for number, (task, task_mentions) in enumerate(by_task.items()):
             task_items, task_problems = self.reconcile_task(task, task_mentions, number)
@@ -502,6 +518,7 @@ class EvidencePipeline:
                 'actions': actions, 'risks': risks, 'questions': questions, 'challenges': [],
                 'audit_summary': f'独立字段核查，{len(problems)}项疑点交人工确认',
                 'source_count': len(self.run['manifest']['sources']), 'workflow': 'evidence_v1',
+                'coverage_check': self.run['manifest'].get('coverage_check', True),
                 'source_processing': {'pages': len(self.pages), 'processed_pages': len(extracted),
                     'input_chars': sum(len(span['text']) for span in self.spans),
                     'processed_chars': sum(len(part['text']) for page in self.pages for part in page),

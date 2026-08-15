@@ -181,8 +181,8 @@ class WorkspaceService:
             raise DomainError("中心记录不存在或无权访问", 404)
         return row
 
-    def recording_dict(self, row, run=None):
-        run = run or self.store.get_run(row.run_id)
+    def recording_dict(self, row, run=None, session=None):
+        run = run or self.store.get_run(row.run_id, session)
         return {"id": row.id, "body": row.body, "version": row.version, "uploaded_at": row.created_at,
                 "run_id": row.run_id, "status": run["status"], "phase": run["phase"], "error": run["error"],
                 "cancel_requested": run["cancel_requested"]}
@@ -212,7 +212,7 @@ class WorkspaceService:
                 if existing and existing.deleted and existing.owner_id == user["id"]:
                     raise DomainError("该资料已在个人回收站，请先恢复原会谈，不重复创建", 409)
                 row = self.private(session, duplicate.recording_id, user)
-                return {**self.recording_dict(row), "duplicate": True,
+                return {**self.recording_dict(row, session=session), "duplicate": True,
                     "notice": "该资料已保存，已打开原会谈，不重复转写或创建。新填信息未覆盖原记录，需要时请修改个人信息。"}
             account = session.get(Account, user["id"])
             if value.opportunity_id:
@@ -266,14 +266,14 @@ class WorkspaceService:
                 label = self.business.label(session, opportunity_id, user)
                 if session.scalar(select(Submission.id).where(Submission.recording_id == key)):
                     raise DomainError("已上报；如需修改中心记录请申请更正", 409)
-                report = self.store.latest_report(row.run_id)
-                run = self.store.get_run(row.run_id)
+                report = self.store.latest_report(row.run_id, session)
+                run = self.store.get_run(row.run_id, session)
                 if not report or run["status"] not in {"waiting_review", "completed"}:
                     raise DomainError("请等待整理完成后上报", 409)
                 meeting = session.get(Meeting, run["meeting_id"])
                 snapshot = {"metadata": {**row.body, "customer": label, "opportunity_id": opportunity_id},
                     "owner_name": user["name"], "report": report["body"],
-                    "evidence": self.store.source_map(row.run_id), "run_id": row.run_id,
+                    "evidence": self.store.source_map(row.run_id, session), "run_id": row.run_id,
                     "audio_path": meeting.audio_path, "recording_version": row.version}
                 snapshot["clarifications"] = self.clarifications(session, key)
                 result = Submission(id=uid("sub_"), recording_id=key, owner_id=user["id"],
@@ -313,10 +313,12 @@ def workspace_router(service):
     @router.get("/recordings")
     def recordings(user=current_user):
         with service.sessions() as session:
-            rows = session.scalars(select(PersonalRecording).where(PersonalRecording.owner_id == user["id"],
+            rows = session.execute(select(PersonalRecording, Run.status, Run.phase, Run.error, Run.cancel_requested)
+                .join(Run, Run.id == PersonalRecording.run_id).where(PersonalRecording.owner_id == user["id"],
                 PersonalRecording.company_id == user["company_id"], PersonalRecording.deleted.is_(False))
                 .order_by(PersonalRecording.created_at.desc())).all()
-            return [service.recording_dict(row) for row in rows]
+            return [service.recording_dict(row, {'status': status, 'phase': phase, 'error': error,
+                    'cancel_requested': cancelled}) for row, status, phase, error, cancelled in rows]
 
     @router.post("/recordings", status_code=201)
     def create(value: RecordingInput, user=current_user):
@@ -379,15 +381,15 @@ def workspace_router(service):
     def detail(key: str, user=current_user):
         with service.sessions() as session:
             row = service.private(session, key, user)
-            run = service.store.get_run(row.run_id)
+            run = service.store.get_run(row.run_id, session)
             meeting = session.get(Meeting, run["meeting_id"])
             submitted = session.scalar(select(Submission).where(Submission.recording_id == key))
-            return {**service.recording_dict(row), "report": service.store.latest_report(row.run_id),
-                    "evidence": service.store.source_map(row.run_id), "has_audio": bool(meeting.audio_path),
+            return {**service.recording_dict(row, run), "report": service.store.latest_report(row.run_id, session),
+                    "evidence": service.store.source_map(row.run_id, session), "has_audio": bool(meeting.audio_path),
                     "clarifications": service.clarifications(session, key),
                     "transcript_text": transcript_text(run),
                     "transcript_history": [{"at": a.created_at, "reason": a.body["reason"],
-                        "text": transcript_text(service.store.get_run(a.body["before_run_id"]))}
+                        "text": transcript_text(service.store.get_run(a.body["before_run_id"], session))}
                         for a in session.scalars(select(Audit).where(Audit.target_id == key,
                             Audit.action == "workspace.transcript_corrected").order_by(Audit.id.desc()))],
                     "submission": {"id": submitted.id, "deleted": submitted.deleted} if submitted else None}
@@ -400,7 +402,7 @@ def workspace_router(service):
             if service.settings.db_url.startswith("sqlite"):
                 session.connection().exec_driver_sql("BEGIN IMMEDIATE")
             row = service.private(session, key, user)
-            run = service.store.get_run(row.run_id)
+            run = service.store.get_run(row.run_id, session)
             if row.version != value.version or run["status"] not in {"waiting_review", "completed", "failed", "cancelled"}:
                 raise DomainError("会谈已变化或还在处理，请刷新", 409)
             if transcript_text(run).strip() == value.text.strip():
@@ -428,10 +430,10 @@ def workspace_router(service):
             if service.settings.db_url.startswith("sqlite"):
                 session.connection().exec_driver_sql("BEGIN IMMEDIATE")
             row = service.private(session, key, user)
-            run = service.store.get_run(row.run_id)
+            run = service.store.get_run(row.run_id, session)
             if row.version != value.version or run["status"] not in {"waiting_review", "completed"}:
                 raise DomainError("会谈已变化或仍在处理，请刷新", 409)
-            report = service.store.latest_report(row.run_id)
+            report = service.store.latest_report(row.run_id, session)
             questions = {q["key"]: q["text"] for q in report["body"]["questions"]} if report else {}
             if not set(value.answers) <= set(questions):
                 raise DomainError("补充问题不属于当前会谈")
@@ -474,7 +476,7 @@ def workspace_router(service):
                 body["customer"] = service.business.label(session, opportunity_id, user)
             rerun = None
             if value.meeting_date != row.body.get("meeting_date", ""):
-                run = service.store.get_run(row.run_id)
+                run = service.store.get_run(row.run_id, session)
                 if run["status"] not in {"waiting_review", "completed", "failed"}:
                     raise DomainError("请等待整理结束后更正会谈日期", 409)
                 next_run = service.store.create_run(session, session.get(Meeting, run["meeting_id"]), run["mode"])
@@ -504,7 +506,7 @@ def workspace_router(service):
     def private_audio(key: str, user=current_user):
         with service.sessions() as session:
             row = service.private(session, key, user)
-            run = service.store.get_run(row.run_id)
+            run = service.store.get_run(row.run_id, session)
             path = session.get(Meeting, run["meeting_id"]).audio_path
         return service.audio(path)
 
@@ -582,11 +584,11 @@ def workspace_router(service):
                 proposed["customer"] = service.business.label(session, opportunity_id, user)
             if value.use_personal_revision:
                 personal = service.private(session, row.recording_id, user)
-                run = service.store.get_run(personal.run_id)
-                report = service.store.latest_report(personal.run_id)
+                run = service.store.get_run(personal.run_id, session)
+                report = service.store.latest_report(personal.run_id, session)
                 if not report or run["status"] not in {"waiting_review", "completed"}:
                     raise DomainError("请先完成个人新版整理再申请中心更正", 409)
-                proposed["replacement"] = {"report": report["body"], "evidence": service.store.source_map(personal.run_id),
+                proposed["replacement"] = {"report": report["body"], "evidence": service.store.source_map(personal.run_id, session),
                     "run_id": personal.run_id, "recording_version": personal.version,
                     "quality_context": {},
                     "clarifications": service.clarifications(session, personal.id)}

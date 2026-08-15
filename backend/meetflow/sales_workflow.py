@@ -62,11 +62,13 @@ def validate_sales_result(value, role, snapshot):
         if item["status"] in {"met", "partial"} and not any(
                 spans[ref]["speaker"] == "sales" for ref in item["evidence"]):
             raise DomainError("达标/部分达标必须引用已确认销售身份的发言")
-        if item["status"] == "unmet" and uncertain:
-            item.update(status="unknown", reason="会话不完整或仍有未知身份，不能认定销售未执行。原判断：" + item["reason"])
+        if item["status"] == "unmet" and (uncertain or not item['evidence']):
+            item.update(status="unknown", reason_title='依据不足，暂不评价',
+                        reason="会话不完整、身份未知或缺少原文依据，不能认定销售未执行。原判断：" + item["reason"])
         notes = snapshot["playbook"]["body"]["product_notes"].strip()
         if role == "product" and (not notes or notes.startswith("请替换为")) and item["status"] != "not_applicable":
-            item.update(status="unknown", reason="未提供已确认的产品依据，不能评价承诺是否符合产品能力。")
+            item.update(status="unknown", reason_title='产品依据不足，暂不评价',
+                        reason="未提供已确认的产品依据，不能评价承诺是否符合产品能力。")
     if result["insights"] and role != "discovery":
         raise DomainError("仅需求角色能提交客户信号")
     for item in result["insights"]:
@@ -157,11 +159,30 @@ class SalesDriver:
         definitions = [{"type": "function", "function": {"name": name, "description": description,
                        "parameters": {"type": "object", "properties": {}, "additionalProperties": False}}}
                        for name, description in [("read_context", "读取本次冻结会话、适用规则与产品资料"),
-                                                 ("read_upstream", "读取本次已完成专业分析及审查反馈")]]
+                                                 ("read_upstream", "读取本次已完成专业分析及审查反馈")]
+                       if name != 'read_upstream' or role == 'auditor' or upstream]
         definitions.append({"type": "function", "function": {"name": "submit_result",
                            "description": "提交有原文引用的结构化评价或审查意见", "parameters": schema.model_json_schema()}})
         rules = [rule for rule in snapshot["playbook"]["body"]["rules"]
                  if role == "auditor" or rule["dimension"] == role]
+        submission = definitions[-1]['function']['parameters']
+        if role != 'discovery' and role != 'auditor':
+            submission['properties'].pop('insights')
+        item_model = 'Challenge' if role == 'auditor' else 'Decision'
+        submission['$defs'][item_model]['properties']['rule_id']['enum'] = [rule['id'] for rule in rules]
+        if role != 'auditor':
+            submission['required'] = ['decisions']
+            submission['properties']['decisions'].update(minItems=len(rules), maxItems=len(rules))
+        allowed_refs = [span['id'] for span in snapshot['conversation']['body']['spans']]
+        for definition in submission['$defs'].values():
+            if 'evidence' in definition.get('properties', {}):
+                definition['properties']['evidence']['items']['enum'] = allowed_refs
+        if role == 'discovery':
+            customer_refs = [span['id'] for span in snapshot['conversation']['body']['spans'] if span['speaker'] == 'customer']
+            if customer_refs:
+                submission['$defs']['Insight']['properties']['evidence']['items']['enum'] = customer_refs
+            else:
+                submission['properties']['insights']['maxItems'] = 0
         context = {"conversation": snapshot["conversation"]["body"], "rules": rules,
                    "product_notes": snapshot["playbook"]["body"]["product_notes"]}
 

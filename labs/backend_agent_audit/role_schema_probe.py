@@ -63,6 +63,8 @@ class DeterministicTransport(httpx.BaseTransport):
         with httpx.HTTPTransport() as transport:
             response = transport.handle_request(modified)
             response.read()
+            with (self.folder / 'wire_response.jsonl').open('a', encoding='utf-8') as stream:
+                stream.write(json.dumps({'status': response.status_code, 'body': response.json()}, ensure_ascii=False) + '\n')
             return response
 
 

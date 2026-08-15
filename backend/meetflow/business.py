@@ -46,10 +46,10 @@ class BusinessService:
                 PersonalRecording.company_id == user["company_id"], PersonalRecording.deleted.is_(False))).all()
             results = []
             for row in rows:
-                report = self.store.latest_report(row.run_id)
-                if report and self.store.get_run(row.run_id)["status"] in {"waiting_review", "completed"}:
+                report = self.store.latest_report(row.run_id, session)
+                if report and self.store.get_run(row.run_id, session)["status"] in {"waiting_review", "completed"}:
                     results.append({"id": row.id, "revision": row.version, "metadata": row.body,
-                        "report": report["body"], "evidence": self.store.source_map(row.run_id),
+                        "report": report["body"], "evidence": self.store.source_map(row.run_id, session),
                         "at": row.created_at, "owner": user["name"], "kind": scope})
             return results
         rows = session.scalars(select(Submission).where(Submission.company_id == user["company_id"],
@@ -96,8 +96,8 @@ class BusinessService:
             if kind == 'personal':
                 self.store.fence(session, row.run_id)
             if kind == "personal":
-                report = self.store.latest_report(row.run_id)
-                if not report or self.store.get_run(row.run_id)["status"] not in {"waiting_review", "completed"}:
+                report = self.store.latest_report(row.run_id, session)
+                if not report or self.store.get_run(row.run_id, session)["status"] not in {"waiting_review", "completed"}:
                     return
                 revision, body = row.version, report["body"]
             else:

@@ -62,25 +62,33 @@ def main(args):
     destination.mkdir(parents=True, exist_ok=False)
     source = ROOT / 'data/benchmarks/clips.json'
     clips = json.loads(source.read_text(encoding='utf8'))['clips'][:args.limit]
-    config = Settings(asr_backend='sensevoice', speaker_diarization=True)
+    config = Settings(asr_backend=args.backend, asr_device='cpu', speaker_diarization=args.backend == 'sensevoice')
     manifest = {'status': 'running', 'protocol': 'docs/32 C1', 'platform': platform.platform(),
-        'asr': 'SenseVoice int8 CPU, VAD max15sec', 'diarization': 'pyannote 3.0, eres2net, threshold .5, auto count',
+        'asr': 'SenseVoice int8 CPU, VAD max15sec' if args.backend == 'sensevoice' else 'Whisper small CPU int8, configured frozen weights',
+        'diarization': 'pyannote 3.0, eres2net, threshold .5, auto count' if config.speaker_diarization else 'not run',
         'clips_sha256': hashlib.sha256(source.read_bytes()).hexdigest(), 'count': len(clips),
         'sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in
                     [Path(__file__), ROOT / 'backend/meetflow/speech.py', ROOT / 'docs/32-completion-plan.md']},
         'models': json.loads((config.speech_model_dir / 'assets.json').read_text(encoding='utf8')),
         'limitations': '24 correlated clips from 8 public non-sales meetings; diagnostic not official CER/DER; developer machine background load'}
     (destination / 'manifest.json').write_text(json.dumps(manifest, indent=2), encoding='utf8')
+    (destination / 'source_bundle.json').write_text(json.dumps({str(p.relative_to(ROOT)): p.read_text(encoding='utf8')
+        for p in [Path(__file__), ROOT / 'backend/meetflow/speech.py', ROOT / 'backend/meetflow/audio.py',
+                  ROOT / 'docs/32-completion-plan.md']}, ensure_ascii=False), encoding='utf8')
     results = []
     for clip in clips:
         start = time.perf_counter()
         try:
-            spans, turns = transcribe(ROOT / 'data/benchmarks' / clip['path'], config, with_turns=True)
+            if args.backend == 'sensevoice':
+                spans, turns = transcribe(ROOT / 'data/benchmarks' / clip['path'], config, with_turns=True)
+            else:
+                from meetflow.audio import transcribe_spans
+                spans, turns = transcribe_spans(ROOT / 'data/benchmarks' / clip['path'], config), []
             ref, hyp = normalized(clip['reference']), normalized(''.join(s['text'] for s in spans))
             result = {'id': clip['id'], 'status': 'completed', 'seconds': clip['seconds'],
                       'wall_seconds': time.perf_counter() - start, 'edits': edits(ref, hyp), 'reference_chars': len(ref),
                       'cer': edits(ref, hyp) / len(ref), 'spans': spans, 'turns': turns,
-                      **speaker_error(clip, turns)}
+                      **(speaker_error(clip, turns) if config.speaker_diarization else {'speaker_evaluation': 'not run'})}
         except Exception as exc:  # noqa: BLE001 -- retain actual dependency/model failures
             result = {'id': clip['id'], 'status': 'failed', 'error': f'{type(exc).__name__}: {exc}',
                       'wall_seconds': time.perf_counter() - start}
@@ -96,4 +104,5 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--limit', type=int, default=24)
+    parser.add_argument('--backend', choices=['sensevoice', 'whisper'], default='sensevoice')
     main(parser.parse_args())

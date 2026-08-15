@@ -1,0 +1,597 @@
+{
+  "protocol": "matching official tokenizer content count +32 tokens per message including generation prefix",
+  "scope": "recorded sequential authored development requests; observed calibration, not a formal guarantee for every chat template",
+  "requests": 58,
+  "underestimates": 0,
+  "unnecessary_byte_refusals": 0,
+  "records": [
+    {
+      "run": "20261113T042310782975Z",
+      "case": "explicit",
+      "role": "facts",
+      "actual_prompt_tokens": 943,
+      "estimated_prompt_tokens": 1018,
+      "byte_upper_bound": 3472,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "explicit",
+      "role": "coverage",
+      "actual_prompt_tokens": 1001,
+      "estimated_prompt_tokens": 1076,
+      "byte_upper_bound": 3682,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "explicit",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1014,
+      "estimated_prompt_tokens": 1089,
+      "byte_upper_bound": 3759,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "explicit",
+      "role": "audit",
+      "actual_prompt_tokens": 1225,
+      "estimated_prompt_tokens": 1300,
+      "byte_upper_bound": 4462,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "revision",
+      "role": "facts",
+      "actual_prompt_tokens": 1038,
+      "estimated_prompt_tokens": 1113,
+      "byte_upper_bound": 3754,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "revision",
+      "role": "coverage",
+      "actual_prompt_tokens": 1252,
+      "estimated_prompt_tokens": 1327,
+      "byte_upper_bound": 4514,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1166,
+      "estimated_prompt_tokens": 1241,
+      "byte_upper_bound": 4180,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1374,
+      "estimated_prompt_tokens": 1449,
+      "byte_upper_bound": 4882,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1031,
+      "estimated_prompt_tokens": 1106,
+      "byte_upper_bound": 3872,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1244,
+      "estimated_prompt_tokens": 1319,
+      "byte_upper_bound": 4618,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "unconfirmed",
+      "role": "facts",
+      "actual_prompt_tokens": 983,
+      "estimated_prompt_tokens": 1058,
+      "byte_upper_bound": 3632,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "unconfirmed",
+      "role": "coverage",
+      "actual_prompt_tokens": 1124,
+      "estimated_prompt_tokens": 1199,
+      "byte_upper_bound": 4185,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "unconfirmed",
+      "role": "reconcile",
+      "actual_prompt_tokens": 961,
+      "estimated_prompt_tokens": 1036,
+      "byte_upper_bound": 3704,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "unconfirmed",
+      "role": "audit",
+      "actual_prompt_tokens": 1182,
+      "estimated_prompt_tokens": 1257,
+      "byte_upper_bound": 4465,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "unconfirmed",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1069,
+      "estimated_prompt_tokens": 1144,
+      "byte_upper_bound": 4078,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T042310782975Z",
+      "case": "unconfirmed",
+      "role": "audit",
+      "actual_prompt_tokens": 1182,
+      "estimated_prompt_tokens": 1257,
+      "byte_upper_bound": 4465,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "explicit",
+      "role": "facts",
+      "actual_prompt_tokens": 1132,
+      "estimated_prompt_tokens": 1211,
+      "byte_upper_bound": 4167,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "explicit",
+      "role": "coverage",
+      "actual_prompt_tokens": 1179,
+      "estimated_prompt_tokens": 1258,
+      "byte_upper_bound": 4336,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "explicit",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1000,
+      "estimated_prompt_tokens": 1079,
+      "byte_upper_bound": 3759,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "explicit",
+      "role": "audit",
+      "actual_prompt_tokens": 1202,
+      "estimated_prompt_tokens": 1281,
+      "byte_upper_bound": 4461,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "facts",
+      "actual_prompt_tokens": 1232,
+      "estimated_prompt_tokens": 1311,
+      "byte_upper_bound": 4461,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "coverage",
+      "actual_prompt_tokens": 1429,
+      "estimated_prompt_tokens": 1508,
+      "byte_upper_bound": 5172,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1125,
+      "estimated_prompt_tokens": 1204,
+      "byte_upper_bound": 4063,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1253,
+      "estimated_prompt_tokens": 1386,
+      "byte_upper_bound": 4538,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1324,
+      "estimated_prompt_tokens": 1403,
+      "byte_upper_bound": 4764,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1273,
+      "estimated_prompt_tokens": 1352,
+      "byte_upper_bound": 4526,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1401,
+      "estimated_prompt_tokens": 1534,
+      "byte_upper_bound": 5001,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1324,
+      "estimated_prompt_tokens": 1403,
+      "byte_upper_bound": 4764,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1021,
+      "estimated_prompt_tokens": 1100,
+      "byte_upper_bound": 3909,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1134,
+      "estimated_prompt_tokens": 1267,
+      "byte_upper_bound": 4365,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1223,
+      "estimated_prompt_tokens": 1302,
+      "byte_upper_bound": 4654,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "unconfirmed",
+      "role": "facts",
+      "actual_prompt_tokens": 1173,
+      "estimated_prompt_tokens": 1252,
+      "byte_upper_bound": 4333,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "unconfirmed",
+      "role": "coverage",
+      "actual_prompt_tokens": 1357,
+      "estimated_prompt_tokens": 1436,
+      "byte_upper_bound": 5028,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "unconfirmed",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1091,
+      "estimated_prompt_tokens": 1170,
+      "byte_upper_bound": 4122,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "unconfirmed",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1214,
+      "estimated_prompt_tokens": 1347,
+      "byte_upper_bound": 4589,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "unconfirmed",
+      "role": "audit",
+      "actual_prompt_tokens": 1286,
+      "estimated_prompt_tokens": 1365,
+      "byte_upper_bound": 4843,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "unconfirmed",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1255,
+      "estimated_prompt_tokens": 1334,
+      "byte_upper_bound": 4683,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T045119053186Z",
+      "case": "unconfirmed",
+      "role": "audit",
+      "actual_prompt_tokens": 1286,
+      "estimated_prompt_tokens": 1365,
+      "byte_upper_bound": 4843,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "explicit",
+      "role": "facts",
+      "actual_prompt_tokens": 1132,
+      "estimated_prompt_tokens": 1211,
+      "byte_upper_bound": 4167,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "explicit",
+      "role": "coverage",
+      "actual_prompt_tokens": 1191,
+      "estimated_prompt_tokens": 1270,
+      "byte_upper_bound": 4349,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "explicit",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1000,
+      "estimated_prompt_tokens": 1079,
+      "byte_upper_bound": 3759,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "explicit",
+      "role": "audit",
+      "actual_prompt_tokens": 1202,
+      "estimated_prompt_tokens": 1281,
+      "byte_upper_bound": 4461,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "facts",
+      "actual_prompt_tokens": 1232,
+      "estimated_prompt_tokens": 1311,
+      "byte_upper_bound": 4461,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "coverage",
+      "actual_prompt_tokens": 1495,
+      "estimated_prompt_tokens": 1574,
+      "byte_upper_bound": 5399,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1010,
+      "estimated_prompt_tokens": 1089,
+      "byte_upper_bound": 3783,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1212,
+      "estimated_prompt_tokens": 1291,
+      "byte_upper_bound": 4485,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1037,
+      "estimated_prompt_tokens": 1116,
+      "byte_upper_bound": 3901,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1244,
+      "estimated_prompt_tokens": 1323,
+      "byte_upper_bound": 4618,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1013,
+      "estimated_prompt_tokens": 1092,
+      "byte_upper_bound": 3872,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1215,
+      "estimated_prompt_tokens": 1294,
+      "byte_upper_bound": 4617,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1185,
+      "estimated_prompt_tokens": 1264,
+      "byte_upper_bound": 4530,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "revision",
+      "role": "audit",
+      "actual_prompt_tokens": 1215,
+      "estimated_prompt_tokens": 1294,
+      "byte_upper_bound": 4617,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "unconfirmed",
+      "role": "facts",
+      "actual_prompt_tokens": 1173,
+      "estimated_prompt_tokens": 1252,
+      "byte_upper_bound": 4333,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "unconfirmed",
+      "role": "facts",
+      "actual_prompt_tokens": 1350,
+      "estimated_prompt_tokens": 1483,
+      "byte_upper_bound": 5095,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "unconfirmed",
+      "role": "coverage",
+      "actual_prompt_tokens": 1254,
+      "estimated_prompt_tokens": 1333,
+      "byte_upper_bound": 4691,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "unconfirmed",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1126,
+      "estimated_prompt_tokens": 1205,
+      "byte_upper_bound": 4256,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "unconfirmed",
+      "role": "reconcile",
+      "actual_prompt_tokens": 1254,
+      "estimated_prompt_tokens": 1387,
+      "byte_upper_bound": 4731,
+      "window": 8192,
+      "output_cap": 1536
+    },
+    {
+      "run": "20261113T051201498541Z",
+      "case": "unconfirmed",
+      "role": "audit",
+      "actual_prompt_tokens": 1322,
+      "estimated_prompt_tokens": 1401,
+      "byte_upper_bound": 4968,
+      "window": 8192,
+      "output_cap": 1536
+    }
+  ],
+  "blocked_request_reconstruction": {
+    "byte_bound": 7231,
+    "tokenizer_estimate": 2189,
+    "context": 8192,
+    "output_reserved": 1536,
+    "actual_server_count": null,
+    "meaning": "estimated suitability only; the rejected request was not sent"
+  }
+}

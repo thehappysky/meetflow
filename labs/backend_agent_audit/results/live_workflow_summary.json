@@ -26,6 +26,9 @@
         "tools": 100
       },
       "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": null,
       "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
       "template_sha256": "2d54db2b9bb29ce7db54fea63a891f5859603813c555b1f88b5e0994652897f9",
       "source_hashes": {
@@ -92,6 +95,9 @@
         "tools": 100
       },
       "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -158,6 +164,9 @@
         "tools": 100
       },
       "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -262,6 +271,9 @@
         "tools": 100
       },
       "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -329,6 +341,9 @@
         "tools": 100
       },
       "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": null,
       "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
       "template_sha256": "2d54db2b9bb29ce7db54fea63a891f5859603813c555b1f88b5e0994652897f9",
       "source_hashes": {
@@ -400,6 +415,9 @@
         "tools": 100
       },
       "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
@@ -506,6 +524,9 @@
         "tools": 100
       },
       "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": null,
       "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
       "template_sha256": "eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
       "source_hashes": {
