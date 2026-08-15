@@ -67,7 +67,7 @@ const speakerNames: Row = {
 };
 const visible = computed(() =>
   rows.value.filter((r) =>
-    [r.metadata.title, r.metadata.customer, r.owner]
+    [r.metadata.title, r.metadata.customer, r.owner, r.subject?.team_name]
       .join(" ")
       .includes(search.value),
   ),
@@ -408,7 +408,10 @@ onBeforeUnmount(() => {
           :disabled="busy"
         >
           <strong>{{ r.metadata.title }}</strong
-          ><span>{{ r.owner }} · {{ r.metadata.customer || "客户待归属" }}</span
+          ><span>负责销售（上报人）：{{ r.subject?.name || r.owner }}</span
+          ><span
+            >{{ r.subject?.team_name || "团队待确认" }} ·
+            {{ r.metadata.customer || "客户待归属" }}</span
           ><span>{{ statuses[r.status] }}</span
           ><b>{{
             r.metrics?.score == null ? "尚无可评分数" : `${r.metrics.score} 分`
@@ -420,7 +423,7 @@ onBeforeUnmount(() => {
           <div>
             <h2>{{ detail.metadata.title }}</h2>
             <p>
-              {{ detail.owner }} · {{ detail.metadata.customer }} · 来源 v{{
+              客户：{{ detail.metadata.customer }} · 来源会谈 v{{
                 detail.source_revision
               }}
             </p>
@@ -432,7 +435,12 @@ onBeforeUnmount(() => {
         <p v-if="detail.stale || detail.historical" class="q-notice">
           正在查看旧版，只能追溯，不能覆盖当前结果。
         </p>
-        <div class="q-score">
+        <div class="q-score" aria-label="本场质检评分与负责人">
+          <div class="q-score-owner">
+            <small>负责销售（上报人）</small>
+            <b>{{ detail.subject?.name || detail.owner }}</b>
+            <small>{{ detail.subject?.team_name || "团队待确认" }}</small>
+          </div>
           <span>{{ statuses[detail.status] }}</span
           ><strong
             >{{ detail.metrics?.score ?? "—" }}<small> / 100</small></strong
@@ -851,6 +859,15 @@ onBeforeUnmount(() => {
 }
 .q-score strong {
   font-size: 38px;
+}
+.q-score-owner {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-right: 12px;
+}
+.q-score-owner b {
+  font-size: 18px;
 }
 .q-score small {
   font-size: 13px;

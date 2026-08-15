@@ -53,6 +53,19 @@ def test_private_minutes_do_not_generate_management_grading(access):
     assert listing(a)==[]
 
 
+def test_score_subject_is_the_submitting_sales_account_in_all_views(access):
+    a=access;_,_,case=central(a)
+    subject=case['subject']
+    with a.app.state.store.sessions() as session:
+        source=session.get(QualityCase,case['id'])
+        assert subject['account_id']==source.owner_id
+        assert session.get(Account,subject['account_id']).username=='sales.a'
+    assert subject['name']=='sales.a' and subject['team_id']=='ta' and subject['team_name']=='一组'
+    assert listing(a)[0]['subject']==subject
+    for view in ('summary','details','full'):
+        assert detail(a,case['id'],'boss','?view='+view)['subject']==subject
+
+
 def test_sales_cannot_read_or_operate_any_quality_entry_even_with_real_ids(access):
     a=access; rec,sub,case=central(a)
     for actor in ('sales.a','sales.a2','sales.b'):
@@ -177,6 +190,7 @@ def test_manager_review_guards_concurrency_and_keeps_raw_machine_report(access):
         assert list(pool.map(lambda _:request(a,'post','/cases/'+case['id']+'/review',json=payload).status_code,range(2)))==[200,200]
     assert detail(a,case['id'])['report']==case['report']
     reviewed=detail(a,case['id'])
+    assert reviewed['subject']==case['subject']  # The reviewer does not become the evaluated salesperson.
     assert next(d for d in reviewed['decisions'] if d['rule_id']=='needs')['reason_title']==''
     overview=detail(a,case['id'],query='?view=summary')
     assert next(d for d in overview['decisions'] if d['rule_id']=='needs')['reason_title']=='需求澄清：依据不足，待确认'

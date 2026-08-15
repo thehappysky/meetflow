@@ -26,6 +26,7 @@ from .database import (
     SalesConversation,
     SalesPlaybook,
     Submission,
+    Team,
     row_dict,
 )
 from .domain import Contract, DomainError, digest, now, uid
@@ -313,10 +314,14 @@ class QualityWorkspace:
                                 .order_by(QualityReview.created_at.desc())) if selected else None
         feedback = session.scalars(select(QualityFeedback).where(QualityFeedback.case_id == case.id)
                                    .order_by(QualityFeedback.created_at)).all()
+        team = session.get(Team, case.team_id) if case.team_id else None
         result = {"id": case.id, "source_kind": case.source_kind, "source_id": case.source_id,
                   "source_revision": case.source_revision, "version": case.version,
                   "stale": current_revision != case.source_revision,
                   "owner": case.body["owner_name"], "metadata": case.body["metadata"],
+                  "subject": {"account_id": case.owner_id, "name": case.body["owner_name"],
+                              "team_id": case.team_id,
+                              "team_name": team.name if team and team.company_id == case.company_id else "团队待确认"},
                   "stage": analysis.snapshot["conversation"]["body"]["stage"] if analysis else case.body["stage"],
                   "status": analysis.status if analysis else "failed" if case.error else "needs_speakers",
                   "pending_feedback": sum(f.status == "pending" for f in feedback),
