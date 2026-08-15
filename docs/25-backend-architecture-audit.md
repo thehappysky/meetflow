@@ -80,6 +80,8 @@ Source、Run.manifest、Submission.snapshot、QualityCase.body、SalesConversati
 
 ## 5. 为什么需要这些 Agent，为什么不是一直分五个
 
+用户后续明确：**最终采用多Agent协作已定，后续只在多Agent内部比较设计。** 单Agent仅作参照和消融，不是产品替代选项。原小基准不利结果继续保留；既不据此取消多Agent，也不为了固定约束声称某种协作已胜出。新增比较见[协作设计对照](27-multi-agent-design-comparison.md)。
+
 当前会谈图有 coordinator、meeting、可选 context、planner、risk、auditor；质检图是按规则分派 discovery／process／product，再独立审查与一次定向返工。ASR 实际是代码服务，不需要因为题目叫“多 Agent”就套一个只能调用识别接口的聊天角色。数值计分与模板填表也不应交给模型猜。
 
 角色只有在它有**不同的证据责任、工具或需要独立纠错**时才有意义：
@@ -92,7 +94,7 @@ Source、Run.manifest、Submission.snapshot、QualityCase.body、SalesConversati
 | 判断是否有支持与反证 | 独立证据审查 | 高影响字段或有具体争议，审查能读到可验证依据 | 错变对减对变错、漏检率、审查开销；不能只统计修好的案例 |
 | 把结果排成纪要／周报 | 确定性映射和模板 | 通常不需要再设整合聊天 Agent | 字段映射正确率、源版本一致、导出内容一致 |
 
-候选日常结构是“代码规划＋按需证据专家＋具体争议审查”，不是自由辩论。简单案例保留强单 Agent 基线；难例按证据缺口启动调查。专家交接结构化主张、支持／反证与变更补丁，不复制整段聊天。调度漏派、审查漏检和对变错都必须计入，不能靠看起来像多 Agent 来证明价值。
+候选日常结构是“代码规划＋证据职责分工＋具体争议审查”，不是自由辩论。单Agent保留为离线实验基线；产品中的按需路由必须明确哪些角色必经、哪些角色可选，不能把全部简单案例退化为单Agent后仍称逐例多Agent协作。专家交接结构化主张、支持／反证与变更补丁，不复制整段聊天。调度漏派、审查漏检和对变错都必须计入，不能靠看起来像多Agent来证明价值。
 
 ```mermaid
 flowchart LR

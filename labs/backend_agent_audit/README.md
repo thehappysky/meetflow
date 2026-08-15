@@ -2,12 +2,16 @@
 
 先看 [预登记](PLAN.md)、[架构审计](../../docs/25-backend-architecture-audit.md)、[实测结论与限制](../../docs/26-quantitative-experiments.md)。结果汇总在 [results/summary.json](results/summary.json)，原始记录位于忽略目录 `test-results/backend-agent-audit/`，不把本机数据库、音频、私密请求或密钥提交。
 
+用户已固定最终采用多Agent，单Agent仅实验参照。内部设计、门控和对应结果见[三种多Agent对照](../../docs/27-multi-agent-design-comparison.md)，不据不利开发结果擅自取消多Agent产品。
+
 ## 文件与复算
 
 | 文件 | 用途 |
 |---|---|
 | cases.py | 12 个有明确 gold 的中文合成开发场景；不是独立业务标注集 |
 | agent_experiment.py | 本地真实模型、三种调用策略、原始请求响应、逐例失败与指标 |
+| topology_experiment.py | 三种多Agent交接／审查机制；逐例至少两个Agent，记录未审查同错与净修复 |
+| test_topologies.py | 交接上下文隔离、争议门控、无效产物与一致但错误的计量 |
 | query_experiment.py | Git 基线与候选 SQL 查询、严格返回等价、交错计时 |
 | current_graph_probe.py | 真实产品图的有预算集成诊断，不是架构质量排名 |
 | protocol_probe.py | DemoProvider 协议路径／Schema 体积探针；不是推理准确率 |
@@ -20,9 +24,10 @@
 在仓库根目录 PowerShell 中运行，使用已有 Python 3.12 虚拟环境及依赖。真实模型命令要求本机 Ollama 服务和模型；下载及运行会占用磁盘／显存。不会修改产品 `.env`，测试数据库使用临时目录。
 
 ```powershell
-.venv\Scripts\python.exe -m pytest tests labs/backend_agent_audit/test_measurement.py -q
+.venv\Scripts\python.exe -m pytest tests labs/backend_agent_audit/test_measurement.py labs/backend_agent_audit/test_topologies.py -q
 .venv\Scripts\python.exe labs/backend_agent_audit/query_experiment.py --sizes 10 100 500 --repeats 7
 .venv\Scripts\python.exe labs/backend_agent_audit/agent_experiment.py --model qwen3:4b --repeats 2
+.venv\Scripts\python.exe labs/backend_agent_audit/topology_experiment.py --model qwen3:4b --repeats 2
 .venv\Scripts\python.exe labs/backend_agent_audit/current_graph_probe.py --model qwen3:4b --profile ollama
 .venv\Scripts\python.exe labs/backend_agent_audit/sqlite_writes.py
 .venv\Scripts\python.exe labs/backend_agent_audit/capacity.py

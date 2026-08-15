@@ -21,6 +21,20 @@
     {
       "directory": "test-results\\backend-agent-audit\\agents\\20261112T124305Z-qwen2.5-7b",
       "model": "qwen2.5:7b",
+      "model_identity": {
+        "name": "qwen2.5:7b",
+        "digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen2",
+          "families": [
+            "qwen2"
+          ],
+          "parameter_size": "7.6B",
+          "quantization_level": "Q4_K_M"
+        }
+      },
       "status": "completed",
       "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
       "plan_sha256": "aa2c55ce49c2498ad092f6d69d05c956dc94c8cf32914c9f191cd7947bf977e9",
@@ -150,6 +164,20 @@
     {
       "directory": "test-results\\backend-agent-audit\\agents\\20261112T124942Z-qwen2.5-7b",
       "model": "qwen2.5:7b",
+      "model_identity": {
+        "name": "qwen2.5:7b",
+        "digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen2",
+          "families": [
+            "qwen2"
+          ],
+          "parameter_size": "7.6B",
+          "quantization_level": "Q4_K_M"
+        }
+      },
       "status": "completed",
       "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
       "plan_sha256": "b04512e2fe3f040f6e9994ba8451103d71c9d1ac7020a3fc101530eb859c03c6",
@@ -279,6 +307,20 @@
     {
       "directory": "test-results\\backend-agent-audit\\agents\\20261112T125716Z-qwen2.5-7b",
       "model": "qwen2.5:7b",
+      "model_identity": {
+        "name": "qwen2.5:7b",
+        "digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen2",
+          "families": [
+            "qwen2"
+          ],
+          "parameter_size": "7.6B",
+          "quantization_level": "Q4_K_M"
+        }
+      },
       "status": "completed",
       "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
       "plan_sha256": "b541f9b4d493d11ef3fbcb46efa07b779e40f4550a43fd8b39b413f5640ac4d5",
@@ -330,6 +372,20 @@
     {
       "directory": "test-results\\backend-agent-audit\\agents\\20261112T131203Z-qwen3-4b",
       "model": "qwen3:4b",
+      "model_identity": {
+        "name": "qwen3:4b",
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M"
+        }
+      },
       "status": "completed",
       "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
       "plan_sha256": "7fd3f1617964be0a65fd061c4488d9f2001d18858f8a4871267894feb9d2cabf",
@@ -715,6 +771,880 @@
           ],
           "bytes": 395112,
           "returned": 500
+        }
+      ]
+    }
+  ],
+  "multi_agent_topologies": [
+    {
+      "directory": "test-results\\backend-agent-audit\\topologies\\20261112T141201Z",
+      "manifest": {
+        "status": "completed",
+        "model": "qwen3:4b",
+        "args": {
+          "url": "http://127.0.0.1:11434",
+          "model": "qwen3:4b",
+          "repeats": 2,
+          "timeout": 90
+        },
+        "git_head": "ca1d42627a14f063b62d848febb5457aa9291c16",
+        "dirty_files": [
+          " M AGENTS.md",
+          " M docs/25-backend-architecture-audit.md",
+          " M docs/26-quantitative-experiments.md",
+          " M labs/backend_agent_audit/PLAN.md",
+          "?? docs/27-multi-agent-design-comparison.md",
+          "?? labs/backend_agent_audit/test_topologies.py",
+          "?? labs/backend_agent_audit/topology_experiment.py"
+        ],
+        "source_sha256": {
+          "agent_experiment.py": "bd909fad5620b0ba07615d4b9e07517aaef1b51c790a435bdc872ce5c723fc16",
+          "capacity.py": "109671ff247acf6aa8fceffd2deef5fc81adccca32caea9c63fe3ef0365c5d91",
+          "cases.py": "35f0d067dd6380baca35a51ad10c9dc6c0ab1f12c8e6743d2c8a9ebecc687354",
+          "current_graph_probe.py": "57c104c018c0290e765086e52c6db3719b774216de41c9da6444c49205b9ab65",
+          "protocol_probe.py": "bbf7df90ece62301265cea9161178e5994030f6cb7efa1c5bd1ba6e44dacc182",
+          "query_experiment.py": "a94252e7446699a9733ce9336ec3a3602841478dd4b41157c7fad1c78a4c1b58",
+          "sqlite_writes.py": "7a97001ab34089e63549469b64ab910ba7df9e3cd1f1c26d5d2ea52408315e95",
+          "summarize.py": "96a9c3b1f1fad9d9ae01d76fae61d36f279f617eb2e30f39a52d820c0e994e52",
+          "test_measurement.py": "039238cda79ff0bf9bc00db8d28505def0371053e7408273af9623888887460b",
+          "test_topologies.py": "46aa87c277e0001f69e55e7657b6284112b8e717545ed2f3b13ba6ac1e2237a6",
+          "topology_experiment.py": "f4ca386025b3053d00eb8209dc54a1fddcedbc2d3f8e43b2833d72fadb11b16b"
+        },
+        "plan_sha256": "fd69b39333687441d1c26e2be56c7a5b9ff41f60b58330c416d900711c47bfe2",
+        "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
+        "python": "3.12.6 (tags/v3.12.6:a4a2d2b, Sep  6 2024, 20:11:23) [MSC v.1940 64 bit (AMD64)]",
+        "platform": "Windows-11-10.0.22631-SP0",
+        "scope": "12 agent-authored synthetic DEVELOPMENT cases, no independent gold or holdout",
+        "execution": "independent expert contexts executed serially on one local GPU; not cloud parallel latency",
+        "generation_cap": "512 per call, max 3 calls; common 1536 upper cap, not matched actual tokens",
+        "contract_sha256": "4adb097a998ddf3b37bfeee5a04cbbc09c1273289d6ff2400135c7ac44e398ce",
+        "price": null,
+        "ended_utc": "2026-11-12T14:16:20.484472+00:00"
+      },
+      "model_identity": {
+        "name": "qwen3:4b",
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M"
+        }
+      },
+      "metrics": {
+        "dispute_review": {
+          "cases": 24,
+          "successful": 22,
+          "all_slots_correct": 12,
+          "invented_actions": 2,
+          "p50_seconds": 2.6869506500079297,
+          "p95_seconds": 4.107413100020494,
+          "input_tokens": 42406,
+          "output_tokens": 2912,
+          "model_calls": 54,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 18,
+            "owner": 18,
+            "due": 14,
+            "status": 14
+          },
+          "evidence": {
+            "tp": 32,
+            "fp": 4,
+            "fn": 10,
+            "f1": 0.8205128205128205
+          },
+          "conditions": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 4,
+            "f1": 0.5
+          },
+          "fully_exact": 8,
+          "distinct_cases": 12,
+          "reviews": 6,
+          "review_rate": 0.25,
+          "unchecked_consensus": 18,
+          "unchecked_core_errors": 6,
+          "unchecked_full_errors": 10,
+          "repaired_core_slots": 0,
+          "damaged_core_slots": 0,
+          "completion_cap_violations": 0,
+          "invalid_intermediate": 4,
+          "net_repair_rate": 0.0,
+          "mean_calls": 2.25,
+          "p50_model_call_seconds": 1.316994449996855
+        },
+        "independent_review": {
+          "cases": 24,
+          "successful": 22,
+          "all_slots_correct": 12,
+          "invented_actions": 2,
+          "p50_seconds": 4.055907500034664,
+          "p95_seconds": 4.204882799996994,
+          "input_tokens": 60956,
+          "output_tokens": 3896,
+          "model_calls": 72,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 18,
+            "owner": 18,
+            "due": 14,
+            "status": 14
+          },
+          "evidence": {
+            "tp": 32,
+            "fp": 4,
+            "fn": 10,
+            "f1": 0.8205128205128205
+          },
+          "conditions": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 4,
+            "f1": 0.5
+          },
+          "fully_exact": 8,
+          "distinct_cases": 12,
+          "reviews": 24,
+          "review_rate": 1.0,
+          "unchecked_consensus": 0,
+          "unchecked_core_errors": 0,
+          "unchecked_full_errors": 0,
+          "repaired_core_slots": 0,
+          "damaged_core_slots": 0,
+          "completion_cap_violations": 0,
+          "invalid_intermediate": 4,
+          "net_repair_rate": 0.0,
+          "mean_calls": 3.0,
+          "p50_model_call_seconds": 1.3217145500238985
+        },
+        "serial_handoff": {
+          "cases": 24,
+          "successful": 22,
+          "all_slots_correct": 16,
+          "invented_actions": 2,
+          "p50_seconds": 4.019834049977362,
+          "p95_seconds": 4.298592200037092,
+          "input_tokens": 63824,
+          "output_tokens": 3816,
+          "model_calls": 72,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 18,
+            "owner": 18,
+            "due": 18,
+            "status": 16
+          },
+          "evidence": {
+            "tp": 32,
+            "fp": 4,
+            "fn": 10,
+            "f1": 0.8205128205128205
+          },
+          "conditions": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 4,
+            "f1": 0.5
+          },
+          "fully_exact": 10,
+          "distinct_cases": 12,
+          "reviews": 24,
+          "review_rate": 1.0,
+          "unchecked_consensus": 0,
+          "unchecked_core_errors": 0,
+          "unchecked_full_errors": 0,
+          "repaired_core_slots": 0,
+          "damaged_core_slots": 0,
+          "completion_cap_violations": 0,
+          "invalid_intermediate": 4,
+          "net_repair_rate": 0.0,
+          "mean_calls": 3.0,
+          "p50_model_call_seconds": 1.3328430999827106
+        }
+      },
+      "stage_diagnostics": {
+        "dispute_review": {
+          "posthoc_explanatory_not_new_selection_metric": true,
+          "core_slots_repaired_relative_to_current_expert": 0,
+          "core_slots_damaged_relative_to_current_expert": 6,
+          "at_least_one_core_correct_expert_but_final_core_wrong": 4
+        },
+        "independent_review": {
+          "posthoc_explanatory_not_new_selection_metric": true,
+          "core_slots_repaired_relative_to_current_expert": 0,
+          "core_slots_damaged_relative_to_current_expert": 6,
+          "at_least_one_core_correct_expert_but_final_core_wrong": 4
+        },
+        "serial_handoff": {
+          "posthoc_explanatory_not_new_selection_metric": true,
+          "core_slots_repaired_relative_to_current_expert": 0,
+          "core_slots_damaged_relative_to_current_expert": 0,
+          "at_least_one_core_correct_expert_but_final_core_wrong": 0
+        }
+      },
+      "prediction_sha256": "18d15c2b731bc7d247678ddb397363c5dedc5841b3ff6229cad1c310e5940999",
+      "unchecked_full_error_cases": [
+        "customer_only",
+        "handover",
+        "injection",
+        "pause",
+        "unknown_owner"
+      ],
+      "case_results": [
+        {
+          "case_id": "unknown_date",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "cancel",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": false
+        },
+        {
+          "case_id": "pause",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": false
+        },
+        {
+          "case_id": "injection",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": false
+        },
+        {
+          "case_id": "done",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "injection",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "failed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "explicit",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": false
+        },
+        {
+          "case_id": "explicit",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": false
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "condition",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "injection",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "failed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "failed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": false
+        },
+        {
+          "case_id": "explicit",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "injection",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": false
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "explicit",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "failed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "cancel",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "explicit",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": false
+        },
+        {
+          "case_id": "cancel",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "explicit",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "failed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "injection",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "handover",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "independent_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "serial_handoff",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "serial_handoff",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "dispute_review",
+          "repeat": 1,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "injection",
+          "policy": "dispute_review",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": false
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "independent_review",
+          "repeat": 0,
+          "status": "failed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
         }
       ]
     }
