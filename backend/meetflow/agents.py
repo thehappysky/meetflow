@@ -42,11 +42,15 @@ def validate_result(result, role, evidence_map, tasks):
                 raise DomainError("会议理解只能引用本次会议")
     task_map = {task["id"]: task for task in tasks}
     action_ids = set()
+    target_ids = set()
     for action in value.actions:
         if action.id in action_ids:
             raise DomainError("行动项编号重复")
         action_ids.add(action.id)
         if action.target_task_id:
+            if action.target_task_id in target_ids:
+                raise DomainError("同一任务不能提交多项互相覆盖的修改，请先归并")
+            target_ids.add(action.target_task_id)
             target = task_map.get(action.target_task_id)
             if not target or target["version"] != action.expected_version:
                 raise DomainError("目标任务或预期版本不属于输入快照")

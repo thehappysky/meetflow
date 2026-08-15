@@ -14,14 +14,15 @@ def tool_call(name, args):
 
 
 class LiveProvider:
-    def __init__(self, settings):
+    def __init__(self, settings, transport=None):
         self.settings = settings
+        self.transport = transport
 
     def complete(self, role, messages, tools, info):
         if not self.settings.live_available:
             raise DomainError("真实模型未配置", 422)
         try:
-            with httpx.Client(timeout=self.settings.model_timeout) as client:
+            with httpx.Client(timeout=self.settings.model_timeout, transport=self.transport) as client:
                 response = client.post(self.settings.model_base_url.rstrip("/") + "/chat/completions",
                     headers={"Authorization": f"Bearer {self.settings.model_api_key}"},
                     json={"model": self.settings.model_name, "messages": messages, "tools": tools,
@@ -111,6 +112,8 @@ class DemoProvider:
                 if not re.search("负责|我来|交付|改造|准备|跟进|完成|发布", text):
                     continue
                 if re.search("只是候选|今天不定", text):
+                    continue
+                if re.search("必须等|发布必须", text) and not re.search("我来|我负责|准备|跟进|改造|交付", text):
                     continue
                 task = next((task for task in tasks if SequenceMatcher(None, task["title"], text)
                              .find_longest_match().size >= 4), None)

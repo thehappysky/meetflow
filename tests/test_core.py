@@ -49,6 +49,17 @@ def test_model_call_budget_is_enforced(store):
         store.reserve(run["id"], "model")
 
 
+def test_active_processing_deadline_is_enforced_and_pause_releases_it(store):
+    import time
+    run = make_run(store)
+    store.begin_processing(run["id"])
+    store._deadlines[run["id"]] = time.monotonic() - 1
+    with pytest.raises(DomainError, match="时间预算"):
+        store.check_active(run["id"])
+    store.end_processing(run["id"])
+    store.check_active(run["id"])
+
+
 def test_artifacts_do_not_silently_overwrite(store):
     run = make_run(store)
     first = store.commit_artifact(run["id"], "0:meeting", "meeting", {"summary": "A"})

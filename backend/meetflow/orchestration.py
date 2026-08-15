@@ -204,6 +204,7 @@ class RunDriver:
                 self.active.discard(run_id)
 
     def process(self, run_id, resume=None):
+        self.store.begin_processing(run_id)
         try:
             run = self.store.get_run(run_id)
             if run["status"] in {"completed", "cancelled"}:
@@ -230,6 +231,8 @@ class RunDriver:
                                   phase="已停止" if cancelled else "处理失败", error=error)
             self.store.event(run_id, "failed", "处理已停止" if cancelled else "处理失败，可查看原因并重试",
                              {"error": error, "type": type(exc).__name__})
+        finally:
+            self.store.end_processing(run_id)
 
     def recover(self):
         with self.store.sessions() as session:

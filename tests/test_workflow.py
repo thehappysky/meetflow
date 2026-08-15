@@ -114,6 +114,19 @@ def test_restart_graph_and_checkpoint_waiting_review(tmp_path):
         assert client.get(f"/api/runs/{run_id}").json()["run"]["status"] == "completed"
 
 
+def test_human_review_wait_does_not_consume_processing_deadline(application):
+    from meetflow.database import Run
+    app, client = application
+    run_id, detail = analyzed(app, client)
+    with app.state.store.sessions.begin() as session:
+        run = session.get(Run, run_id)
+        run.created_at = "2020-01-01T00:00:00+00:00"
+    response = client.post(f"/api/runs/{run_id}/review", json=approval_request(detail, selected_actions=[]))
+    assert response.status_code == 200
+    app.state.driver.process(run_id, {"approval_id": response.json()["id"]})
+    assert app.state.store.get_run(run_id)["status"] == "completed"
+
+
 def test_plan_rejects_cycles_and_unaudited_work():
     with pytest.raises(DomainError, match="依赖环"):
         validate_plan([{"id": "a", "role": "planner", "goal": "x", "depends_on": ["a"]}])

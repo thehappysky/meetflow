@@ -2,6 +2,7 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Annotated
 
 from fastapi import FastAPI, File, Form, Header, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -112,9 +113,11 @@ def create_app(settings=None, provider=None):
         return result
 
     @app.post("/api/meetings/audio", status_code=201)
-    async def create_audio_meeting(project_id: str = Form(...), title: str = Form("录音会议"),
-                                   meeting_time: str | None = Form(None), timezone: str = Form("Asia/Shanghai"),
-                                   mode: str = Form("demo"), file: UploadFile = File(...)):
+    async def create_audio_meeting(file: Annotated[UploadFile, File()], project_id: Annotated[str, Form()],
+                                   title: Annotated[str, Form()] = "录音会议",
+                                   meeting_time: Annotated[str | None, Form()] = None,
+                                   timezone: Annotated[str, Form()] = "Asia/Shanghai",
+                                   mode: Annotated[str, Form()] = "demo"):
         if not audio_available(settings):
             raise DomainError("音频转写未启用：安装 audio 依赖并配置 ASR 模型后再上传；当前可粘贴会议文字", 422)
         metadata = MeetingInput(project_id=project_id, title=title, meeting_time=meeting_time,

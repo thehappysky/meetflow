@@ -1,5 +1,6 @@
 import re
-from datetime import UTC
+import threading
+import time
 
 from sqlalchemy import select, update
 
@@ -10,6 +11,16 @@ from .domain import DomainError, MeetingInput, SourceInput, digest, now, uid
 class Store:
     def __init__(self, sessions, settings):
         self.sessions, self.settings = sessions, settings
+        self._deadlines = {}
+        self._deadline_lock = threading.Lock()
+
+    def begin_processing(self, run_id):
+        with self._deadline_lock:
+            self._deadlines[run_id] = time.monotonic() + self.settings.run_timeout
+
+    def end_processing(self, run_id):
+        with self._deadline_lock:
+            self._deadlines.pop(run_id, None)
 
     def audit(self, session, action, target_id, body=None):
         session.add(Audit(action=action, target_id=target_id, body=body or {}))
@@ -95,9 +106,10 @@ class Store:
         run = self.get_run(run_id)
         if run["cancel_requested"]:
             raise DomainError("处理已停止", 409)
-        from datetime import datetime
-        if (datetime.now(UTC) - datetime.fromisoformat(run["created_at"])).total_seconds() > self.settings.run_timeout:
-            raise DomainError("本次处理达到时间预算，请创建新的分析运行", 409)
+        with self._deadline_lock:
+            deadline = self._deadlines.get(run_id)
+        if deadline is not None and time.monotonic() > deadline:
+            raise DomainError("本次执行达到时间预算，可恢复处理；累计调用预算仍保留", 409)
         return run
 
     def reserve(self, run_id, kind):
