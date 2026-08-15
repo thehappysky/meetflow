@@ -120,7 +120,8 @@ def test_unsupported_literal_fields_are_visible_questions_never_actions(typed_st
     result = EvidencePipeline(store, run['id'], InvalidFields()).analyze()
     assert not result['actions']
     assert len(result['questions']) == 1
-    assert 'owner' in result['questions'][0]['text']
+    assert '负责人尚未核实' in result['questions'][0]['text']
+    assert 'owner' not in result['questions'][0]['text']
     assert set(result['questions'][0]['evidence']) <= set(store.source_map(run['id']))
 
 
@@ -363,3 +364,21 @@ def test_oversized_entity_history_fails_explicitly_instead_of_silently_truncatin
                'owner': '王宁', 'due_text': '明天', 'condition': None}
     with pytest.raises(DomainError, match='未截断历史'):
         pipeline.reconcile_task('发送报价', {f'm{i}': mention for i in range(21)}, 0)
+
+
+
+def test_unverified_fields_become_actionable_questions_without_internal_diagnostics(typed_store):
+    store, run = typed_store
+    class InvalidCondition:
+        def complete(self, role, messages, tools, info):
+            assert role in {'facts','coverage'}
+            value = {'summary':'报价前提仍须确认','mentions':[{'task':'发送报价','ref':'s0',
+                'kind':'condition','owner':'王宁','condition':'付款以后'}]}
+            return {'role':'assistant','tool_calls':[tool_call('submit_result',value)]},{}
+    report = EvidencePipeline(store,run['id'],InvalidCondition()).analyze()
+    assert not report['actions'] and report['questions']
+    question = report['questions'][0]
+    assert '执行前提尚未核实' in question['text'] and question['evidence']
+    assert 'condition' not in question['text'] and 'null' not in question['text']
+    raw = next(a['body'] for a in store.artifacts(run['id']) if a['role'] == 'facts')
+    assert raw['pending'][0]['field'] == 'condition' and 'condition' in raw['pending'][0]['reason']
