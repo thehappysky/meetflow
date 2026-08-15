@@ -1,6 +1,6 @@
 import hashlib
 import json
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import Literal
 from uuid import uuid4
 
@@ -16,7 +16,7 @@ def uid(prefix: str = "") -> str:
 
 
 def now() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def digest(value) -> str:

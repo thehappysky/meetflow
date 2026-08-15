@@ -1,4 +1,5 @@
 import re
+from datetime import UTC
 
 from sqlalchemy import select, update
 
@@ -94,8 +95,8 @@ class Store:
         run = self.get_run(run_id)
         if run["cancel_requested"]:
             raise DomainError("处理已停止", 409)
-        from datetime import datetime, timezone
-        if (datetime.now(timezone.utc) - datetime.fromisoformat(run["created_at"])).total_seconds() > self.settings.run_timeout:
+        from datetime import datetime
+        if (datetime.now(UTC) - datetime.fromisoformat(run["created_at"])).total_seconds() > self.settings.run_timeout:
             raise DomainError("本次处理达到时间预算，请创建新的分析运行", 409)
         return run
 

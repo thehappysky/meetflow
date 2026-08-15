@@ -1,7 +1,6 @@
 import pytest
-
 from meetflow.config import Settings
-from meetflow.database import Source, make_database
+from meetflow.database import make_database
 from meetflow.domain import DomainError, MeetingInput, SourceInput
 from meetflow.store import Store
 from meetflow.tools import ToolGateway, normalize_date
