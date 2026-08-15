@@ -1,3 +1,4 @@
+export const NETWORK_ERROR = "连接暂时中断，正在尝试重新连接。";
 export async function api(path: string, options: RequestInit = {}) {
   const response = await fetch(`/api${path}`, {
     ...options,
@@ -12,6 +13,8 @@ export async function api(path: string, options: RequestInit = {}) {
         : { "Content-Type": "application/json" }),
       ...options.headers,
     },
+  }).catch(() => {
+    throw new Error(NETWORK_ERROR);
   });
   const value = await response.json().catch(() => ({}));
   if (response.status === 401) {

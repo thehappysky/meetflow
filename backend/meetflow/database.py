@@ -285,6 +285,46 @@ class Submission(Base):
     created_at: Mapped[str] = mapped_column(default=now)
 
 
+class Customer(Base):
+    __tablename__ = "workspace_customers"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    team_id: Mapped[str] = mapped_column(ForeignKey("access_teams.id"))
+    name: Mapped[str]
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class Opportunity(Base):
+    __tablename__ = "workspace_opportunities"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    customer_id: Mapped[str] = mapped_column(ForeignKey("workspace_customers.id"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    team_id: Mapped[str] = mapped_column(ForeignKey("access_teams.id"))
+    title: Mapped[str]
+    stage: Mapped[str] = mapped_column(default="待确认")
+    version: Mapped[int] = mapped_column(default=1)
+    history: Mapped[list] = mapped_column(JSON, default=list)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class Followup(Base):
+    __tablename__ = "workspace_followups"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    scope_key: Mapped[str] = mapped_column(unique=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    team_id: Mapped[str] = mapped_column(ForeignKey("access_teams.id"))
+    source_kind: Mapped[str]
+    source_id: Mapped[str]
+    source_revision: Mapped[int]
+    body: Mapped[dict] = mapped_column(JSON)
+    version: Mapped[int] = mapped_column(default=1)
+    history: Mapped[list] = mapped_column(JSON, default=list)
+    updated_at: Mapped[str] = mapped_column(default=now)
+
+
 class MeetingClarification(Base):
     __tablename__ = "workspace_meeting_clarifications"
     id: Mapped[str] = mapped_column(String(80), primary_key=True)

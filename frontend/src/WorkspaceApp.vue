@@ -10,7 +10,9 @@ import {
 import LegacyApp from "./App.vue";
 import QualityWorkspace from "./QualityWorkspace.vue";
 import TrainingRules from "./TrainingRules.vue";
-import { api, post } from "./api";
+import BusinessWorkspace from "./BusinessWorkspace.vue";
+import OpportunityPicker from "./OpportunityPicker.vue";
+import { api, post, NETWORK_ERROR } from "./api";
 
 type Row = Record<string, any>;
 const loaded = ref(false),
@@ -40,6 +42,7 @@ const selectedTeam = ref(""),
   teamName = ref(""),
   search = ref(""),
   submitCustomer = ref("");
+const submitOpportunity = ref<string | null>(null);
 const login = reactive({ username: "", password: "" });
 const registration = reactive({
   invitation: "",
@@ -52,12 +55,14 @@ const form = reactive({
   customer: "",
   meeting_date: "",
   transcript: "",
+  opportunity_id: null as string | null,
 });
 const edit = reactive({
   title: "",
   customer: "",
   meeting_date: "",
   reason: "",
+  opportunity_id: null as string | null,
 });
 const file = ref<File | null>(null),
   checkSubmit = ref(false);
@@ -170,6 +175,7 @@ async function refresh() {
   );
   if (user.value?.id !== owner) return;
   lastRefresh = Date.now();
+  if (error.value === NETWORK_ERROR) error.value = "";
   if (role === "admin") {
     teams.value = data[0];
     accounts.value = data[1];
@@ -306,6 +312,8 @@ async function open(key: string, central = false) {
   centralDetail.value = central;
   submitCustomer.value =
     result.body?.customer || result.metadata?.customer || "";
+  submitOpportunity.value =
+    result.body?.opportunity_id || result.metadata?.opportunity_id || null;
 }
 async function saveRecording() {
   await perform(async () => {
@@ -319,6 +327,7 @@ async function saveRecording() {
           title: form.title,
           customer: form.customer,
           meeting_date: form.meeting_date,
+          opportunity_id: form.opportunity_id,
         }),
       );
       result = await api("/workspace/audio", { method: "POST", body });
@@ -329,6 +338,7 @@ async function saveRecording() {
     form.customer = "";
     form.meeting_date = "";
     form.transcript = "";
+    form.opportunity_id = null;
     await refresh();
     await open(result.id);
     notice.value =
@@ -345,12 +355,14 @@ async function submit() {
       detail.value!.id,
       detail.value!.version,
       submitCustomer.value,
+      submitOpportunity.value,
     ]);
     if (submitAttempt?.signature !== signature)
       submitAttempt = { signature, key: crypto.randomUUID() };
     await post(`/workspace/recordings/${detail.value!.id}/submit`, {
       version: detail.value!.version,
       customer: submitCustomer.value,
+      opportunity_id: submitOpportunity.value,
       request_key: submitAttempt!.key,
     });
     navigate("center");
@@ -359,7 +371,10 @@ async function submit() {
   });
 }
 function editing(correction = false) {
-  Object.assign(edit, metadata.value, { reason: "" });
+  Object.assign(edit, metadata.value, {
+    reason: "",
+    opportunity_id: metadata.value?.opportunity_id || null,
+  });
   editOpen.value = !correction;
   requestOpen.value = correction;
 }
@@ -378,6 +393,7 @@ async function saveEdit() {
           title: edit.title,
           customer: edit.customer,
           meeting_date: edit.meeting_date,
+          opportunity_id: edit.opportunity_id,
           version: detail.value!.version,
         }),
       });
@@ -637,6 +653,9 @@ onBeforeUnmount(() => {
             ><button @click="navigate('rules')">销售培训规则</button></template
           >
           <template v-else>
+            <button v-if="user.role !== 'sales'" @click="navigate('home')">
+              {{ user.role === "boss" ? "公司简报" : "团队工作台" }}
+            </button>
             <button v-if="user.role === 'sales'" @click="navigate('home')">
               会谈录音
             </button>
@@ -653,6 +672,7 @@ onBeforeUnmount(() => {
                     : "销售质检"
               }}
             </button>
+            <button @click="navigate('business')">客户与跟进</button>
           </template>
         </nav>
         <div class="wk-identity" aria-label="当前登录身份">
@@ -665,15 +685,25 @@ onBeforeUnmount(() => {
         <div v-if="error" class="wk-error" role="alert">{{ error }}</div>
         <div v-if="notice" class="wk-note" role="status">{{ notice }}</div>
         <div class="wk-scope">
-          {{ scope }} · 权限由服务器校验 ·
+          {{ scope }} ·
           {{
             user.role === "sales"
               ? "未上报资料仅自己可见"
               : "管理范围仅含已上报资料"
           }}
         </div>
+        <BusinessWorkspace
+          v-if="
+            page === 'business' ||
+            (page === 'home' && user.role !== 'sales' && user.role !== 'admin')
+          "
+          :key="page"
+          :user="user"
+          :initial="page === 'business' ? 'customers' : 'overview'"
+          @meeting="meetingFromQuality"
+        />
         <QualityWorkspace
-          v-if="page === 'quality' && user.role !== 'admin'"
+          v-else-if="page === 'quality' && user.role !== 'admin'"
           :user="user"
           :source="qualitySource"
           @meeting="meetingFromQuality"
@@ -784,11 +814,10 @@ onBeforeUnmount(() => {
           >
             <h2>{{ requestOpen ? "中心更正申请" : "个人信息修改" }}</h2>
             <label>录音名称<input v-model="edit.title" required /></label
-            ><label
-              >客户／商机<input
-                v-model="edit.customer"
-                :required="requestOpen" /></label
-            ><label
+            ><OpportunityPicker
+              v-model="edit.opportunity_id"
+              @label="edit.customer = $event"
+            /><label
               >实际会议日期<input
                 v-model="edit.meeting_date"
                 type="date" /></label
@@ -961,11 +990,11 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
                 <template v-else>
-                  <label
-                    >上报客户／商机<input
-                      v-model="submitCustomer"
-                      placeholder="上报前补选或填写" /></label
-                  ><label class="wk-check"
+                  <OpportunityPicker
+                    v-model="submitOpportunity"
+                    label="上报客户／商机（必选）"
+                    @label="submitCustomer = $event"
+                  /><label class="wk-check"
                     ><input
                       type="checkbox"
                       v-model="checkSubmit"
@@ -973,7 +1002,7 @@ onBeforeUnmount(() => {
                   ><button
                     class="wk-primary"
                     @click="submit"
-                    :disabled="busy || !report || !submitCustomer.trim()"
+                    :disabled="busy || !report || !submitOpportunity"
                   >
                     确认上报本场
                   </button></template
@@ -1038,7 +1067,10 @@ onBeforeUnmount(() => {
                 >实际会议日期<input
                   v-model="form.meeting_date"
                   type="date" /></label
-              ><label>客户／商机<input v-model="form.customer" /></label>
+              ><OpportunityPicker
+                v-model="form.opportunity_id"
+                @label="form.customer = $event"
+              />
             </details>
             <label v-if="!file"
               >会谈文字<textarea

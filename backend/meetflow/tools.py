@@ -84,7 +84,7 @@ class ToolGateway:
         elif name == "read_upstream":
             value = self.upstream
         else:
-            value = normalize_date(args["expression"], run["manifest"]["meeting_time"],
+            value = normalize_date(args["expression"], run["manifest"].get("meeting_date") or run["manifest"]["meeting_time"],
                                    run["manifest"]["timezone"])
         encoded = json.dumps(value, ensure_ascii=False)
         if len(encoded) > 24000:

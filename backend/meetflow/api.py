@@ -13,6 +13,7 @@ from sqlalchemy import select, update
 
 from .audio import audio_available
 from .auth import AuthService, auth_routers
+from .business import BusinessService, business_router
 from .config import Settings
 from .database import (
     Approval,
@@ -55,7 +56,15 @@ def create_app(settings=None, provider=None, sales_provider=None):
     workspace = WorkspaceService(store, driver, auth)
     quality = QualityWorkspace(workspace, sales, sales_driver)
     workspace.quality = quality
-    driver.on_report = quality.on_run_ready
+    business = BusinessService(workspace)
+    workspace.business = business
+    def on_report(run_id):
+        for service in (quality, business):
+            try:
+                service.on_run_ready(run_id)
+            except Exception as exc:  # noqa: BLE001 -- one derived feature must not block another
+                store.event(run_id, "derived_prepare_failed", "附加整理需要重试", {"error": str(exc)[:1000]})
+    driver.on_report = on_report
 
     @asynccontextmanager
     async def lifespan(app):
@@ -64,6 +73,7 @@ def create_app(settings=None, provider=None, sales_provider=None):
             sales_driver.recover()
             if settings.auth_enabled:
                 quality.recover()
+                business.recover()
         yield
         driver.close()
         sales_driver.close()
@@ -74,7 +84,9 @@ def create_app(settings=None, provider=None, sales_provider=None):
     app.state.sales, app.state.sales_driver = sales, sales_driver
     app.state.auth, app.state.workspace = auth, workspace
     app.state.quality = quality
+    app.state.business = business
     app.include_router(quality_router(quality))
+    app.include_router(business_router(business))
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
                        allow_methods=["GET", "POST", "PATCH", "DELETE"],
                        allow_headers=["Content-Type", "Last-Event-ID", "Authorization"])

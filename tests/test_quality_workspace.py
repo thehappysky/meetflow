@@ -247,7 +247,7 @@ def test_question_answers_create_versioned_run_without_mutating_center_or_transc
     body["questions"] = [{"key": "date", "text": "实际会谈日期是什么？", "evidence": [], "affected_actions": [], "options": []}]
     store.save_report(rec["run_id"], body)
     submitted = a.client.post(f"/api/workspace/recordings/{rec['id']}/submit", headers=a.actors["sales.a"], json={
-        "version": 1, "customer": "合成客户", "request_key": "clarify-test-submit"}).json()
+        "version": 1, "customer": "合成客户", "opportunity_id": a.opportunities["sales.a"], "request_key": "clarify-test-submit"}).json()
     original = store.source_map(rec["run_id"])
     path = f"/api/workspace/recordings/{rec['id']}/clarifications"
     assert a.client.post(path, headers=a.actors["manager.a"], json={"version": 1, "answers": {"date": "11月10日"}}).status_code == 404

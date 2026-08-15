@@ -46,7 +46,7 @@ class SourceInput(Contract):
 class MeetingInput(Contract):
     project_id: str
     salesperson: str = Field(default="", max_length=100)
-    customer: str = Field(default="", max_length=150)
+    customer: str = Field(default="", max_length=400)
     title: str = Field(default="未命名会议", min_length=1, max_length=200)
     meeting_time: datetime | None = None
     timezone: str = "Asia/Shanghai"

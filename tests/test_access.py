@@ -44,7 +44,13 @@ def access(tmp_path):
                 "name": username, "password": PASSWORD})
             assert result.status_code == 201, result.text
             actors[username] = {"Authorization": "Bearer " + result.json()["token"]}
-        yield SimpleNamespace(app=app, client=client, actors=actors, login=login)
+        opportunities = {}
+        for username in ("sales.a", "sales.a2", "sales.b"):
+            response = client.post("/api/workspace/business/opportunities", headers=actors[username],
+                                   json={"customer_name": "合成客户", "title": "项目"})
+            assert response.status_code == 201, response.text
+            opportunities[username] = response.json()["id"]
+        yield SimpleNamespace(app=app, client=client, actors=actors, login=login, opportunities=opportunities)
 
 
 def invite(a, team="ta"):
@@ -63,7 +69,7 @@ def recording(a, actor="sales.a", title="合成客户需求会谈"):
 def submitted(a, actor="sales.a", key="submission-key-a"):
     row = recording(a, actor)
     response = a.client.post(f"/api/workspace/recordings/{row['id']}/submit", headers=a.actors[actor],
-        json={"version": 1, "customer": "合成客户／项目", "request_key": key})
+        json={"version": 1, "customer": "合成客户／项目", "opportunity_id": a.opportunities[actor], "request_key": key})
     assert response.status_code == 201, response.text
     return row, response.json()
 
@@ -173,7 +179,7 @@ def test_personal_changes_deletion_leave_center_snapshot_and_idempotent_submit(a
     row, central = submitted(a)
     detail = a.client.get(f"/api/workspace/recordings/{row['id']}", headers=a.actors["sales.a"]).json()
     assert detail["submission"] == {"id": central["id"], "deleted": False}
-    payload = {"version": 1, "customer": "合成客户／项目", "request_key": "submission-key-a"}
+    payload = {"version": 1, "customer": "合成客户／项目", "opportunity_id": a.opportunities["sales.a"], "request_key": "submission-key-a"}
     repeat = a.client.post(f"/api/workspace/recordings/{row['id']}/submit", headers=a.actors["sales.a"], json=payload)
     assert repeat.json()["id"] == central["id"]
     assert a.client.patch(f"/api/workspace/recordings/{row['id']}", headers=a.actors["sales.a"], json={
@@ -218,7 +224,7 @@ def test_audio_permission_survives_personal_deletion(access, monkeypatch):
     if not a.app.state.store.latest_report(row["run_id"]):
         a.app.state.store.save_report(row["run_id"], {"mode": "demo", "summary": "测试", "claims": [], "actions": [], "risks": [], "questions": [], "challenges": []})
         a.app.state.store.update_run(row["run_id"], status="waiting_review")
-    data = a.client.post(f"/api/workspace/recordings/{row['id']}/submit", headers=a.actors["sales.a"], json={"version": 1, "customer": "测试客户", "request_key": "audio-submit-key"})
+    data = a.client.post(f"/api/workspace/recordings/{row['id']}/submit", headers=a.actors["sales.a"], json={"version": 1, "customer": "测试客户", "opportunity_id": a.opportunities["sales.a"], "request_key": "audio-submit-key"})
     assert data.status_code == 201, data.text
     key = data.json()["id"]
     assert a.client.get(f"/api/workspace/recordings/{row['id']}/audio", headers=a.actors["boss"]).status_code == 404

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, reactive, ref } from "vue";
-import { api, post } from "./api";
+import { api, post, NETWORK_ERROR } from "./api";
 type Row = Record<string, any>;
 const props = defineProps<{
   user: Row;
@@ -130,6 +130,7 @@ async function refresh(initial = false) {
   const data = await api(`/workspace/quality/cases?scope=${requestedScope}`);
   if (dead || requestedScope !== scope.value) return;
   rows.value = data.cases;
+  if (error.value === NETWORK_ERROR) error.value = "";
   groups.value = data.summary;
   if ((initial || !detail.value) && props.source) {
     const item = rows.value.find(
