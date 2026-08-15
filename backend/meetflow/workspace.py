@@ -12,8 +12,16 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
 from .audio import audio_available
-from .database import Account, Correction, Meeting, PersonalRecording, Submission, row_dict
-from .domain import Contract, DomainError, MeetingInput, digest, now, uid
+from .database import (
+    Account,
+    Correction,
+    Meeting,
+    MeetingClarification,
+    PersonalRecording,
+    Submission,
+    row_dict,
+)
+from .domain import Contract, DomainError, MeetingInput, SourceInput, digest, now, uid
 
 
 class RecordingInput(Contract):
@@ -48,6 +56,11 @@ class DecisionInput(Contract):
     approve: bool
 
 
+class ClarificationInput(Contract):
+    version: int = Field(ge=1)
+    answers: dict[str, str]
+
+
 class DeleteInput(Contract):
     reason: str = Field(min_length=1, max_length=1000)
 
@@ -65,6 +78,16 @@ class WorkspaceService:
     def __init__(self, store, driver, auth):
         self.store, self.driver, self.auth = store, driver, auth
         self.sessions, self.settings = store.sessions, store.settings
+        self.quality = None
+
+    def prepare_quality(self, kind, key):
+        if not self.quality:
+            return
+        try:
+            self.quality.ensure(kind, key)
+        except DomainError as exc:
+            with self.sessions.begin() as session:
+                self.store.audit(session, "quality.prepare_pending", key, {"message": exc.message})
 
     def private(self, session, key, user):
         row = session.get(PersonalRecording, key)
@@ -90,6 +113,11 @@ class WorkspaceService:
         run = self.store.get_run(row.run_id)
         return {"id": row.id, "body": row.body, "version": row.version, "uploaded_at": row.created_at,
                 "run_id": row.run_id, "status": run["status"], "phase": run["phase"], "error": run["error"]}
+
+    @staticmethod
+    def clarifications(session, key):
+        return [row_dict(row) for row in session.scalars(select(MeetingClarification).where(
+            MeetingClarification.recording_id == key).order_by(MeetingClarification.created_at))]
 
     def create(self, user, value):
         if user["role"] != "sales":
@@ -145,6 +173,9 @@ class WorkspaceService:
                     "owner_name": user["name"], "report": report["body"],
                     "evidence": self.store.source_map(row.run_id), "run_id": row.run_id,
                     "audio_path": meeting.audio_path, "recording_version": row.version}
+                if self.quality:
+                    snapshot["quality_context"] = self.quality.freeze(session, "personal", key, row.version)
+                snapshot["clarifications"] = self.clarifications(session, key)
                 result = Submission(id=uid("sub_"), recording_id=key, owner_id=user["id"],
                     company_id=user["company_id"], team_id=row.team_id, snapshot=snapshot,
                     request_key=value.request_key, request_hash=request_hash)
@@ -152,7 +183,9 @@ class WorkspaceService:
                 session.flush()
                 self.store.audit(session, "workspace.submitted", result.id,
                                  {"actor": user["id"], "recording_id": key})
-                return {"id": result.id, "revision": result.revision}
+                output = {"id": result.id, "revision": result.revision}
+            self.prepare_quality("center", output["id"])
+            return output
         except IntegrityError:
             raise DomainError("已上报或请求冲突，请刷新查看", 409) from None
 
@@ -163,6 +196,7 @@ class WorkspaceService:
                   "metadata": row.snapshot["metadata"], "submitted_at": row.created_at}
         if detail:
             result.update(report=row.snapshot["report"], evidence=row.snapshot["evidence"],
+                          clarifications=row.snapshot.get("clarifications", []),
                           has_audio=bool(row.snapshot.get("audio_path")),
                           history=[{"revision": h["revision"], "metadata": h["snapshot"]["metadata"],
                                     "at": h["at"]} for h in row.history])
@@ -244,7 +278,43 @@ def workspace_router(service):
             submitted = session.scalar(select(Submission).where(Submission.recording_id == key))
             return {**service.recording_dict(row), "report": service.store.latest_report(row.run_id),
                     "evidence": service.store.source_map(row.run_id), "has_audio": bool(meeting.audio_path),
+                    "clarifications": service.clarifications(session, key),
                     "submission": {"id": submitted.id, "deleted": submitted.deleted} if submitted else None}
+
+    @router.post("/recordings/{key}/clarifications", status_code=201)
+    def clarify(key: str, value: ClarificationInput, user=current_user):
+        if not value.answers or len(value.answers) > 30 or any(not answer.strip() or len(answer) > 2000 for answer in value.answers.values()):
+            raise DomainError("请填写 1—30 项补充，每项不超过 2000 字")
+        with service.sessions.begin() as session:
+            if service.settings.db_url.startswith("sqlite"):
+                session.connection().exec_driver_sql("BEGIN IMMEDIATE")
+            row = service.private(session, key, user)
+            run = service.store.get_run(row.run_id)
+            if row.version != value.version or run["status"] not in {"waiting_review", "completed"}:
+                raise DomainError("会谈已变化或仍在处理，请刷新", 409)
+            report = service.store.latest_report(row.run_id)
+            questions = {q["key"]: q["text"] for q in report["body"]["questions"]} if report else {}
+            if not set(value.answers) <= set(questions):
+                raise DomainError("补充问题不属于当前会谈")
+            latest = {}
+            for note in service.clarifications(session, key):
+                latest.update(note["body"]["answers"])
+            answers = {k: v.strip() for k, v in value.answers.items() if v.strip() != latest.get(k)}
+            if not answers:
+                raise DomainError("这些补充已保存，无需重复提交", 409)
+            text = "销售本人补充，未经客户确认；不得将单方补充写成双方已确认事实。\n" + "\n".join(
+                f"问题：{questions[k]}\n销售补充：{v}" for k, v in answers.items())
+            service.store.add_source(session, run["project_id"], SourceInput(
+                title="销售补充（未经客户确认）", kind="requirement", text=text), run["meeting_id"])
+            next_run = service.store.create_run(session, session.get(Meeting, run["meeting_id"]), run["mode"])
+            row.run_id, row.version = next_run.id, row.version + 1
+            session.add(MeetingClarification(id=uid("mc_"), recording_id=key, actor_id=user["id"],
+                source_version=row.version, body={"answers": answers, "questions": {k: questions[k] for k in answers}}))
+            service.store.audit(session, "workspace.clarified", key, {"actor": user["id"], "version": row.version})
+            run_id = next_run.id
+        if service.settings.start_worker:
+            service.driver.submit(run_id)
+        return {"version": row.version, "run_id": run_id}
 
     @router.patch("/recordings/{key}")
     def edit(key: str, value: RecordingEdit, user=current_user):
@@ -259,6 +329,7 @@ def workspace_router(service):
             if changed.rowcount != 1:
                 raise DomainError("记录已变化，请刷新", 409)
             service.store.audit(session, "workspace.personal_edited", key, {"actor": user["id"]})
+        service.prepare_quality("personal", key)
         return {"version": value.version + 1}
 
     @router.delete("/recordings/{key}")
@@ -366,12 +437,16 @@ def workspace_router(service):
                 raise DomainError("中心版本已变化，请重新申请", 409)
             if value.approve:
                 row.history = [*row.history, {"revision": row.revision, "snapshot": row.snapshot, "at": now()}]
-                row.snapshot = {**row.snapshot, "metadata": request.proposed}
+                context = service.quality.freeze(session, "center", row.id, row.revision) if service.quality else {}
+                row.snapshot = {**row.snapshot, "metadata": request.proposed,
+                                "quality_context": context or row.snapshot.get("quality_context", {})}
                 row.revision += 1
             request.status = "approved" if value.approve else "rejected"
             request.reviewed_by = user["id"]
             service.store.audit(session, "workspace.correction_reviewed", key,
                                 {"actor": user["id"], "approve": value.approve})
+        if value.approve:
+            service.prepare_quality("center", row.id)
         return {"status": request.status, "revision": row.revision}
 
     return router

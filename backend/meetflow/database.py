@@ -285,6 +285,66 @@ class Submission(Base):
     created_at: Mapped[str] = mapped_column(default=now)
 
 
+class MeetingClarification(Base):
+    __tablename__ = "workspace_meeting_clarifications"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    recording_id: Mapped[str] = mapped_column(ForeignKey("workspace_recordings.id"), index=True)
+    actor_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    source_version: Mapped[int]
+    body: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class QualityPolicy(Base):
+    __tablename__ = "workspace_quality_policies"
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"))
+    cards: Mapped[dict] = mapped_column(JSON, default=dict)
+
+
+class QualityCase(Base):
+    __tablename__ = "workspace_quality_cases"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    scope_key: Mapped[str] = mapped_column(unique=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    team_id: Mapped[str] = mapped_column(ForeignKey("access_teams.id"))
+    source_kind: Mapped[str]
+    source_id: Mapped[str]
+    source_revision: Mapped[int]
+    body: Mapped[dict] = mapped_column(JSON)
+    version: Mapped[int] = mapped_column(default=1)
+    analysis_ids: Mapped[list] = mapped_column(JSON, default=list)
+    active_analysis_id: Mapped[str | None] = mapped_column(ForeignKey("sales_analyses.id"))
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[str] = mapped_column(default=now)
+    updated_at: Mapped[str] = mapped_column(default=now)
+
+
+class QualityReview(Base):
+    __tablename__ = "workspace_quality_reviews"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("workspace_quality_cases.id"))
+    analysis_id: Mapped[str] = mapped_column(ForeignKey("sales_analyses.id"))
+    actor_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    request_hash: Mapped[str] = mapped_column(unique=True)
+    body: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class QualityFeedback(Base):
+    __tablename__ = "workspace_quality_feedback"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("workspace_quality_cases.id"))
+    analysis_id: Mapped[str] = mapped_column(ForeignKey("sales_analyses.id"))
+    requester_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    body: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(default="pending")
+    resolution: Mapped[str | None] = mapped_column(Text)
+    reviewed_by: Mapped[str | None] = mapped_column(ForeignKey("access_accounts.id"))
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
 class Correction(Base):
     __tablename__ = "workspace_corrections"
     id: Mapped[str] = mapped_column(String(80), primary_key=True)

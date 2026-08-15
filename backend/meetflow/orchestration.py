@@ -186,6 +186,7 @@ class RunDriver:
     """One local driver; no distributed failover claim."""
     def __init__(self, store, provider=None):
         self.store, self.provider = store, provider
+        self.on_report = None
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="meetflow-runner")
         self.active, self.lock = set(), threading.Lock()
 
@@ -233,6 +234,11 @@ class RunDriver:
                              {"error": error, "type": type(exc).__name__})
         finally:
             self.store.end_processing(run_id)
+        if self.on_report and self.store.get_run(run_id)["status"] in {"waiting_review", "completed"}:
+            try:
+                self.on_report(run_id)
+            except Exception as exc:  # noqa: BLE001 -- quality failure must not erase a completed meeting
+                self.store.event(run_id, "quality_prepare_failed", "纪要已保存，质检启动失败", {"error": str(exc)[:1000]})
 
     def recover(self):
         with self.store.sessions() as session:

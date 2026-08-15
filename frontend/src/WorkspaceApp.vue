@@ -1,6 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, reactive, ref, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 import LegacyApp from "./App.vue";
+import QualityWorkspace from "./QualityWorkspace.vue";
+import TrainingRules from "./TrainingRules.vue";
 import { api, post } from "./api";
 
 type Row = Record<string, any>;
@@ -52,6 +61,11 @@ const edit = reactive({
 });
 const file = ref<File | null>(null),
   checkSubmit = ref(false);
+const qualitySource = ref<{ kind: string; id: string } | null>(null);
+const questionAnswers = reactive<Row>({});
+const evidenceOpen = ref(false),
+  evidenceHighlight = ref("");
+const audioPlayer = ref<HTMLAudioElement | null>(null);
 let timer: number | undefined,
   sequence = 0,
   lastRefresh = 0;
@@ -62,9 +76,15 @@ const roleNames: Row = {
   manager: "主管",
   sales: "销售",
 };
-watch(user, (value) => {
-  document.title = value ? `${value.name} · ${roleNames[value.role]} · MeetFlow` : "MeetFlow · 登录工作区";
-}, { immediate: true });
+watch(
+  user,
+  (value) => {
+    document.title = value
+      ? `${value.name} · ${roleNames[value.role]} · MeetFlow`
+      : "MeetFlow · 登录工作区";
+  },
+  { immediate: true },
+);
 const stateNames: Row = {
   queued: "等待整理",
   running: "正在整理",
@@ -74,11 +94,13 @@ const stateNames: Row = {
   cancelled: "已停止",
 };
 const scope = computed(() =>
-  user.value?.role === "admin" ? "公司账号与团队设置" : user.value?.role === "sales"
-    ? "个人工作区"
-    : user.value?.role === "manager"
-      ? user.value.team
-      : "全公司已上报范围",
+  user.value?.role === "admin"
+    ? "公司账号与团队设置"
+    : user.value?.role === "sales"
+      ? "个人工作区"
+      : user.value?.role === "manager"
+        ? user.value.team
+        : "全公司已上报范围",
 );
 const metadata = computed(() =>
   centralDetail.value ? detail.value?.metadata : detail.value?.body,
@@ -96,10 +118,17 @@ const visibleCenter = computed(() =>
 function displayTime(value: string) {
   if (!value) return "时间待确认";
   return new Intl.DateTimeFormat("zh-CN", {
-    timeZone: "Asia/Shanghai", dateStyle: "medium", timeStyle: "short",
+    timeZone: "Asia/Shanghai",
+    dateStyle: "medium",
+    timeStyle: "short",
   }).format(new Date(value));
 }
-watch(() => registration.invitation, () => { inviteInfo.value = null; });
+watch(
+  () => registration.invitation,
+  () => {
+    inviteInfo.value = null;
+  },
+);
 
 function clearAudio() {
   if (audioUrl.value) URL.revokeObjectURL(audioUrl.value);
@@ -193,7 +222,7 @@ async function logout() {
     expire();
   });
 }
-function navigate(next: string) {
+function navigate(next: string, refreshData = true) {
   sequence++;
   clearAudio();
   detail.value = null;
@@ -202,7 +231,52 @@ function navigate(next: string) {
   notice.value = "";
   editOpen.value = false;
   requestOpen.value = false;
-  if (!busy.value) void perform(refresh);
+  if (refreshData && !busy.value) void perform(refresh);
+}
+function enterQuality(kind?: string, id?: string) {
+  qualitySource.value = kind && id ? { kind, id } : null;
+  navigate("quality");
+}
+async function meetingFromQuality(kind: string, id: string) {
+  navigate(kind === "center" ? "center" : "home", false);
+  await perform(async () => {
+    await refresh();
+    await open(id, kind === "center");
+  });
+}
+async function seekEvidence(id: string) {
+  evidenceOpen.value = true;
+  evidenceHighlight.value = id;
+  const span = detail.value?.evidence?.[id];
+  if (detail.value?.has_audio && span?.start != null) {
+    await audio();
+    const seek = () => {
+      if (audioPlayer.value) audioPlayer.value.currentTime = span.start;
+    };
+    if (audioPlayer.value?.readyState) seek();
+    else
+      audioPlayer.value?.addEventListener("loadedmetadata", seek, {
+        once: true,
+      });
+    notice.value = `原文已展开，录音定位到 ${Math.floor(span.start)} 秒。`;
+  } else notice.value = "已展开并标记文字依据。";
+}
+async function clarifyQuestions() {
+  await perform(async () => {
+    const answers = Object.fromEntries(
+      (report.value?.questions || [])
+        .filter((q: Row) => questionAnswers[q.key]?.trim())
+        .map((q: Row) => [q.key, questionAnswers[q.key]]),
+    );
+    const key = detail.value!.id;
+    await post(`/workspace/recordings/${key}/clarifications`, {
+      version: detail.value!.version,
+      answers,
+    });
+    await refresh();
+    await open(key);
+    notice.value = "补充已记录，正在重新整理；原始发言和已有中心版本保留。";
+  });
 }
 async function loadInvitation() {
   if (user.value) return;
@@ -224,6 +298,11 @@ async function open(key: string, central = false) {
   );
   if (current !== sequence || user.value?.id !== owner) return;
   detail.value = result;
+  evidenceOpen.value = false;
+  evidenceHighlight.value = "";
+  for (const key of Object.keys(questionAnswers)) delete questionAnswers[key];
+  for (const note of result.clarifications || [])
+    Object.assign(questionAnswers, note.body.answers);
   centralDetail.value = central;
   submitCustomer.value =
     result.body?.customer || result.metadata?.customer || "";
@@ -262,8 +341,13 @@ async function submit() {
     return;
   }
   await perform(async () => {
-    const signature = JSON.stringify([detail.value!.id, detail.value!.version, submitCustomer.value]);
-    if (submitAttempt?.signature !== signature) submitAttempt = { signature, key: crypto.randomUUID() };
+    const signature = JSON.stringify([
+      detail.value!.id,
+      detail.value!.version,
+      submitCustomer.value,
+    ]);
+    if (submitAttempt?.signature !== signature)
+      submitAttempt = { signature, key: crypto.randomUUID() };
     await post(`/workspace/recordings/${detail.value!.id}/submit`, {
       version: detail.value!.version,
       customer: submitCustomer.value,
@@ -411,7 +495,8 @@ onMounted(async () => {
       busy.value ||
       polling.value ||
       !user.value ||
-      (!rows.value.some((r) => ["queued", "running"].includes(r.status)) && Date.now() - lastRefresh < 10000)
+      (!rows.value.some((r) => ["queued", "running"].includes(r.status)) &&
+        Date.now() - lastRefresh < 10000)
     )
       return;
     polling.value = true;
@@ -548,7 +633,8 @@ onBeforeUnmount(() => {
         <strong class="wk-brand">MeetFlow</strong>
         <nav aria-label="工作区导航">
           <template v-if="user.role === 'admin'"
-            ><button @click="navigate('home')">团队与邀请码</button></template
+            ><button @click="navigate('home')">团队与邀请码</button
+            ><button @click="navigate('rules')">销售培训规则</button></template
           >
           <template v-else>
             <button v-if="user.role === 'sales'" @click="navigate('home')">
@@ -558,6 +644,15 @@ onBeforeUnmount(() => {
               {{ user.role === "sales" ? "我的上报" : "中心会谈" }}
             </button>
             <button @click="navigate('corrections')">更正申请</button>
+            <button @click="enterQuality()">
+              {{
+                user.role === "sales"
+                  ? "复盘质检"
+                  : user.role === "boss"
+                    ? "质检概览"
+                    : "销售质检"
+              }}
+            </button>
           </template>
         </nav>
         <div class="wk-identity" aria-label="当前登录身份">
@@ -577,7 +672,14 @@ onBeforeUnmount(() => {
               : "管理范围仅含已上报资料"
           }}
         </div>
-        <template v-if="user.role === 'admin'">
+        <QualityWorkspace
+          v-if="page === 'quality' && user.role !== 'admin'"
+          :user="user"
+          :source="qualitySource"
+          @meeting="meetingFromQuality"
+        />
+        <TrainingRules v-else-if="user.role === 'admin' && page === 'rules'" />
+        <template v-else-if="user.role === 'admin'">
           <h1>团队与邀请码</h1>
           <div class="wk-columns">
             <section class="wk-panel">
@@ -655,7 +757,9 @@ onBeforeUnmount(() => {
               </p>
               <small
                 >{{ centralDetail ? "上报时间" : "上传时间" }}：{{
-                  displayTime(centralDetail ? detail.submitted_at : detail.uploaded_at)
+                  displayTime(
+                    centralDetail ? detail.submitted_at : detail.uploaded_at,
+                  )
                 }}（北京时间）</small
               >
             </div>
@@ -663,6 +767,14 @@ onBeforeUnmount(() => {
               修改个人信息</button
             ><button v-else-if="user.role === 'sales'" @click="editing(true)">
               申请更正中心记录
+            </button>
+            <button
+              v-if="report"
+              @click="
+                enterQuality(centralDetail ? 'center' : 'personal', detail.id)
+              "
+            >
+              查看本场复盘质检
             </button>
           </div>
           <form
@@ -695,18 +807,126 @@ onBeforeUnmount(() => {
             <section class="wk-panel">
               <h2>会谈纪要</h2>
               <p class="wk-summary">{{ report.summary || "暂无摘要" }}</p>
+              <h3 v-if="report.claims?.length">讨论结论与决策</h3>
+              <article
+                v-for="(c, i) in report.claims"
+                :key="`claim-${i}`"
+                class="wk-finding"
+              >
+                <strong>{{
+                  (
+                    {
+                      fact: "信息",
+                      decision: "决策",
+                      commitment: "承诺",
+                      suggestion: "建议",
+                      condition: "条件",
+                      unresolved: "未决",
+                    } as Row
+                  )[c.kind] || "信息"
+                }}</strong>
+                <p>{{ c.text }}</p>
+                <button
+                  v-for="id in c.evidence"
+                  :key="id"
+                  class="wk-link"
+                  @click="seekEvidence(id)"
+                >
+                  查看原文依据
+                </button>
+              </article>
               <h3>后续事项</h3>
               <p v-for="a in report.actions" :key="a.id">
                 {{ a.title }} · {{ a.owner || "负责人待确认" }} ·
                 {{ a.due || "日期待确认" }}
+                <button
+                  v-for="id in a.evidence"
+                  :key="id"
+                  class="wk-link"
+                  @click="seekEvidence(id)"
+                >
+                  依据
+                </button>
               </p>
               <p v-if="!report.actions?.length">本次未提取到明确后续事项。</p>
+              <h3 v-if="report.risks?.length">风险与未决条件</h3>
+              <article
+                v-for="(risk, i) in report.risks"
+                :key="`risk-${i}`"
+                class="wk-finding"
+              >
+                <p>{{ risk.text }}</p>
+                <button
+                  v-for="id in risk.evidence"
+                  :key="id"
+                  class="wk-link"
+                  @click="seekEvidence(id)"
+                >
+                  核对风险依据
+                </button>
+              </article>
+              <h3 v-if="report.questions?.length">需要补充的疑点</h3>
+              <form
+                v-if="report.questions?.length"
+                @submit.prevent="clarifyQuestions"
+              >
+                <article
+                  v-for="q in report.questions"
+                  :key="q.key"
+                  class="wk-finding"
+                >
+                  <p>{{ q.text }}</p>
+                  <label v-if="!centralDetail"
+                    >你的补充<textarea
+                      v-model="questionAnswers[q.key]"
+                      maxlength="2000"
+                      placeholder="不确定可以暂时留空；补充不等于客户已确认。"
+                    /></label
+                  ><button
+                    v-for="id in q.evidence"
+                    :key="id"
+                    class="wk-link"
+                    @click="seekEvidence(id)"
+                    type="button"
+                  >
+                    核对疑点依据
+                  </button>
+                </article>
+                <button
+                  v-if="!centralDetail"
+                  :disabled="
+                    busy ||
+                    !report.questions.some((q: Row) =>
+                      questionAnswers[q.key]?.trim(),
+                    )
+                  "
+                >
+                  保存补充并重新整理
+                </button>
+              </form>
+              <details v-if="report.challenges?.length">
+                <summary>
+                  分析中的核查提醒（{{ report.challenges.length }}）
+                </summary>
+                <p v-for="(c, i) in report.challenges" :key="i">{{ c.text }}</p>
+              </details>
+              <details v-if="detail.clarifications?.length">
+                <summary>销售补充记录（保留原话，不等于客户确认）</summary>
+                <article v-for="n in detail.clarifications" :key="n.id">
+                  <p v-for="(answer, key) in n.body.answers" :key="key">
+                    {{ n.body.questions[key] }}：{{ answer }}
+                  </p>
+                </article>
+              </details>
               <h3>原文依据</h3>
-              <details>
+              <details :open="evidenceOpen">
                 <summary>展开本次原文</summary>
                 <p
                   v-for="s in Object.values(detail.evidence || {}) as Row[]"
                   :key="s.id"
+                  :class="{
+                    'wk-evidence-highlight': evidenceHighlight === s.id,
+                  }"
                 >
                   {{ s.start != null ? `${Math.floor(s.start)}秒 · ` : ""
                   }}{{ s.text }}
@@ -717,30 +937,47 @@ onBeforeUnmount(() => {
               <h2>{{ centralDetail ? "中心证据" : "个人工作区" }}</h2>
               <template v-if="detail.has_audio"
                 ><button @click="audio" :disabled="busy">加载录音</button
-                ><audio v-if="audioUrl" :src="audioUrl" controls /></template
+                ><audio
+                  v-if="audioUrl"
+                  ref="audioPlayer"
+                  :src="audioUrl"
+                  controls /></template
               ><template v-if="!centralDetail"
                 ><p>上传和个人修改不自动进入中心。上报时固定本次依据。</p>
                 <div v-if="detail.submission">
-                  <p>{{ detail.submission.deleted ? "该场曾上报，中心记录已由主管撤下。" : "本场已上报；个人修改不会同步覆盖中心。" }}</p>
-                  <button v-if="!detail.submission.deleted" @click="perform(() => open(detail!.submission.id, true))" :disabled="busy">查看已上报版本</button>
+                  <p>
+                    {{
+                      detail.submission.deleted
+                        ? "该场曾上报，中心记录已由主管撤下。"
+                        : "本场已上报；个人修改不会同步覆盖中心。"
+                    }}
+                  </p>
+                  <button
+                    v-if="!detail.submission.deleted"
+                    @click="perform(() => open(detail!.submission.id, true))"
+                    :disabled="busy"
+                  >
+                    查看已上报版本
+                  </button>
                 </div>
                 <template v-else>
-                <label
-                  >上报客户／商机<input
-                    v-model="submitCustomer"
-                    placeholder="上报前补选或填写" /></label
-                ><label class="wk-check"
-                  ><input
-                    type="checkbox"
-                    v-model="checkSubmit"
-                  />确认上报本场录音与纪要，主管和老板可在范围内查看。</label
+                  <label
+                    >上报客户／商机<input
+                      v-model="submitCustomer"
+                      placeholder="上报前补选或填写" /></label
+                  ><label class="wk-check"
+                    ><input
+                      type="checkbox"
+                      v-model="checkSubmit"
+                    />确认上报本场录音与纪要，主管和老板可在范围内查看。</label
+                  ><button
+                    class="wk-primary"
+                    @click="submit"
+                    :disabled="busy || !report || !submitCustomer.trim()"
+                  >
+                    确认上报本场
+                  </button></template
                 ><button
-                  class="wk-primary"
-                  @click="submit"
-                  :disabled="busy || !report || !submitCustomer.trim()"
-                >
-                  确认上报本场</button
-                ></template><button
                   class="wk-link"
                   @click="removePersonal"
                   :disabled="busy"
@@ -834,7 +1071,9 @@ onBeforeUnmount(() => {
         <template v-else-if="page === 'corrections'">
           <h1>更正申请</h1>
           <p>中心旧版在主管确认前保持不变。</p>
-          <button @click="perform(refresh)" :disabled="busy">刷新更正申请</button>
+          <button @click="perform(refresh)" :disabled="busy">
+            刷新更正申请
+          </button>
           <div v-if="!corrections.length" class="wk-empty">
             当前范围内没有更正申请。
           </div>
@@ -1132,6 +1371,20 @@ onBeforeUnmount(() => {
 }
 .wk-summary {
   white-space: pre-wrap;
+}
+.wk-finding {
+  border-left: 3px solid #dce7d8;
+  padding: 8px 12px;
+  margin: 12px 0;
+  background: #f8faf6;
+}
+.wk-finding p {
+  margin: 6px 0;
+}
+.wk-evidence-highlight {
+  background: #fff0bf;
+  border-left: 3px solid #ba9556;
+  padding: 12px;
 }
 .wk-actions {
   display: flex;

@@ -31,6 +31,7 @@ from .database import (
 from .demo import import_demo, import_sales_meeting_demo
 from .domain import DomainError, MeetingInput, ReviewInput, SourceInput, TaskUpdate, now, uid
 from .orchestration import RunDriver
+from .quality_workspace import QualityWorkspace, quality_router
 from .reviews import approve, render_markdown
 from .sales import SalesService
 from .sales_api import sales_router
@@ -52,12 +53,17 @@ def create_app(settings=None, provider=None, sales_provider=None):
     sales_driver = SalesDriver(sales, sales_provider)
     auth = AuthService(store)
     workspace = WorkspaceService(store, driver, auth)
+    quality = QualityWorkspace(workspace, sales, sales_driver)
+    workspace.quality = quality
+    driver.on_report = quality.on_run_ready
 
     @asynccontextmanager
     async def lifespan(app):
         if settings.start_worker:
             driver.recover()
             sales_driver.recover()
+            if settings.auth_enabled:
+                quality.recover()
         yield
         driver.close()
         sales_driver.close()
@@ -67,6 +73,8 @@ def create_app(settings=None, provider=None, sales_provider=None):
     app.state.store, app.state.driver = store, driver
     app.state.sales, app.state.sales_driver = sales, sales_driver
     app.state.auth, app.state.workspace = auth, workspace
+    app.state.quality = quality
+    app.include_router(quality_router(quality))
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
                        allow_methods=["GET", "POST", "PATCH", "DELETE"],
                        allow_headers=["Content-Type", "Last-Event-ID", "Authorization"])
