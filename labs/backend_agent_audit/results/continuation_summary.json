@@ -1,0 +1,2397 @@
+{
+  "scope": "Authored development regression, one local host; no independent business accuracy",
+  "limitations": [
+    "The same 15+7 cases recur; run counts are not independent meeting counts.",
+    "Report completion is distinct from all narrow checks passing.",
+    "Metadata load has inference disabled and is not ASR/LLM throughput or an enterprise SLA.",
+    "V4 request timeout was 90 seconds; V3/state_v2 used 180 seconds."
+  ],
+  "cohorts": [
+    {
+      "run": "20261114T021649659989Z",
+      "revision": "context_v3",
+      "model": "qwen3.5:4b-q4_K_M",
+      "case_set": "acceptance_cases.json",
+      "cases": 15,
+      "reports": 15,
+      "all_checks_passed": 11,
+      "model_calls": 73,
+      "input_tokens": 92884,
+      "output_tokens": 7168,
+      "wall_seconds": 201.65159650018904,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 180.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "81b9abc853bf8208955010ab661f2a45000eeae04b102e5bb703a54a3cb7ed6a",
+        "labs\\backend_agent_audit\\acceptance_cases.json": "ab105fb3522945db0155c2037dd468b06203f31bd92b227260cec93ca4d590fa"
+      },
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 17.294645600020885
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "conditional_trial": true
+          },
+          "model_calls": 8,
+          "wall_seconds": 28.419251800049096
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 4.694691000040621
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 5.284895999939181
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 10.010813699918799
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 9.17421780002769
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false
+          },
+          "model_calls": 8,
+          "wall_seconds": 21.659957999945618
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": true
+          },
+          "model_calls": 5,
+          "wall_seconds": 16.140303199994378
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false
+          },
+          "model_calls": 9,
+          "wall_seconds": 21.474298000102863
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_0_condition": false
+          },
+          "model_calls": 2,
+          "wall_seconds": 5.085907300002873
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 4.677578500006348
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 10.235820999951102
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 11.020005300058983
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true
+          },
+          "model_calls": 7,
+          "wall_seconds": 19.13202820008155
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": false,
+            "action_0_status": true
+          },
+          "model_calls": 8,
+          "wall_seconds": 17.347181100049056
+        }
+      ]
+    },
+    {
+      "run": "20261114T022035664475Z",
+      "revision": "review_v3",
+      "model": "qwen3.5:4b-q4_K_M",
+      "case_set": "acceptance_cases.json",
+      "cases": 15,
+      "reports": 15,
+      "all_checks_passed": 3,
+      "model_calls": 90,
+      "input_tokens": 106354,
+      "output_tokens": 7818,
+      "wall_seconds": 222.6042549998965,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 180.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "81b9abc853bf8208955010ab661f2a45000eeae04b102e5bb703a54a3cb7ed6a",
+        "labs\\backend_agent_audit\\acceptance_cases.json": "ab105fb3522945db0155c2037dd468b06203f31bd92b227260cec93ca4d590fa"
+      },
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": false,
+            "quote_owner": false,
+            "quote_due": false,
+            "quote_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 12.571505300002173
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": false,
+            "quote_owner": false,
+            "quote_due": false,
+            "quote_status": false,
+            "conditional_trial": true
+          },
+          "model_calls": 10,
+          "wall_seconds": 31.19047779997345
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 10.704414599924348
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 5.423436300014146
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 12.174258999992162
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "unknown_date_question": true
+          },
+          "model_calls": 5,
+          "wall_seconds": 12.275127500062808
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false
+          },
+          "model_calls": 11,
+          "wall_seconds": 25.61514469992835
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false
+          },
+          "model_calls": 6,
+          "wall_seconds": 14.60483500000555
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false
+          },
+          "model_calls": 11,
+          "wall_seconds": 23.581487699993886
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_0_condition": false
+          },
+          "model_calls": 2,
+          "wall_seconds": 4.987761199939996
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 4.904128400026821
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 11.444981200038455
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 14.943956300034188
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_1_unique": false,
+            "action_1_owner": false,
+            "action_1_due": false,
+            "action_1_status": false
+          },
+          "model_calls": 9,
+          "wall_seconds": 21.093056899961084
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 8,
+          "wall_seconds": 17.089683099999093
+        }
+      ]
+    },
+    {
+      "run": "20261114T022443789408Z",
+      "revision": "review_v3",
+      "model": "qwen3.5:4b-q4_K_M",
+      "case_set": "identity_boundary_cases.json",
+      "cases": 7,
+      "reports": 7,
+      "all_checks_passed": 0,
+      "model_calls": 44,
+      "input_tokens": 50907,
+      "output_tokens": 3735,
+      "wall_seconds": 106.74764179997146,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 180.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "81b9abc853bf8208955010ab661f2a45000eeae04b102e5bb703a54a3cb7ed6a",
+        "labs\\backend_agent_audit\\identity_boundary_cases.json": "58106f40ed10760bcbc199cf5d7b6cb5933c26a04c0f792e14dfd07522926e46"
+      },
+      "results": [
+        {
+          "case": "b01_named_other",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_1_unique": false,
+            "action_1_owner": false,
+            "action_1_due": false,
+            "action_1_status": false
+          },
+          "model_calls": 10,
+          "wall_seconds": 23.954665899975225
+        },
+        {
+          "case": "b02_customer_date_request",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 14.980157800018787
+        },
+        {
+          "case": "b03_do_not_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 12.12477230001241
+        },
+        {
+          "case": "b04_cancel_reservation_is_future_work",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 10.228177499957383
+        },
+        {
+          "case": "b05_two_distinct_demos",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_1_unique": false,
+            "action_1_owner": false,
+            "action_1_due": false,
+            "action_1_status": false
+          },
+          "model_calls": 9,
+          "wall_seconds": 21.015813799924217
+        },
+        {
+          "case": "b06_unknown_speaker",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 11.491699500009418
+        },
+        {
+          "case": "b07_reopened_demo",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 5,
+          "wall_seconds": 12.952355000074022
+        }
+      ]
+    },
+    {
+      "run": "20261114T032746168899Z",
+      "revision": "relation_v4",
+      "model": "qwen3.5:4b-q4_K_M",
+      "case_set": "acceptance_cases.json",
+      "cases": 15,
+      "reports": 14,
+      "all_checks_passed": 10,
+      "model_calls": 65,
+      "input_tokens": 85810,
+      "output_tokens": 6362,
+      "wall_seconds": 176.48371840000618,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 90.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "d2e4ce87611da63603987f23e336d36bc717b897c4043869ba5b9a8ea98932e6",
+        "labs\\backend_agent_audit\\acceptance_cases.json": "ab105fb3522945db0155c2037dd468b06203f31bd92b227260cec93ca4d590fa"
+      },
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 15.609810599940829
+        },
+        {
+          "case": "revision",
+          "status": "failed",
+          "checks": {
+            "report_present": false
+          },
+          "model_calls": 9,
+          "wall_seconds": 24.00359400000889
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 13.577035999973305
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 5.183295599999838
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 9.78415970003698
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 9.066208200063556
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": false,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 13.67301100003533
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": false,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 12.129425800056197
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": true
+          },
+          "model_calls": 5,
+          "wall_seconds": 10.105352399987169
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": false,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_0_condition": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 9.727616699994542
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 4.393228200031444
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 8.862163699930534
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 11.478502499987371
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": false,
+            "action_1_owner": false,
+            "action_1_due": false,
+            "action_1_status": false
+          },
+          "model_calls": 7,
+          "wall_seconds": 14.905421699979343
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 13.984892299980856
+        }
+      ]
+    },
+    {
+      "run": "20261114T033105281569Z",
+      "revision": "relation_v4",
+      "model": "qwen3.5:4b-q4_K_M",
+      "case_set": "identity_boundary_cases.json",
+      "cases": 7,
+      "reports": 6,
+      "all_checks_passed": 5,
+      "model_calls": 37,
+      "input_tokens": 47512,
+      "output_tokens": 3168,
+      "wall_seconds": 88.06918749993201,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 90.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "22e1871f374207a0c5285d04677ab50f028fdfa04b0cad5d84e209b149df5ac5",
+        "labs\\backend_agent_audit\\identity_boundary_cases.json": "58106f40ed10760bcbc199cf5d7b6cb5933c26a04c0f792e14dfd07522926e46"
+      },
+      "results": [
+        {
+          "case": "b01_named_other",
+          "status": "failed",
+          "checks": {
+            "report_present": false
+          },
+          "model_calls": 10,
+          "wall_seconds": 17.927460000035353
+        },
+        {
+          "case": "b02_customer_date_request",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 13.44532249995973
+        },
+        {
+          "case": "b03_do_not_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 9.027684699976817
+        },
+        {
+          "case": "b04_cancel_reservation_is_future_work",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": false
+          },
+          "model_calls": 4,
+          "wall_seconds": 9.006620900006965
+        },
+        {
+          "case": "b05_two_distinct_demos",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true
+          },
+          "model_calls": 7,
+          "wall_seconds": 16.562681499985047
+        },
+        {
+          "case": "b06_unknown_speaker",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 10.590080599999055
+        },
+        {
+          "case": "b07_reopened_demo",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 11.509337299969047
+        }
+      ]
+    },
+    {
+      "run": "20261114T033404578866Z",
+      "revision": "state_v2",
+      "model": "qwen3.5:4b-q4_K_M",
+      "case_set": "identity_boundary_cases.json",
+      "cases": 7,
+      "reports": 7,
+      "all_checks_passed": 6,
+      "model_calls": 33,
+      "input_tokens": 40520,
+      "output_tokens": 3250,
+      "wall_seconds": 86.7826711999951,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 180.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "1af550d1a02eba335b8237e2c8073b8a9980cdad2cdf734a441940a66e400afa",
+        "labs\\backend_agent_audit\\identity_boundary_cases.json": "58106f40ed10760bcbc199cf5d7b6cb5933c26a04c0f792e14dfd07522926e46"
+      },
+      "results": [
+        {
+          "case": "b01_named_other",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true
+          },
+          "model_calls": 7,
+          "wall_seconds": 17.79700150003191
+        },
+        {
+          "case": "b02_customer_date_request",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 15.19339749997016
+        },
+        {
+          "case": "b03_do_not_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 8.732146500027739
+        },
+        {
+          "case": "b04_cancel_reservation_is_future_work",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": false,
+            "action_0_status": false
+          },
+          "model_calls": 4,
+          "wall_seconds": 8.455204300000332
+        },
+        {
+          "case": "b05_two_distinct_demos",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true
+          },
+          "model_calls": 6,
+          "wall_seconds": 14.73697099997662
+        },
+        {
+          "case": "b06_unknown_speaker",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 9.761261699954048
+        },
+        {
+          "case": "b07_reopened_demo",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 12.106688700034283
+        }
+      ]
+    },
+    {
+      "run": "20261114T033543802117Z",
+      "revision": "state_v2",
+      "model": "qwen3.5:9b-q4_K_M",
+      "case_set": "acceptance_cases.json",
+      "cases": 15,
+      "reports": 15,
+      "all_checks_passed": 10,
+      "model_calls": 73,
+      "input_tokens": 90813,
+      "output_tokens": 8510,
+      "wall_seconds": 1093.6505086000543,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 180.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "1af550d1a02eba335b8237e2c8073b8a9980cdad2cdf734a441940a66e400afa",
+        "labs\\backend_agent_audit\\acceptance_cases.json": "ab105fb3522945db0155c2037dd468b06203f31bd92b227260cec93ca4d590fa"
+      },
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 58.901739399996586
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "conditional_trial": false
+          },
+          "model_calls": 9,
+          "wall_seconds": 223.88544019998517
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": false,
+            "uncertainty_preserved": true
+          },
+          "model_calls": 5,
+          "wall_seconds": 71.98560980008915
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 17.716702100005932
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 42.62650929996744
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 39.68936540000141
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": false
+          },
+          "model_calls": 8,
+          "wall_seconds": 120.3646842999151
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false
+          },
+          "model_calls": 7,
+          "wall_seconds": 133.06326550000813
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 35.458099400042556
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_0_condition": false
+          },
+          "model_calls": 6,
+          "wall_seconds": 100.2705372000346
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 17.39056830003392
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 40.12111930001993
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 46.828680900041945
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true
+          },
+          "model_calls": 6,
+          "wall_seconds": 64.34672329993919
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 81.00146419997327
+        }
+      ]
+    },
+    {
+      "run": "20261114T035420966606Z",
+      "revision": "state_v2",
+      "model": "qwen3.5:9b-q4_K_M",
+      "case_set": "identity_boundary_cases.json",
+      "cases": 7,
+      "reports": 7,
+      "all_checks_passed": 7,
+      "model_calls": 37,
+      "input_tokens": 44598,
+      "output_tokens": 3321,
+      "wall_seconds": 409.84760080010165,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 180.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "1af550d1a02eba335b8237e2c8073b8a9980cdad2cdf734a441940a66e400afa",
+        "labs\\backend_agent_audit\\identity_boundary_cases.json": "58106f40ed10760bcbc199cf5d7b6cb5933c26a04c0f792e14dfd07522926e46"
+      },
+      "results": [
+        {
+          "case": "b01_named_other",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true
+          },
+          "model_calls": 6,
+          "wall_seconds": 67.82700400007889
+        },
+        {
+          "case": "b02_customer_date_request",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 5,
+          "wall_seconds": 71.88879180001095
+        },
+        {
+          "case": "b03_do_not_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 37.18254410009831
+        },
+        {
+          "case": "b04_cancel_reservation_is_future_work",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 34.020356800057925
+        },
+        {
+          "case": "b05_two_distinct_demos",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true
+          },
+          "model_calls": 6,
+          "wall_seconds": 67.49704359995667
+        },
+        {
+          "case": "b06_unknown_speaker",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 48.86088499997277
+        },
+        {
+          "case": "b07_reopened_demo",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 8,
+          "wall_seconds": 82.57097549992613
+        }
+      ]
+    },
+    {
+      "run": "20261114T040123348736Z",
+      "revision": "state_v2",
+      "model": "qwen3.5:4b-q4_K_M",
+      "case_set": "acceptance_cases.json",
+      "cases": 15,
+      "reports": 15,
+      "all_checks_passed": 12,
+      "model_calls": 69,
+      "input_tokens": 84665,
+      "output_tokens": 7157,
+      "wall_seconds": 193.66061030013952,
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "request_timeout": 180.0,
+      "source_hashes": {
+        "backend\\meetflow\\evidence_pipeline.py": "1af550d1a02eba335b8237e2c8073b8a9980cdad2cdf734a441940a66e400afa",
+        "labs\\backend_agent_audit\\acceptance_cases.json": "ab105fb3522945db0155c2037dd468b06203f31bd92b227260cec93ca4d590fa"
+      },
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 16.72274900006596
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "conditional_trial": true
+          },
+          "model_calls": 7,
+          "wall_seconds": 25.08050240005832
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 14.092988099902868
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 4.876622200012207
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 9.510382400010712
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 8.621343100094236
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false
+          },
+          "model_calls": 6,
+          "wall_seconds": 18.777919200016186
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false
+          },
+          "model_calls": 8,
+          "wall_seconds": 20.731758399982937
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": true
+          },
+          "model_calls": 5,
+          "wall_seconds": 10.56566149997525
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_0_condition": true
+          },
+          "model_calls": 5,
+          "wall_seconds": 10.769771800027229
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true
+          },
+          "model_calls": 2,
+          "wall_seconds": 4.205205700010993
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 10.015119999996386
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 11.210351199959405
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": false,
+            "action_1_due": true,
+            "action_1_status": true
+          },
+          "model_calls": 6,
+          "wall_seconds": 16.183556800009683
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "checks": {
+            "report_present": true,
+            "dynamic_roles": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true
+          },
+          "model_calls": 4,
+          "wall_seconds": 12.296678500017151
+        }
+      ]
+    }
+  ],
+  "asr_candidates": [
+    {
+      "run": "20261114T040458064185Z",
+      "status": "completed",
+      "asr": "Whisper faster-whisper-large-v3-turbo CPU int8",
+      "clips_completed": 24,
+      "requested_clips": 24,
+      "weighted_cer": 0.4401603584482962,
+      "baseline_weighted_cer": 0.4741186180874897,
+      "wall_seconds": 1211.0477473002393,
+      "baseline_seconds": 569.0503601000528,
+      "gates": {
+        "all_24_completed": true,
+        "same_annotation_manifest": true,
+        "all_timestamps_valid": true,
+        "cer_improvement_at_least_5pp": false,
+        "wall_time_at_most_2x": false
+      },
+      "passes_engineering_gate": false,
+      "results": [
+        {
+          "id": "R8001_M8004_MS801_early",
+          "status": "completed",
+          "seconds": 51.790000000000006,
+          "wall_seconds": 72.236545199994,
+          "edits": 128,
+          "reference_chars": 301,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8001_M8004_MS801_middle",
+          "status": "completed",
+          "seconds": 69.56500000000005,
+          "wall_seconds": 28.316201900015585,
+          "edits": 397,
+          "reference_chars": 599,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8001_M8004_MS801_late",
+          "status": "completed",
+          "seconds": 150.41999999999985,
+          "wall_seconds": 80.7679912999738,
+          "edits": 977,
+          "reference_chars": 1201,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8003_M8001_MS801_early",
+          "status": "completed",
+          "seconds": 60.83999999999999,
+          "wall_seconds": 34.49700820003636,
+          "edits": 125,
+          "reference_chars": 279,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8003_M8001_MS801_middle",
+          "status": "completed",
+          "seconds": 59.049999999999955,
+          "wall_seconds": 56.861659400048666,
+          "edits": 145,
+          "reference_chars": 328,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8003_M8001_MS801_late",
+          "status": "completed",
+          "seconds": 49.86499999999978,
+          "wall_seconds": 24.912357700057328,
+          "edits": 171,
+          "reference_chars": 328,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8007_M8010_MS803_early",
+          "status": "completed",
+          "seconds": 30.02000000000001,
+          "wall_seconds": 33.18926020001527,
+          "edits": 154,
+          "reference_chars": 262,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8007_M8010_MS803_middle",
+          "status": "completed",
+          "seconds": 65.66500000000008,
+          "wall_seconds": 66.90096220001578,
+          "edits": 264,
+          "reference_chars": 520,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8007_M8010_MS803_late",
+          "status": "completed",
+          "seconds": 40.42000000000007,
+          "wall_seconds": 25.93786689999979,
+          "edits": 125,
+          "reference_chars": 311,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8007_M8011_MS806_early",
+          "status": "completed",
+          "seconds": 53.920000000000016,
+          "wall_seconds": 32.91314339998644,
+          "edits": 113,
+          "reference_chars": 310,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8007_M8011_MS806_middle",
+          "status": "completed",
+          "seconds": 57.89499999999998,
+          "wall_seconds": 72.18348509992938,
+          "edits": 139,
+          "reference_chars": 354,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8007_M8011_MS806_late",
+          "status": "completed",
+          "seconds": 65.65499999999997,
+          "wall_seconds": 36.557935699936934,
+          "edits": 204,
+          "reference_chars": 480,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8008_M8013_MS807_early",
+          "status": "completed",
+          "seconds": 62.29499999999999,
+          "wall_seconds": 83.1511161000235,
+          "edits": 103,
+          "reference_chars": 260,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8008_M8013_MS807_middle",
+          "status": "completed",
+          "seconds": 54.47000000000003,
+          "wall_seconds": 68.99011220003013,
+          "edits": 100,
+          "reference_chars": 248,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8008_M8013_MS807_late",
+          "status": "completed",
+          "seconds": 63.24000000000001,
+          "wall_seconds": 67.12303220003378,
+          "edits": 127,
+          "reference_chars": 256,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8018_MS809_early",
+          "status": "completed",
+          "seconds": 57.754999999999995,
+          "wall_seconds": 27.82082599995192,
+          "edits": 47,
+          "reference_chars": 273,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8018_MS809_middle",
+          "status": "completed",
+          "seconds": 58.61500000000001,
+          "wall_seconds": 42.67657110001892,
+          "edits": 67,
+          "reference_chars": 336,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8018_MS809_late",
+          "status": "completed",
+          "seconds": 56.62999999999988,
+          "wall_seconds": 56.62606630008668,
+          "edits": 48,
+          "reference_chars": 271,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8019_MS810_early",
+          "status": "completed",
+          "seconds": 60.735,
+          "wall_seconds": 70.51719630009029,
+          "edits": 43,
+          "reference_chars": 267,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8019_MS810_middle",
+          "status": "completed",
+          "seconds": 59.75999999999999,
+          "wall_seconds": 34.43609940004535,
+          "edits": 34,
+          "reference_chars": 218,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8019_MS810_late",
+          "status": "completed",
+          "seconds": 53.174999999999955,
+          "wall_seconds": 25.898918099934235,
+          "edits": 61,
+          "reference_chars": 244,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8020_MS810_early",
+          "status": "completed",
+          "seconds": 58.875,
+          "wall_seconds": 68.81866190000437,
+          "edits": 32,
+          "reference_chars": 239,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8020_MS810_middle",
+          "status": "completed",
+          "seconds": 60.63499999999999,
+          "wall_seconds": 58.597967000096105,
+          "edits": 73,
+          "reference_chars": 320,
+          "timestamps_valid": true
+        },
+        {
+          "id": "R8009_M8020_MS810_late",
+          "status": "completed",
+          "seconds": 60.600000000000136,
+          "wall_seconds": 41.11676349991467,
+          "edits": 56,
+          "reference_chars": 276,
+          "timestamps_valid": true
+        }
+      ]
+    }
+  ],
+  "metadata_load": {
+    "run": "20261114T023008066853Z",
+    "status": "passed",
+    "sales_accounts": 100,
+    "teams": 5,
+    "inference_enabled": false,
+    "checks": 11,
+    "groups": [
+      {
+        "phase": "create",
+        "concurrency": 20,
+        "requests": 100,
+        "successful": 100,
+        "p50_seconds": 0.06194000004325062,
+        "p95_seconds": 1.1425106000388041
+      },
+      {
+        "phase": "create",
+        "concurrency": 50,
+        "requests": 100,
+        "successful": 100,
+        "p50_seconds": 0.34533260005991906,
+        "p95_seconds": 1.2886768999742344
+      },
+      {
+        "phase": "create",
+        "concurrency": 100,
+        "requests": 100,
+        "successful": 100,
+        "p50_seconds": 0.7000670999987051,
+        "p95_seconds": 1.321476300014183
+      },
+      {
+        "phase": "read",
+        "concurrency": 100,
+        "requests": 300,
+        "successful": 300,
+        "scope_correct": 300,
+        "p50_seconds": 0.44570979999843985,
+        "p95_seconds": 0.6768809999339283
+      }
+    ]
+  },
+  "asr_projection": {
+    "basis_run": "20261113T051328986460Z",
+    "clips": 24,
+    "public_non_sales_meetings": 8,
+    "model": "Whisper small CPU int8",
+    "audio_seconds": 1461.8899999999996,
+    "observed_seconds": 569.0503601000528,
+    "observed_rtf": 0.38925661992355987,
+    "scope": "Projection from short clips, not measured 15/30/60-minute recordings or end-to-end capacity",
+    "excludes": [
+      "LLM",
+      "queueing",
+      "upload",
+      "retries",
+      "speaker identification",
+      "long-audio performance changes"
+    ],
+    "scenarios": [
+      {
+        "recordings_per_day": 50,
+        "minutes_each": 15,
+        "audio_hours": 12.5,
+        "projected_asr_worker_hours": 4.865707749044498,
+        "projected_workers_for_8h_at_60pct": 2
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_each": 30,
+        "audio_hours": 25.0,
+        "projected_asr_worker_hours": 9.731415498088996,
+        "projected_workers_for_8h_at_60pct": 3
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_each": 60,
+        "audio_hours": 50.0,
+        "projected_asr_worker_hours": 19.462830996177992,
+        "projected_workers_for_8h_at_60pct": 5
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_each": 15,
+        "audio_hours": 25.0,
+        "projected_asr_worker_hours": 9.731415498088996,
+        "projected_workers_for_8h_at_60pct": 3
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_each": 30,
+        "audio_hours": 50.0,
+        "projected_asr_worker_hours": 19.462830996177992,
+        "projected_workers_for_8h_at_60pct": 5
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_each": 60,
+        "audio_hours": 100.0,
+        "projected_asr_worker_hours": 38.925661992355984,
+        "projected_workers_for_8h_at_60pct": 9
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_each": 15,
+        "audio_hours": 75.0,
+        "projected_asr_worker_hours": 29.19424649426699,
+        "projected_workers_for_8h_at_60pct": 7
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_each": 30,
+        "audio_hours": 150.0,
+        "projected_asr_worker_hours": 58.38849298853398,
+        "projected_workers_for_8h_at_60pct": 13
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_each": 60,
+        "audio_hours": 300.0,
+        "projected_asr_worker_hours": 116.77698597706797,
+        "projected_workers_for_8h_at_60pct": 25
+      }
+    ]
+  },
+  "docx_pagination": {
+    "engine": "Isolated project-local LibreOffice 26.8.3",
+    "input_sha256": "50deb63365e89b60868b87862d5da2a8846c92ca2147591d1149c3789de7a08c",
+    "pages": 2,
+    "visually_inspected": true,
+    "clipping_or_missing_glyphs_seen": false,
+    "microsoft_word_client_checked": false
+  },
+  "actual_runtime": {
+    "supplement-runtime": {
+      "run": "20261114T043317774396Z",
+      "status": "passed",
+      "checks": 28,
+      "before": {
+        "model_calls": 4,
+        "meeting_runs": 1
+      },
+      "after": {
+        "model_calls": 4,
+        "meeting_runs": 1
+      },
+      "docx_sha256": "dcf13f8877299aa3e74e909e7abda4cbcffc28658d59962d8a442dd95ae11ab4"
+    },
+    "main-live": {
+      "run": "20261114T043335444483Z",
+      "status": "passed",
+      "checks": 30,
+      "meeting_mode": "live",
+      "quality_mode": "live",
+      "wall_seconds": 34.73499999998603
+    },
+    "backend-runtime": {
+      "run": "20261114T043411881798Z",
+      "status": "passed",
+      "checks": 50,
+      "model_calls": 5,
+      "database_tables": 37,
+      "server_starts": 3,
+      "report_mode": "live"
+    },
+    "supplement-pagination": {
+      "status": "passed",
+      "docx_engine": "LibreOffice 26.8.3",
+      "docx_pages": 1,
+      "docx_reviewed": [
+        "page-1.png"
+      ],
+      "product_pdf_reviewed": [
+        "product-pdf-1.png"
+      ],
+      "product_pdf_pages": 1,
+      "clipping_or_missing_glyphs_seen": false,
+      "native_microsoft_word": false
+    }
+  }
+}

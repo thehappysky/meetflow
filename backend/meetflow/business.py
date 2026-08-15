@@ -50,12 +50,15 @@ class BusinessService:
                 if report and self.store.get_run(row.run_id, session)["status"] in {"waiting_review", "completed"}:
                     results.append({"id": row.id, "revision": row.version, "metadata": row.body,
                         "report": report["body"], "evidence": self.store.source_map(row.run_id, session),
+                        "run_id": row.run_id,
                         "at": row.created_at, "owner": user["name"], "kind": scope})
             return results
         rows = session.scalars(select(Submission).where(Submission.company_id == user["company_id"],
                                 Submission.deleted.is_(False))).all()
         return [{"id": row.id, "revision": row.revision, "metadata": row.snapshot["metadata"],
                  "report": row.snapshot["report"], "evidence": row.snapshot["evidence"],
+                 "clarifications": row.snapshot.get("clarifications", []),
+                 "run_id": row.snapshot.get("run_id"),
                  "at": row.created_at, "owner": row.snapshot["owner_name"], "kind": "center"}
                 for row in rows if self.workspace.visible(row, user)]
 

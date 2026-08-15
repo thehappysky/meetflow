@@ -63,18 +63,35 @@ def main(args):
     source = ROOT / 'data/benchmarks/clips.json'
     clips = json.loads(source.read_text(encoding='utf8'))['clips'][:args.limit]
     config = Settings(asr_backend=args.backend, asr_device='cpu', speaker_diarization=args.backend == 'sensevoice')
+    if args.asr_model:
+        if args.backend != 'whisper' or not args.asr_model.is_dir():
+            raise ValueError('--asr-model requires Whisper and an existing local model directory')
+        config.asr_model = str(args.asr_model.resolve())
+    model_path = Path(config.asr_model)
+    model_files = [p for p in sorted(model_path.iterdir()) if p.is_file()] if args.backend == 'whisper' else []
+    weights = []
+    for path in model_files:
+        with path.open('rb') as stream:
+            checksum = hashlib.file_digest(stream, 'sha256').hexdigest()
+        weights.append({'file':path.name,'bytes':path.stat().st_size,'sha256':checksum})
+    audio_hashes = {}
+    for clip in clips:
+        with (ROOT / 'data/benchmarks' / clip['path']).open('rb') as stream:
+            audio_hashes[clip['id']] = hashlib.file_digest(stream, 'sha256').hexdigest()
     manifest = {'status': 'running', 'protocol': 'docs/32 C1', 'platform': platform.platform(),
-        'asr': 'SenseVoice int8 CPU, VAD max15sec' if args.backend == 'sensevoice' else 'Whisper small CPU int8, configured frozen weights',
+        'asr': 'SenseVoice int8 CPU, VAD max15sec' if args.backend == 'sensevoice' else f'Whisper {model_path.name} CPU int8',
         'diarization': 'pyannote 3.0, eres2net, threshold .5, auto count' if config.speaker_diarization else 'not run',
         'clips_sha256': hashlib.sha256(source.read_bytes()).hexdigest(), 'count': len(clips),
+        'audio_sha256': audio_hashes,
         'sources': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in
-                    [Path(__file__), ROOT / 'backend/meetflow/speech.py', ROOT / 'docs/32-completion-plan.md']},
-        'models': json.loads((config.speech_model_dir / 'assets.json').read_text(encoding='utf8')),
+                    [Path(__file__), ROOT / 'backend/meetflow/speech.py', ROOT / 'backend/meetflow/audio.py',
+                     ROOT / 'docs/32-completion-plan.md', ROOT / 'docs/37-asr-turbo-comparison.md']},
+        'models': weights if args.backend == 'whisper' else json.loads((config.speech_model_dir / 'assets.json').read_text(encoding='utf8')),
         'limitations': '24 correlated clips from 8 public non-sales meetings; diagnostic not official CER/DER; developer machine background load'}
     (destination / 'manifest.json').write_text(json.dumps(manifest, indent=2), encoding='utf8')
     (destination / 'source_bundle.json').write_text(json.dumps({str(p.relative_to(ROOT)): p.read_text(encoding='utf8')
         for p in [Path(__file__), ROOT / 'backend/meetflow/speech.py', ROOT / 'backend/meetflow/audio.py',
-                  ROOT / 'docs/32-completion-plan.md']}, ensure_ascii=False), encoding='utf8')
+                  ROOT / 'docs/32-completion-plan.md', ROOT / 'docs/37-asr-turbo-comparison.md']}, ensure_ascii=False), encoding='utf8')
     results = []
     for clip in clips:
         start = time.perf_counter()
@@ -88,6 +105,7 @@ def main(args):
             result = {'id': clip['id'], 'status': 'completed', 'seconds': clip['seconds'],
                       'wall_seconds': time.perf_counter() - start, 'edits': edits(ref, hyp), 'reference_chars': len(ref),
                       'cer': edits(ref, hyp) / len(ref), 'spans': spans, 'turns': turns,
+                      'timestamps_valid': bool(spans) and all(0 <= s['start'] <= s['end'] <= clip['seconds'] + .1 for s in spans),
                       **(speaker_error(clip, turns) if config.speaker_diarization else {'speaker_evaluation': 'not run'})}
         except Exception as exc:  # noqa: BLE001 -- retain actual dependency/model failures
             result = {'id': clip['id'], 'status': 'failed', 'error': f'{type(exc).__name__}: {exc}',
@@ -105,4 +123,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--limit', type=int, default=24)
     parser.add_argument('--backend', choices=['sensevoice', 'whisper'], default='sensevoice')
+    parser.add_argument('--asr-model', type=Path)
     main(parser.parse_args())

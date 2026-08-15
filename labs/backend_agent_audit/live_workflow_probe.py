@@ -185,7 +185,7 @@ if __name__ == '__main__':
     parser.add_argument('--base-url', default='http://127.0.0.1:11434')
     parser.add_argument('--cases-file', type=Path)
     parser.add_argument('--no-coverage', action='store_true')
-    parser.add_argument('--revision', choices=['state_v2', 'relation_v4'])
+    parser.add_argument('--revision', choices=['base_v1', 'state_v2'])
     parser.add_argument('--tokenizer', type=Path)
     parser.add_argument('--profile', choices=['ollama', 'ollama_json'], default='ollama')
     parser.add_argument('--workflow', choices=['dynamic', 'evidence_v1'], default='dynamic')

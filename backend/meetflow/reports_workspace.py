@@ -127,7 +127,10 @@ class ReportService:
         return [f for f in items if (f["source_kind"], f["source_id"], f["source_revision"]) in aliases]
 
     def stamp(self, session, user, source):
-        return digest({"source": source, "followups": self.followups(session, user, source)})
+        # Keep the original source fingerprint shape across additive API metadata.
+        # A saved note still invalidates drafts through the source revision.
+        frozen = {k: source[k] for k in ('id', 'revision', 'metadata', 'report', 'evidence', 'at', 'owner', 'kind')}
+        return digest({"source": frozen, "followups": self.followups(session, user, source)})
 
     def entry(self, session, user, key, source):
         report = source["report"]
@@ -138,11 +141,22 @@ class ReportService:
                  + ("｜反馈 " + f["body"]["feedback"] if f["body"].get("feedback") else "") for f in followups]
         risks = [r["text"] for r in report.get("risks", [])]
         risks.extend("待确认：" + q["text"] for q in report.get("questions", []))
+        supplements = {}
+        notes = (self.workspace.clarifications(session, source["id"]) if source["kind"] == "personal"
+                 else source.get("clarifications", []))
+        for note in notes:
+            for question, answer in note["body"]["answers"].items():
+                text = note["body"]["questions"][question]
+                identity = (note["body"].get("run_id"), question, text)
+                supplements[identity] = {"question": text, "answer": answer, "context":
+                    "当前分析的本人补充" if note["body"].get("run_id") and note["body"]["run_id"] == source["run_id"]
+                    else "历史补充，适用性待核对"}
         result = {"key": key, "kind": source["kind"], "id": source["id"], "revision": source["revision"],
             "title": source["metadata"]["title"], "customer": source["metadata"].get("customer", ""),
             "meeting_date": source["metadata"].get("meeting_date") or "", "at": source["at"],
             "summary": report["summary"], "next_steps": "\n".join(steps), "risks": "\n".join(risks),
-            "note": "", "mode": report["mode"], "evidence": deepcopy(source["evidence"]),
+            "note": "", "supplements": list(supplements.values()),
+            "mode": report["mode"], "evidence": deepcopy(source["evidence"]),
             "stamp": self.stamp(session, user, source), "edits": []}
         result["mapped"] = {k: result[k] for k in ("summary", "next_steps", "risks", "meeting_date", "note")}
         return result

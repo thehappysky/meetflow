@@ -218,6 +218,19 @@ const metadata = computed(() =>
 const report = computed(() =>
   centralDetail.value ? detail.value?.report : detail.value?.report?.body,
 );
+const savedQuestionAnswers = computed<Row>(() => {
+  const answers: Row = {};
+  for (const note of detail.value?.clarifications || [])
+    if (note.body.run_id && note.body.run_id === detail.value?.run_id)
+      Object.assign(answers, note.body.answers);
+  return answers;
+});
+const changedQuestionAnswers = computed(() =>
+  (report.value?.questions || []).filter((q: Row) => {
+    const answer = questionAnswers[q.key]?.trim();
+    return answer && answer !== savedQuestionAnswers.value[q.key];
+  }),
+);
 const transcriptSpans = computed<Row[]>(() =>
   (Object.values(detail.value?.evidence || {}) as Row[]).filter(
     (span) => span.source_kind === "transcript",
@@ -491,9 +504,10 @@ async function seekEvidence(id: string) {
 async function clarifyQuestions() {
   await perform(async () => {
     const answers = Object.fromEntries(
-      (report.value?.questions || [])
-        .filter((q: Row) => questionAnswers[q.key]?.trim())
-        .map((q: Row) => [q.key, questionAnswers[q.key]]),
+      changedQuestionAnswers.value.map((q: Row) => [
+        q.key,
+        questionAnswers[q.key],
+      ]),
     );
     const key = detail.value!.id;
     await post(`/workspace/recordings/${key}/clarifications`, {
@@ -502,7 +516,8 @@ async function clarifyQuestions() {
     });
     await refresh();
     await open(key);
-    notice.value = "补充已记录，正在重新整理；原始发言和已有中心版本保留。";
+    notice.value =
+      "本人补充已保存，可带入简报或周报；原文判断和已有中心版本保留。";
   });
 }
 async function loadInvitation() {
@@ -533,7 +548,8 @@ async function open(key: string, central = false) {
   evidenceHighlight.value = "";
   for (const key of Object.keys(questionAnswers)) delete questionAnswers[key];
   for (const note of result.clarifications || [])
-    Object.assign(questionAnswers, note.body.answers);
+    if (note.body.run_id && note.body.run_id === result.run_id)
+      Object.assign(questionAnswers, note.body.answers);
   centralDetail.value = central;
   submitCustomer.value =
     result.body?.customer || result.metadata?.customer || "";
@@ -1342,7 +1358,10 @@ onBeforeUnmount(() => {
                   </button>
                 </article>
               </details>
-              <h3 v-if="report.questions?.length">需要补充的疑点</h3>
+              <h3 v-if="report.questions?.length">原文待核实的信息</h3>
+              <p v-if="report.questions?.length && !centralDetail">
+                本人补充会随资料保存并带入报告。实际会谈日期请在会谈信息中修改。
+              </p>
               <form
                 v-if="report.questions?.length"
                 @submit.prevent="clarifyQuestions"
@@ -1354,7 +1373,7 @@ onBeforeUnmount(() => {
                 >
                   <p>{{ q.text }}</p>
                   <label v-if="!centralDetail"
-                    >你的补充<textarea
+                    >本人补充（不会改写原文）<textarea
                       v-model="questionAnswers[q.key]"
                       maxlength="2000"
                       placeholder="不确定可以暂时留空；补充不等于客户已确认。"
@@ -1371,14 +1390,9 @@ onBeforeUnmount(() => {
                 </article>
                 <button
                   v-if="!centralDetail"
-                  :disabled="
-                    busy ||
-                    !report.questions.some((q: Row) =>
-                      questionAnswers[q.key]?.trim(),
-                    )
-                  "
+                  :disabled="busy || !changedQuestionAnswers.length"
                 >
-                  保存补充并重新整理
+                  保存本人补充
                 </button>
               </form>
               <details v-if="report.challenges?.length">
@@ -1390,6 +1404,14 @@ onBeforeUnmount(() => {
               <details v-if="detail.clarifications?.length">
                 <summary>销售补充记录（保留原话，不等于客户确认）</summary>
                 <article v-for="n in detail.clarifications" :key="n.id">
+                  <small
+                    >资料 v{{ n.source_version }} ·
+                    {{
+                      n.body.run_id && n.body.run_id === detail.run_id
+                        ? "当前分析的本人补充"
+                        : "历史补充，适用性待核对"
+                    }}</small
+                  >
                   <p v-for="(answer, key) in n.body.answers" :key="key">
                     {{ n.body.questions[key] }}：{{ answer }}
                   </p>

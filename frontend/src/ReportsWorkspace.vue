@@ -394,9 +394,22 @@ onBeforeUnmount(() => {
                   rows="3"
                   :readonly="confirmed"
                   maxlength="12000"
-                /></label
-              ><label
-                >本人补充<textarea
+                />
+              </label>
+              <details v-if="e.supplements?.length">
+                <summary>
+                  已带入
+                  {{ e.supplements.length }} 条会谈本人补充（未经客户确认）
+                </summary>
+                <p>
+                  将随本报告导出。如需更正，请在会谈中修改补充，再生成新草稿。
+                </p>
+                <p v-for="(item, index) in e.supplements" :key="index">
+                  [{{ item.context }}] {{ item.question }}：{{ item.answer }}
+                </p>
+              </details>
+              <label
+                >报告中另外补充<textarea
                   v-model="e.note"
                   rows="2"
                   :readonly="confirmed"

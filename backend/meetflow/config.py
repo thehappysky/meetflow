@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     meeting_workflow: Literal['dynamic', 'evidence_v1'] = 'dynamic'
     evidence_coverage: bool = True
     evidence_reference_protocol: Literal['quoted_v1', 'refs_v1'] = 'refs_v1'
-    evidence_prompt_revision: Literal['base_v1', 'state_v2', 'relation_v4'] = 'state_v2'
+    evidence_prompt_revision: Literal['base_v1', 'state_v2'] = 'state_v2'
     max_model_calls: int = 48
     max_tool_calls: int = 100
     max_agent_steps: int = 10

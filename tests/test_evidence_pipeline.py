@@ -382,3 +382,34 @@ def test_unverified_fields_become_actionable_questions_without_internal_diagnost
     assert 'condition' not in question['text'] and 'null' not in question['text']
     raw = next(a['body'] for a in store.artifacts(run['id']) if a['role'] == 'facts')
     assert raw['pending'][0]['field'] == 'condition' and 'condition' in raw['pending'][0]['reason']
+
+
+
+def test_old_pending_coverage_conversation_resumes_when_ui_metadata_is_added(typed_store, monkeypatch):
+    store, run = typed_store
+    pipeline = EvidencePipeline(store,run['id'])
+    legacy = {'summary':'负责人待确认','mentions':[],'observations':[], 'pending':[
+        {'task':'发送报价','ref':'s0','reason':'owner必须为该片段中的原词，未知留null'}]}
+    store.commit_artifact(run['id'],'evidence:facts:0','facts',legacy)
+    initial = {'page':0,'pages':1,'spans':pipeline.pages[0], 'initial_extraction':legacy}
+    original_save = store.save_conversation
+    def crash_after_response(*args):
+        original_save(*args)
+        if args[3][-1]['role'] == 'assistant':
+            raise RuntimeError('persisted legacy response')
+    class OldCoverage:
+        def complete(self,*args):
+            return {'role':'assistant','tool_calls':[tool_call('submit_result',{
+                'summary':'负责人尚不能核实','mentions':[],'observations':[]})]},{}
+    pipeline.provider=OldCoverage()
+    monkeypatch.setattr(store,'save_conversation',crash_after_response)
+    with pytest.raises(RuntimeError,match='legacy response'):
+        pipeline.agent('coverage',Extracted,initial,pipeline.validate_extracted,key='evidence:coverage:0')
+    monkeypatch.setattr(store,'save_conversation',original_save)
+    class NoRepeatedInference:
+        def complete(self,*args):
+            raise AssertionError('persisted model response must be reused')
+    report=EvidencePipeline(store,run['id'],NoRepeatedInference()).analyze()
+    assert not report['actions'] and len(report['questions'])==1
+    assert 'owner' not in report['questions'][0]['text']
+    assert store.get_run(run['id'])['model_calls']==1

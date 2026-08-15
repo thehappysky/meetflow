@@ -10,6 +10,7 @@ from meetflow.database import (
     QualityFeedback,
     QualityReview,
     SalesAnalysis,
+    Source,
     row_dict,
 )
 from meetflow.domain import DomainError
@@ -279,7 +280,7 @@ def test_legacy_private_quality_is_inaccessible_and_pending_work_is_suspended(ac
     assert len(listing(a))==1
 
 
-def test_question_answers_create_versioned_run_without_mutating_center_or_transcript(access):
+def test_question_answers_version_notes_without_reinference_or_mutating_center(access, monkeypatch):
     a = access
     rec = recording(a)
     store = a.app.state.store
@@ -292,12 +293,17 @@ def test_question_answers_create_versioned_run_without_mutating_center_or_transc
     path = f"/api/workspace/recordings/{rec['id']}/clarifications"
     assert a.client.post(path, headers=a.actors["manager.a"], json={"version": 1, "answers": {"date": "11月10日"}}).status_code == 404
     assert a.client.post(path, headers=a.actors["sales.a"], json={"version": 1, "answers": {"foreign": "伪造其他问题"}}).status_code == 400
+    monkeypatch.setattr(store.settings, 'start_worker', True)
+    def forbid_inference(*args):
+        raise AssertionError('saving a seller note must not resubmit AI work')
+    monkeypatch.setattr(a.app.state.driver, 'submit', forbid_inference)
     response = a.client.post(path, headers=a.actors["sales.a"], json={"version": 1, "answers": {"date": "核对后为11月10日"}})
     assert response.status_code == 201, response.text
-    assert response.json()["version"] == 2 and response.json()["run_id"] != rec["run_id"]
+    assert response.json()["version"] == 2 and response.json()["run_id"] == rec["run_id"]
     assert store.source_map(rec["run_id"]) == original
     central = a.client.get(f"/api/workspace/center/{submitted['id']}", headers=a.actors["manager.a"]).json()
     assert central["clarifications"] == []
-    run = store.get_run(response.json()["run_id"])
-    assert any(s["title"] == "销售补充（未经客户确认）" for s in run["manifest"]["sources"])
+    with store.sessions() as session:
+        assert session.scalar(select(Source).where(Source.title == "销售补充（未经客户确认）")) is not None
+    assert store.latest_report(rec["run_id"])["body"] == body
     assert a.client.post(path, headers=a.actors["sales.a"], json={"version": 1, "answers": {"date": "网络重试"}}).status_code == 409

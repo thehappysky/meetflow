@@ -34,6 +34,10 @@ def blocks(body):
             for label, field in (("会谈摘要", "summary"), ("后续安排与反馈", "next_steps"), ("风险与待确认", "risks")):
                 yield "label", label
                 yield "text", e[field] or "暂无已记录内容"
+            if e.get("supplements"):
+                yield "label", "会谈中保存的本人补充（未经客户确认）"
+                for supplement in e["supplements"]:
+                    yield "text", f"[{supplement['context']}] {supplement['question']}：{supplement['answer']}"
             if e.get("note"):
                 yield "label", "本人补充"
                 yield "text", e["note"]

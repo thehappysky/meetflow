@@ -296,6 +296,7 @@ class WorkspaceService:
                   "metadata": row.snapshot["metadata"], "submitted_at": row.created_at}
         if detail:
             result.update(report=row.snapshot["report"], evidence=row.snapshot["evidence"],
+                          run_id=row.snapshot.get("run_id"),
                           clarifications=row.snapshot.get("clarifications", []),
                           has_audio=bool(row.snapshot.get("audio_path")),
                           history=[{"revision": h["revision"], "metadata": h["snapshot"]["metadata"],
@@ -439,7 +440,8 @@ def workspace_router(service):
                 raise DomainError("补充问题不属于当前会谈")
             latest = {}
             for note in service.clarifications(session, key):
-                latest.update(note["body"]["answers"])
+                if note["body"].get("run_id") == row.run_id:
+                    latest.update(note["body"]["answers"])
             answers = {k: v.strip() for k, v in value.answers.items() if v.strip() != latest.get(k)}
             if not answers:
                 raise DomainError("这些补充已保存，无需重复提交", 409)
@@ -447,16 +449,16 @@ def workspace_router(service):
                 f"问题：{questions[k]}\n销售补充：{v}" for k, v in answers.items())
             service.store.add_source(session, run["project_id"], SourceInput(
                 title="销售补充（未经客户确认）", kind="requirement", text=text), run["meeting_id"])
-            next_run = service.store.create_run(session, session.get(Meeting, run["meeting_id"]), run["mode"])
-            next_run.manifest = {**next_run.manifest, "meeting_date": row.body.get("meeting_date") or None}
-            row.run_id, row.version = next_run.id, row.version + 1
+            # A seller's note is not another utterance or a customer confirmation.
+            # Keep the frozen analysis; version and export the note separately.
+            row.version += 1
             session.add(MeetingClarification(id=uid("mc_"), recording_id=key, actor_id=user["id"],
-                source_version=row.version, body={"answers": answers, "questions": {k: questions[k] for k in answers}}))
+                source_version=row.version, body={"answers": answers, "questions": {k: questions[k] for k in answers},
+                    "run_id": row.run_id}))
             service.store.audit(session, "workspace.clarified", key, {"actor": user["id"], "version": row.version})
-            run_id = next_run.id
-        if service.settings.start_worker:
-            service.driver.submit(run_id)
-        return {"version": row.version, "run_id": run_id}
+            run_id = row.run_id
+        service.prepare_quality("personal", key)
+        return {"version": row.version, "run_id": run_id, "notice": "本人补充已保存，原文判断不变，可在简报或周报中核对使用"}
 
     @router.patch("/recordings/{key}")
     def edit(key: str, value: RecordingEdit, user=current_user):
