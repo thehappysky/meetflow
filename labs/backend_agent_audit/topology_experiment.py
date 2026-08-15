@@ -82,8 +82,10 @@ def metrics(rows):
     return result
 
 
-def run(args):
-    folder = ROOT/"test-results/backend-agent-audit/topologies"/datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+def run(args, *, role_sets=None, collaboration=collaborate, output_group="topologies",
+        repair_reference="history_state draft before review"):
+    policies = tuple(role_sets) if role_sets else POLICIES
+    folder = ROOT/"test-results/backend-agent-audit"/output_group/datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     folder.mkdir(parents=True, exist_ok=False)
     plan = Path(__file__).with_name("PLAN.md").read_bytes()
     sources = {p.name: p.read_text(encoding="utf-8") for p in Path(__file__).parent.glob("*.py")}
@@ -97,12 +99,14 @@ def run(args):
         "scope": "12 agent-authored synthetic DEVELOPMENT cases, no independent gold or holdout",
         "execution": "independent expert contexts executed serially on one local GPU; not cloud parallel latency",
         "generation_cap": "512 per call, max 3 calls; common 1536 upper cap, not matched actual tokens",
+        "role_sets": role_sets or {policy: ROLES for policy in policies},
+        "comparison": "role prompts only, fixed serial topology" if role_sets else "topology and review gate",
         "contract_sha256": sha(CONTRACT.encode()), "price": None}
     write_json(folder/"manifest.json", manifest)
     write_json(folder/"source_bundle.json", sources)
     write_json(folder/"cases.json", CASES)
     (folder/"plan_snapshot.md").write_bytes(plan)
-    trials = [(c, p, r) for c in CASES for p in POLICIES for r in range(args.repeats)]
+    trials = [(c, p, r) for c in CASES for p in policies for r in range(args.repeats)]
     random.Random(20261112).shuffle(trials)
     results = []
     with httpx.Client(timeout=args.timeout) as client:
@@ -114,12 +118,14 @@ def run(args):
             trial = f"{case['id']}/{policy}/{repeat}"
             usage = {"model_calls": 0, "input_tokens": 0, "output_tokens": 0, "completion_cap_violations": 0}
             times = []
+            active_roles = role_sets[policy] if role_sets else ROLES
 
-            def call(role, upstream, *, case=case, repeat=repeat, usage=usage, trial=trial, times=times):
+            def call(role, upstream, *, case=case, repeat=repeat, usage=usage, trial=trial, times=times,
+                     active_roles=active_roles):
                 request = {"model": args.model, "stream": False, "think": False, "format": Outcome.model_json_schema(),
-                    "keep_alive": "30m", "options": {"temperature": 0, "seed": 2026+repeat*10+list(ROLES).index(role),
+                    "keep_alive": "30m", "options": {"temperature": 0, "seed": 2026+repeat*10+list(active_roles).index(role),
                     "num_ctx": 4096, "num_predict": 512}, "messages": [
-                    {"role": "system", "content": CONTRACT+"\n"+ROLES[role]+"\n输出JSON Schema："+json.dumps(Outcome.model_json_schema(), ensure_ascii=False)},
+                    {"role": "system", "content": CONTRACT+"\n"+active_roles[role]+"\n输出JSON Schema："+json.dumps(Outcome.model_json_schema(), ensure_ascii=False)},
                     {"role": "user", "content": json.dumps({"frozen_evidence": packet(case), "upstream": upstream}, ensure_ascii=False)}]}
                 usage["model_calls"] += 1
                 append(folder/"trace.jsonl", {"trial": trial, "role": role, "event": "request", "request": request})
@@ -143,7 +149,7 @@ def run(args):
                     append(folder/"trace.jsonl", {"trial": trial, "role": role, "event": "timing", "seconds": elapsed})
 
             start = time.perf_counter()
-            outcome = collaborate(policy, call)
+            outcome = collaboration(policy, call)
             pred = outcome["final"]["prediction"]
             before = evaluate(outcome["drafts"][1]["prediction"], case["gold"])["slots"]
             evaluation = evaluate(pred, case["gold"])
@@ -152,7 +158,7 @@ def run(args):
             row = {"trial": trial, "case_id": case["id"], "policy": policy, "repeat": repeat,
                 "status": "completed" if pred else "failed", "wall_seconds": time.perf_counter()-start,
                 **usage, **outcome, "prediction": pred, "evaluation": evaluation, "fully_exact": bool(exact),
-                "call_seconds": times, "repair_reference": "history_state draft before review",
+                "call_seconds": times, "repair_reference": repair_reference,
                 "repaired_core_slots": sum(not before[k] and evaluation["slots"][k] for k in before),
                 "damaged_core_slots": sum(before[k] and not evaluation["slots"][k] for k in before)}
             append(folder/"predictions.jsonl", row)
