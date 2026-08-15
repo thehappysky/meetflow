@@ -284,6 +284,14 @@ def test_live_sales_uses_http_tool_protocol_without_demo_fallback(app_client):
         call_ids = {call["id"] for m in payload["messages"] for call in m.get("tool_calls", [])}
         assert all(reply["tool_call_id"] in call_ids for reply in tool_replies)
         message, _ = SalesDemoProvider().complete(role, payload["messages"], payload["tools"], {})
+        if role == 'auditor' and any(call['function']['name'] == 'submit_result' for call in message.get('tool_calls', [])):
+            upstream = json.loads(next(m['content'] for m in tool_replies if m.get('name') == 'read_upstream'))
+            decisions = [item for key, result in upstream.items() if not key.endswith(':auditor')
+                         for item in result.get('decisions', [])]
+            message['tool_calls'][0]['function']['arguments'] = json.dumps({'checks': [
+                {'rule_id': d['rule_id'], 'suggested_status': d['status'],
+                 'reason': '测试适配器核对上游判断', 'evidence': d['evidence']}
+                for d in decisions]})
         return httpx.Response(200, json={"choices": [{"message": message}],
                                        "usage": {"prompt_tokens": 100, "completion_tokens": 20}})
 

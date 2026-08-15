@@ -83,7 +83,8 @@ class LiveProvider:
                 "model": self.settings.model_name, "messages": native_messages, "tools": tools,
                 "stream": False, "think": False,
                 "options": {"num_predict": self.settings.max_output_tokens,
-                            "num_ctx": self.settings.model_context_window},
+                            "num_ctx": self.settings.model_context_window,
+                            "temperature": self.settings.model_temperature, "seed": self.settings.model_seed},
             })
         if response.is_error:
             raise DomainError(f"模型服务返回 HTTP {response.status_code}；请检查本地模型及工具调用支持", 502)
@@ -144,7 +145,8 @@ class LiveProvider:
                 'model': self.settings.model_name, 'messages': history, 'format': schema,
                 'stream': False, 'think': False,
                 'options': {'num_predict': self.settings.max_output_tokens,
-                            'num_ctx': self.settings.model_context_window}})
+                            'num_ctx': self.settings.model_context_window,
+                            'temperature': self.settings.model_temperature, 'seed': self.settings.model_seed}})
         if response.is_error:
             raise DomainError(f'模型结构化接口返回 HTTP {response.status_code}；不会自动切换协议或规则模式', 502)
         payload = response.json()

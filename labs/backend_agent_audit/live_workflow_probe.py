@@ -36,6 +36,12 @@ def check_report(case, report, artifacts, evidence):
               'action_references_exist': all(a['evidence'] and set(a['evidence']) <= set(evidence) for a in actions)}
     if 'expected' in case:
         expected = case['expected']
+        if expected.get('min_pages'):
+            processing = report.get('source_processing', {})
+            chars = sum(len(span['text']) for span in evidence.values() if span.get('source_kind') == 'transcript')
+            checks['minimum_pages_processed'] = processing.get('pages', 0) >= expected['min_pages']
+            checks['all_page_inputs_processed'] = (processing.get('processed_chars') == chars == processing.get('input_chars')
+                and processing.get('processed_pages') == processing.get('pages'))
         checks['exact_action_count'] = len(actions) == len(expected['actions'])
         for index, wanted in enumerate(expected['actions']):
             matching = [action for action in actions if wanted['title_contains'] in action['title']]
@@ -79,6 +85,7 @@ def main(args):
     cases = json.loads(args.cases_file.read_text(encoding='utf8')) if args.cases_file else CASES
     files = [Path(__file__), Path(__file__).with_name('PLAN.md'), ROOT / 'docs/32-completion-plan.md',
              Path(__file__).with_name('current_graph_probe.py'), Path(__file__).with_name('role_schema_probe.py'),
+             Path(__file__).with_name('summarize_coverage.py'),
              *sorted((ROOT / 'backend/meetflow').rglob('*.py'))]
     if args.cases_file:
         files.append(args.cases_file.resolve())
@@ -143,8 +150,8 @@ def main(args):
                             'artifacts': store.artifacts(run_id)}
                     item['checks'] = check_report(case, item['report'], item['artifacts'], store.source_map(run_id))
                     if args.workflow == 'evidence_v1' and item['report']:
-                        required = {'facts', 'reconcile', 'audit'} | (set() if args.no_coverage else {'coverage'})
-                        item['checks']['dynamic_roles'] = required <= {a['role'] for a in item['artifacts']}
+                        from summarize_coverage import applicable_role_check
+                        item['checks']['dynamic_roles'] = applicable_role_check(item, not args.no_coverage)
                 run = store.get_run(run_id)
                 item.update(case=case['id'], wall_seconds=time.perf_counter() - start,
                             roles=dict(Counter(c['role'] for c in provider.calls)),

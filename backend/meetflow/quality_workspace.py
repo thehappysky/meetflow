@@ -244,7 +244,8 @@ class QualityWorkspace:
                                          status="ready", audio_path=None)
         session.add(conversation)
         session.flush()
-        snapshot = {"conversation": self.sales.conversation_dict(conversation), "playbook": card}
+        snapshot = {"conversation": self.sales.conversation_dict(conversation), "playbook": card,
+                    'audit_protocol': 'comparison_v2'}
         analysis = SalesAnalysis(id=uid("sa_"), conversation_id=conversation.id, project_id=policy["project_id"],
             playbook_id=card["id"], snapshot=snapshot, mode="live" if self.settings.live_available else "demo")
         session.add(analysis)

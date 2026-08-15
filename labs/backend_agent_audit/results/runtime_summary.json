@@ -1,0 +1,135 @@
+{
+  "scope": "single-host actual runtime, not enterprise capacity or independent AI accuracy",
+  "date": "2026-11-13",
+  "actual_stack": [
+    "FastAPI",
+    "SQLAlchemy",
+    "SQLite WAL",
+    "Alembic",
+    "LangGraph SQLite checkpoints",
+    "database work leases",
+    "ThreadPoolExecutor",
+    "faster-whisper",
+    "Ollama"
+  ],
+  "not_deployed": [
+    "Redis",
+    "Celery",
+    "PostgreSQL",
+    "external broker"
+  ],
+  "database": {
+    "journal": "wal",
+    "integrity": "ok",
+    "fk_violations": 0,
+    "tables": 37,
+    "version": "0003"
+  },
+  "health": {
+    "status": "ok",
+    "live_available": true,
+    "audio_available": true,
+    "auth_enabled": true
+  },
+  "tcp_audio_cohorts": [
+    {
+      "run": "20261113T143930068568Z",
+      "status": "failed",
+      "checks": 23,
+      "failed_checks": [
+        "real background analysis produced report"
+      ],
+      "error": {
+        "type": "AssertionError",
+        "message": "real background analysis produced report"
+      }
+    },
+    {
+      "run": "20261113T144245116005Z",
+      "status": "failed",
+      "checks": 23,
+      "failed_checks": [
+        "real background analysis produced report"
+      ],
+      "error": {
+        "type": "AssertionError",
+        "message": "real background analysis produced report"
+      }
+    },
+    {
+      "run": "20261113T144617788123Z",
+      "status": "passed",
+      "checks": 50,
+      "failed_checks": [],
+      "model_calls": 8,
+      "database_tables": 37,
+      "server_starts": 3,
+      "report_mode": "live"
+    },
+    {
+      "run": "20261113T152258539492Z",
+      "status": "passed",
+      "checks": 50,
+      "failed_checks": [],
+      "model_calls": 15,
+      "database_tables": 37,
+      "server_starts": 3,
+      "report_mode": "live"
+    },
+    {
+      "run": "20261113T154011973969Z",
+      "status": "passed",
+      "checks": 50,
+      "failed_checks": [],
+      "model_calls": 5,
+      "database_tables": 37,
+      "server_starts": 3,
+      "report_mode": "live"
+    }
+  ],
+  "main_live_cohorts": [
+    {
+      "run": "20261113T145507237462Z",
+      "status": "passed",
+      "checks": 27,
+      "failed_checks": [],
+      "meeting_mode": "live",
+      "quality_mode": "live"
+    },
+    {
+      "run": "20261113T153001546367Z",
+      "status": "failed",
+      "checks": 20,
+      "failed_checks": [],
+      "error": {
+        "type": "OperationalError",
+        "message": "no such table: quality_cases"
+      }
+    },
+    {
+      "run": "20261113T153259281538Z",
+      "status": "failed",
+      "checks": 17,
+      "failed_checks": [
+        "quality produced live report"
+      ],
+      "error": {
+        "type": "AssertionError",
+        "message": "quality produced live report"
+      }
+    },
+    {
+      "run": "20261113T153930682420Z",
+      "status": "passed",
+      "checks": 30,
+      "failed_checks": [],
+      "meeting_mode": "live",
+      "quality_mode": "live"
+    }
+  ],
+  "limits": [
+    "Synthetic accounts and public audio; all failed attempts retained.",
+    "Browser automation helper failed to initialize; no new UI screenshots.",
+    "Word file structure/content checked; native pagination rendering unavailable."
+  ]
+}

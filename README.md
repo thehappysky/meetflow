@@ -1,10 +1,59 @@
 # MeetFlow：从会议录音到纪要与待办
 
-当前正按[完整交付与验收计划](docs/32-completion-plan.md)继续实现；[本批验收证据](docs/33-completion-evidence.md)持续更新。原资料已无损升级并在独立目录恢复验证，下面L1/L2保留为历史基线；最终模型选型与整体验收仍在进行，以PROGRESS最新阶段为准。
+当前按[完整交付与验收计划](docs/32-completion-plan.md)推进；最新实际运行结果见[后端组件与启动验收](docs/35-backend-runtime-acceptance.md)。原资料已无损升级和恢复验证，下面旧轮次保留为历史基线；模型业务质量仍有未通过案例。
 
 MeetFlow面向企业软件／服务销售：录音上传后自动整理全文、纪要、需求／决策及后续事项；销售自行复盘并确认导出报告。确认上报后，主管／老板获得授权范围内的客户推进与独立质检信息。
 
-**项目固定采用多Agent协作；职责划分和协作方式分别做实验。** 当前可运行账号版默认使用规则模拟，ASR已接入；真实本地模型完整图仍在隔离验证，业务质量未通过，不宣称真实AI效果或企业容量已达标。
+**项目固定采用多Agent协作；职责划分和协作方式分别做实验。** 真实录音→真实ASR→真实多Agent→纪要／报告已走通，主服务当前通过显式本地AI入口启用真实分析。已有离线演示记录保留demo标记；真实模型仍有改期误审等质量问题，须核对草稿和待确认事项。
+
+## 现在怎样运行，后台实际用了什么
+
+已准备依赖与模型的本机，在仓库根目录执行：
+
+```powershell
+.\scripts\start-local-ai.ps1 -SkipInstall
+```
+
+打开 `http://127.0.0.1:8765`，使用各自账号。主服务当前已按此命令运行；销售上传后后台处理，主管/老板只看到已上报范围。新的真实AI合成验收会谈与质检已保留供查验。首次环境准备和重复验收步骤见[运行说明](docs/35-backend-runtime-acceptance.md#怎样启动和复验)。原 `start.ps1` 遵循`.env`，模型未配置时是规则演示，两种入口有明确区别。
+
+| 组件 | 实际实现 | 本轮验证 |
+|---|---|---|
+| 数据库 | SQLAlchemy + SQLite WAL + Alembic | 37表、外键完整性；本轮37表3409行备份恢复逐行一致 |
+| 后台任务 | 业务库持久任务 + 本地线程执行器 + 数据库租约 | 入队后关闭/重启自动处理；完成后重启不重复推理；另有进程强杀测试 |
+| Agent恢复 | LangGraph SQLite检查点 + 持久消息/产物 | 已保存响应和完成结果可复用；未知在途响应不承诺exactly-once |
+| 语音/模型 | CPU Whisper-small + 隔离Ollama + Qwen3.5-4B开发配置 | 56.63秒公开录音、23段全文、8次模型调用生成live纪要 |
+| 前后端与权限 | FastAPI同源提供Vue构建与REST API，页面轮询 | 实际50项隔离HTTP检查、30项主服务真实纪要/质检检查 |
+
+**没有部署Redis、Celery、PostgreSQL或独立消息代理。** 当前以数据库作为任务恢复依据，线程池只负责本地执行调度；这是已运行的单机实现，不等同于成熟分布式队列，也没有验证20–100名销售的生产容量。
+
+最终冻结版本189项产品/实验检查通过，前端类型和生产构建通过。主服务健康检查`live_available/audio_available/auth_enabled`均true；本轮浏览器操控工具初始化失败，未做新截图或点击验收。50/30是流程断言数量，**不是AI准确率**。成功与失败保留在[公开运行汇总](labs/backend_agent_audit/results/runtime_summary.json)及[模型逐例摘要](labs/backend_agent_audit/results/typed_workflow_summary.json)。
+
+### 当前真实会谈Agent数据流
+
+```mermaid
+flowchart TD
+    Audio[录音入库，queued任务] --> Lease[后台领取租约]
+    Lease --> ASR[Whisper全文＋时间戳]
+    ASR --> Page[冻结来源，完整分页]
+    Page --> Facts[facts提取Agent<br/>只选择本页证据ID]
+    Facts --> Coverage[coverage覆盖Agent<br/>对照原文核查遗漏]
+    Coverage --> Ground[代码回填原句，校验字段原词<br/>无依据提及保留待确认]
+    Ground --> Merge[reconcile归并Agent<br/>逐事项选择负责人／日期／条件来源]
+    Merge --> Resolve[代码归一日期及状态]
+    Resolve --> Audit[audit独立审查Agent<br/>五字段核查，可补查只读证据]
+    Audit --> Check{有具体问题且未返工}
+    Check -->|是| Repair[定向归并与复核一次]
+    Check -->|否| Draft[保存草稿和疑点]
+    Repair --> Draft
+    Draft --> Review[销售核对→明确上报→冻结中心版本]
+```
+
+模型负责识别/判断与选择依据，代码负责原文回填、日期归一、权限、预算和持久化。字段可追溯不代表语义必然正确：小模型仍可能漏掉改期或将正确承诺误审为疑点，因此不会自动发出正式任务或以缺证据直接扣分。质检使用下文独立管理工作流，与销售事实整理分开授权。
+
+实现上，LangGraph父图编排“分析→人工确认→结束”；四类会谈Agent在分析节点内通过类型化产物委派，独立消息和完成产物另行入库，并非四个父图节点。会谈当前串行处理各页/事项；管理图可逻辑并发专家，但本地Ollama限制1个模型请求同时执行，不能宣称云端并行加速。
+
+<details>
+<summary>历史：上一轮后端联调与L1/L2原始动态工作流成绩（原文保留）</summary>
 
 ## 后端完成度与前后端联调（2026-11-13）
 
@@ -34,6 +83,8 @@ MeetFlow面向企业软件／服务销售：录音上传后自动整理全文、
 
 同为Qwen2.5:7b、每角色10步、每调用1536、总48调用／600秒；只有3个代理编写开发场景，不是独立业务验证。L2三个场景分别耗时152.92／192.82／148.90秒，仍有负责人漏提、改期错误、条件串到其他事项和建议变成todo候选。当前只解决一部分协议集成问题，效率也不理想。完整请求／失败留本机，公开[逐例计量与源码摘要](labs/backend_agent_audit/results/live_workflow_summary.json)，没有启用实际销售评分或自动发布正式任务。
 
+</details>
+
 ### 当前本地部署结构
 
 ```mermaid
@@ -48,7 +99,7 @@ flowchart TD
     JOB --> ASR[faster-whisper<br/>录音按需转写]
     JOB --> GRAPH[LangGraph<br/>工具循环与协作图]
     GRAPH --> CHECK[checkpoints.db<br/>sales-checkpoints.db]
-    GRAPH -.真实模式默认未启用.-> MODEL[大模型接口适配器]
+    GRAPH --> MODEL[真实本地模型适配器<br/>显式AI启动入口]
 ```
 
 箭头表示访问／调用。录音先转写再分析，已有文字跳过ASR。默认部署是同一服务提供页面和API；Node只用于前端安装／构建，开发模式才另外启动Vite。账号页面使用定时轮询，不是已实现WebSocket；本地执行器也不是Redis／Celery队列。
@@ -90,9 +141,9 @@ flowchart TD
 
 ## Agent怎样分工：代码现状与研究候选
 
-### 当前产品：两条授权隔离的工作流
+### 原动态工作流与管理质检（旧运行和对照保留）
 
-会谈整理图当前由协调者生成有依赖的任务计划。下图是代码支持的一种典型计划，不表示每场固定执行全部角色；计划须经无环、依赖和审查覆盖校验。
+原dynamic会谈图由协调者生成有依赖的任务计划，保留以便旧运行恢复和实验对照；当前本地AI入口采用前述evidence_v1图。下图是原dynamic代码支持的一种典型计划，不表示每场固定执行全部角色；计划须经无环、依赖和审查覆盖校验。
 
 ```mermaid
 flowchart TD
@@ -165,6 +216,17 @@ flowchart TD
 | 按议题或录音片段分工再归并 | 长会议上下文 | 跨片段改期、条件、取消被拆开 | 未测，需长录音标签 |
 
 [LangGraph官方文档](https://docs.langchain.com/oss/python/langgraph/workflows-agents)说明工作流与动态工具Agent的区别；[组合模式文章](https://www.anthropic.com/research/building-effective-agents)提供串行／并行／评估修订候选；[MAST论文](https://arxiv.org/abs/2503.13657v3)提醒分别追踪设计、协作对齐与验证失败。**这些资料提供假设和实现方式，没有证明本项目该选哪组角色。**
+
+## 量化对照与单个Agent构造
+
+当前会谈采用类型化证据交接，提取/覆盖Agent选择原文ID，由代码回填引用；字段不满足原词约束时保留待确认，不能进入行动。每个角色有独立工具循环、累计预算、持久消息和产物；日期、权限、版本与租约写入检查由代码处理。管理质检有独立专家/审查图，保存父图检查点及完成产物，目前不承诺每个内部工具步骤都可恢复。
+
+state_v2同模型同协议的15例覆盖核查消融见[逐例结果](labs/backend_agent_audit/results/coverage_ablation.json)：四角色和三角色均15/15产出，全部窄检查12/15与11/15，调用69/49次，合计约194.64/130.20秒。覆盖修复了相对日期疑点和一个条件事项负责人，却在双事项的一个负责人上退步；当前保留四角色为质量优先开发配置，不能称显著优势或生产最优。都是已看过的开发场景、单次运行。
+
+较早base_v1对照四/三均9/15，75/57调用，见[原结果](labs/backend_agent_audit/results/coverage_ablation_base_v1.json)。当时原始角色检查对无事项会谈错误地要求归并/审查，原分数7/15保留；适用性校正为9/15，**没有更改业务预期或删失败案例**。最新管理审查只让模型给独立建议状态，代码与真实上游比较后才产生争议，避免重复挑错；三类固定管理开发检查3/3通过，完整历史见[质检汇总](labs/backend_agent_audit/results/quality_summary.json)。本地temperature=0/seed=2026已与实验显式对齐，仍不保证每次语义正确。
+
+<details>
+<summary>历史研究：T/R1/I1职责与协作方式实验，原结果和旧限制保留</summary>
 
 ## 已跑的量化对照：协作方式与职责划分分开看
 
@@ -259,6 +321,8 @@ L2起，实际提交工具Schema只提供该角色允许的字段：actions仅pl
 
 首次输入减少约39.5%，但两者都未完成；不能宣称成功率提高。1000个合成短ID全量枚举又使meeting Schema增至27568字符，生产长会议不能直接照搬。**上述I1及单角色探针当批未切换产品**；之后L2才将角色字段裁剪纳入正式工具定义，见[后续完整图诊断](docs/31-live-workflow-repair.md)。枚举与去重仍留实验。原参数、两次失败和逐角色成本见[内部优化量化记录](docs/29-agent-internals-and-ablation.md)，20种开发场景仍无独立标注／留出集。
 
+</details>
+
 ## 当前技术与数据架构
 
 模块化单体：Python3.12+、FastAPI、Pydantic、SQLAlchemy、SQLite WAL、LangGraph＋SQLite检查点；前端Vue；语音faster-whisper，报告python-docx／ReportLab。后台为本地执行器，不是分布式队列。PostgreSQL、Redis、Celery与外部CRM同步尚未部署。
@@ -279,7 +343,7 @@ flowchart TD
     P -.个人报告来源快照.-> W[SalesReport<br/>草稿与已确认固定内容]
 ```
 
-这是业务关联图，不是全量物理ER。部分来源、多态关系和JSON内ID由应用检查，并非全部有数据库外键；70个外键不能代替公司／团队权限验证。主库保存结构化资料和快照，音频是文件，检查点另存两份SQLite文件。建表主要依赖create_all，尚无正式Alembic迁移链；未将回收站恢复当成数据库备份恢复演练。
+这是业务关联图，不是全量物理ER。部分来源、多态关系和JSON内ID由应用检查，并非全部有数据库外键；71个外键不能代替公司／团队权限验证。主库保存结构化资料和快照，音频是文件，检查点另存两份SQLite文件。已有Alembic 0001—0003迁移、数据库租约与持久Agent消息；本轮离线备份/恢复已核对37表3409行逐行一致，详见[恢复与运行证据](docs/35-backend-runtime-acceptance.md)。
 
 主库保留24条初轮PyAV19兼容性失败，已与原始失败批次逐ID匹配；修复后另一批24条均有待确认／完成结果。历史失败不删除，waiting_review通常是等待人工确认而非执行异常。当前依赖PyAV16.1.0，详见[真实录音历史测试](docs/15-real-audio-benchmark.md)与[本轮状态核验](docs/30-backend-frontend-database-status.md)。
 
@@ -293,6 +357,8 @@ flowchart TD
 .\scripts\start.ps1
 # 已安装依赖并构建后：
 .\scripts\start.ps1 -SkipInstall
+# 已准备本地ASR/模型后的真实AI入口：
+.\scripts\start-local-ai.ps1 -SkipInstall
 ```
 
 打开 **http://127.0.0.1:8765**。首次创建合成账号公司可另开终端运行 `.venv\Scripts\python.exe scripts/bootstrap_access_demo.py`；凭证只保存在忽略的 `data/access-demo.json`，不提交。管理员生成指定团队邀请码，销售自行注册，主管看本团队、老板看全公司。现有账号不会被脚本重置。

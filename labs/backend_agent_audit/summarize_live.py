@@ -63,8 +63,11 @@ def main():
             if 'checks' in result and 'dynamic_roles' in result['checks']:
                 result['checks']['required_roles'] = result['checks'].pop('dynamic_roles')
     (target.parent / 'typed_workflow_summary.json').write_text(json.dumps({
-        'scope': 'Adaptive typed pipeline development; every cohort kept, only three authored cases',
-        'limitations': envelope['limitations'], 'runs': typed}, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        'scope': 'Adaptive typed pipeline development; cohorts include original three and twelve additional authored cases',
+        'limitations': [*envelope['limitations'],
+            'The additional twelve were frozen before their first run; after inspecting failures, later changes are development regression.',
+            'Neither set has independent human annotation; repeated runs do not increase the number of distinct cases.'],
+        'runs': typed}, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(json.dumps({'output': str(target.relative_to(ROOT)), 'runs': len(runs)}, ensure_ascii=True))
 
 

@@ -24,3 +24,14 @@ def test_unconfirmed_suggestion_becoming_action_is_counted_as_error():
 
 def test_missing_report_stays_in_failure_denominator():
     assert check_report(CASES[0], None, [], {}) == {'report_present': False}
+
+
+def test_zero_item_meeting_does_not_require_useless_reconciliation_but_real_items_do():
+    from summarize_coverage import applicable_role_check
+    result = {'artifacts': [{'role':'facts','body':{'mentions':[]}},
+                            {'role':'coverage','body':{'mentions':[]}}]}
+    assert applicable_role_check(result, True)
+    result['artifacts'][1]['body']['mentions'] = [{'task':'发送报价'}]
+    assert not applicable_role_check(result, True)
+    result['artifacts'].extend([{'role':'reconcile','body':{}}, {'role':'audit','body':{}}])
+    assert applicable_role_check(result, True)

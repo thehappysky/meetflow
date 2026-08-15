@@ -109,7 +109,9 @@ class Store:
                     "sources": [row_dict(source) for source in sources],
                     "tasks": [row_dict(task) for task in tasks], "title": meeting.title,
                     "meeting_time": meeting.meeting_time, "timezone": meeting.timezone,
-                    "workflow": self.settings.meeting_workflow, 'coverage_check': self.settings.evidence_coverage}
+                    "workflow": self.settings.meeting_workflow, 'coverage_check': self.settings.evidence_coverage,
+                    'evidence_reference_protocol': self.settings.evidence_reference_protocol,
+                    'evidence_prompt_revision': self.settings.evidence_prompt_revision}
         run = Run(id=uid("r_"), meeting_id=meeting.id, project_id=meeting.project_id, mode=mode,
                   manifest=manifest)
         session.add(run)

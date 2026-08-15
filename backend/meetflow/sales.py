@@ -135,7 +135,8 @@ class SalesService:
             if session.scalar(select(SalesAnalysis.id).where(SalesAnalysis.conversation_id == conversation.id,
                     SalesAnalysis.status.in_(["queued", "running"]))):
                 raise DomainError("已有分析正在执行", 409)
-            snapshot = {"conversation": self.conversation_dict(conversation), "playbook": row_dict(card)}
+            snapshot = {"conversation": self.conversation_dict(conversation), "playbook": row_dict(card),
+                        'audit_protocol': 'comparison_v2'}
             row = SalesAnalysis(id=uid("sa_"), conversation_id=conversation.id, project_id=conversation.project_id,
                                 playbook_id=card.id, snapshot=snapshot, mode=value.mode)
             session.add(row)

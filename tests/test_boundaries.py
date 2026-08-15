@@ -42,7 +42,7 @@ def test_native_ollama_budget_and_tool_history_roundtrip():
         assert request.url == "http://127.0.0.1:11434/api/chat"
         assert "authorization" not in request.headers
         body = json.loads(request.content)
-        assert body["options"] == {"num_predict": 512, "num_ctx": 8192}
+        assert body["options"] == {"num_predict": 512, "num_ctx": 8192, "temperature": 0.25, "seed": 17}
         assert body["think"] is False and body["stream"] is False
         assert body["messages"][0]["tool_calls"][0]["function"]["arguments"] == {"source_id": "s1"}
         assert body["messages"][1] == {"role": "tool", "tool_name": "read_source", "content": "source text"}
@@ -51,7 +51,8 @@ def test_native_ollama_budget_and_tool_history_roundtrip():
             "prompt_eval_count": 37, "eval_count": 12})
 
     settings = Settings(model_api_profile="ollama", model_name="local-model", model_api_key="",
-                        model_base_url="http://127.0.0.1:11434/v1", max_output_tokens=512)
+                        model_base_url="http://127.0.0.1:11434/v1", max_output_tokens=512,
+                        model_temperature=0.25, model_seed=17)
     message, usage = LiveProvider(settings, transport=httpx.MockTransport(respond)).complete("meeting", history, [], {})
     call = message["tool_calls"][0]
     assert call["id"].startswith("call_")

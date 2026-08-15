@@ -67,6 +67,79 @@ def test_quote_validation_rejects_fabricated_owner_date_and_cross_run_evidence(t
             pipeline.validate_extracted(Extracted(summary='原文', mentions=[value]))
 
 
+def test_reference_only_submission_rehydrates_frozen_text_and_keeps_field_validation(typed_store):
+    store, run = typed_store
+    pipeline = EvidencePipeline(store, run['id'])
+    page = pipeline.pages[0]
+    calls = []
+    class ReferencesOnly:
+        def complete(self, role, messages, tools, info):
+            submission = next(t['function']['parameters'] for t in tools if t['function']['name'] == 'submit_result')
+            assert 'quote' not in submission['$defs']['Mention']['properties']
+            assert 'quote' not in submission['$defs']['Observation']['properties']
+            calls.append(role)
+            value = {'summary': '原文提及报价', 'mentions': [{'task': '发送报价', 'ref': page[0]['id'],
+                     'kind': 'commitment', 'owner': '王宁', 'due_text': '明天'}],
+                     'observations': [{'ref': page[0]['id'], 'kind': 'fact'}]}
+            return {'role': 'assistant', 'tool_calls': [tool_call('submit_result', value)]}, {}
+    pipeline.provider = ReferencesOnly()
+    value = pipeline.agent('facts', Extracted, {'spans': page}, pipeline.validate_extracted)
+    assert calls == ['facts']
+    assert value.mentions[0].quote == page[0]['text'] == value.observations[0].quote
+    assert store.artifacts(run['id'])[0]['body']['mentions'][0]['quote'] == page[0]['text']
+
+
+def test_reference_protocol_frozen_and_legacy_quote_contract_retained(typed_store):
+    from meetflow.database import Run
+    store, run = typed_store
+    with store.sessions.begin() as session:
+        row = session.get(Run, run['id'])
+        row.manifest = {k:v for k,v in row.manifest.items() if k != 'evidence_reference_protocol'}
+    pipeline = EvidencePipeline(store, run['id'])
+    assert pipeline.reference_protocol == 'quoted_v1'
+    class Legacy(TypedAdapter):
+        def complete(self, role, messages, tools, info):
+            schema = next(t['function']['parameters'] for t in tools if t['function']['name'] == 'submit_result')
+            assert 'quote' in schema['$defs']['Mention']['required']
+            return super().complete(role, messages, tools, info)
+    pipeline.provider = Legacy()
+    value = pipeline.agent('facts', Extracted, {'spans': pipeline.pages[0]}, pipeline.validate_extracted)
+    assert value.mentions[0].owner == '王宁'
+
+
+def test_unsupported_literal_fields_are_visible_questions_never_actions(typed_store):
+    store, run = typed_store
+    class InvalidFields(TypedAdapter):
+        def complete(self, role, messages, tools, info):
+            assert role in {'facts', 'coverage'}  # No ungrounded action reaches downstream agents.
+            initial = json.loads(messages[1]['content'])
+            ref = initial['spans'][0]['id']
+            value = {'summary': '报价信息待确认', 'mentions': [{'ref': ref, 'task': '发送报价',
+                'kind': 'commitment', 'owner': '不存在的负责人', 'due_text': '明天'}]}
+            return {'role': 'assistant', 'tool_calls': [tool_call('submit_result', value)]}, {}
+    result = EvidencePipeline(store, run['id'], InvalidFields()).analyze()
+    assert not result['actions']
+    assert len(result['questions']) == 1
+    assert 'owner' in result['questions'][0]['text']
+    assert set(result['questions'][0]['evidence']) <= set(store.source_map(run['id']))
+
+
+def test_omitted_date_selection_keeps_original_date_visible_without_guessing(typed_store):
+    store, run = typed_store
+    class MissingDate(TypedAdapter):
+        def complete(self, role, messages, tools, info):
+            message, usage = super().complete(role, messages, tools, info)
+            if role == 'reconcile':
+                value = json.loads(message['tool_calls'][0]['function']['arguments'])
+                value['items'][0]['date_from'] = None
+                message['tool_calls'][0]['function']['arguments'] = json.dumps(value)
+            return message, usage
+    body = EvidencePipeline(store, run['id'], MissingDate()).analyze()
+    assert body['actions'][0]['due'] is None
+    assert any('明天' in q['text'] and q['affected_actions'] for q in body['questions'])
+    assert body['evidence_prompt_revision'] == 'state_v2'
+
+
 def test_group_rejects_cross_item_condition_missing_owner_and_suggestion_promotion():
     mentions = {'q': {'owner': '王宁', 'due_text': '明天', 'condition': None, 'kind': 'commitment'},
                 't': {'owner': None, 'due_text': None, 'condition': '法务通过后', 'kind': 'condition'}}

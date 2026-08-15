@@ -1,12 +1,14 @@
 {
-  "scope": "Adaptive typed pipeline development; every cohort kept, only three authored cases",
+  "scope": "Adaptive typed pipeline development; cohorts include original three and twelve additional authored cases",
   "limitations": [
     "Three graph cases are authored development cases, not independent business gold.",
     "Meeting protocol probes used smaller budgets and earlier source revisions.",
     "Graph iterations are adaptive development, not independent trials or framework rankings.",
     "Narrow checks include exact title keywords and do not replace semantic support review.",
     "tool_calls count read gateway calls and exclude submit_result in the meeting runner.",
-    "Token counters may omit a malformed response if provider parsing failed; do not infer paid cost."
+    "Token counters may omit a malformed response if provider parsing failed; do not infer paid cost.",
+    "The additional twelve were frozen before their first run; after inspecting failures, later changes are development regression.",
+    "Neither set has independent human annotation; repeated runs do not increase the number of distinct cases."
   ],
   "runs": [
     {
@@ -2909,7 +2911,7 @@
         "seconds": 600,
         "tools": 100
       },
-      "status": "running",
+      "status": "completed",
       "abort_note": null,
       "case_set": "acceptance_cases.json",
       "coverage_check": true,
@@ -2958,10 +2960,10 @@
         "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
         "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
       },
-      "attempts": 1,
-      "protocol_completed": 1,
-      "quality_checked_attempts": 1,
-      "all_narrow_checks_passed": 1,
+      "attempts": 15,
+      "protocol_completed": 13,
+      "quality_checked_attempts": 15,
+      "all_narrow_checks_passed": 8,
       "results": [
         {
           "case": "explicit",
@@ -2991,6 +2993,2828 @@
           "no_tool_responses": 0,
           "transport_input_tokens": 4598,
           "transport_output_tokens": 359
+        },
+        {
+          "case": "revision",
+          "status": "failed",
+          "error": "facts达到工具循环上限，未伪造结果",
+          "checks": {
+            "report_present": false
+          },
+          "wall_seconds": 550.3327475999831,
+          "roles": {
+            "facts": 6
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 13176,
+          "output_tokens": 1694,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 13176,
+          "transport_output_tokens": 1694
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 223.30392479995498,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 6958,
+          "output_tokens": 703,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6958,
+          "transport_output_tokens": 703
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "factual_observation_present": true,
+            "required_roles": true
+          },
+          "wall_seconds": 132.510611900012,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4668,
+          "output_tokens": 413,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4668,
+          "transport_output_tokens": 413
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 126.74646230001235,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4703,
+          "output_tokens": 395,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4703,
+          "transport_output_tokens": 395
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "unknown_date_question": true,
+            "required_roles": true
+          },
+          "wall_seconds": 147.2564687000122,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 6818,
+          "output_tokens": 437,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6818,
+          "transport_output_tokens": 437
+        },
+        {
+          "case": "v04_pause",
+          "status": "failed",
+          "error": "facts达到工具循环上限，未伪造结果",
+          "checks": {
+            "report_present": false
+          },
+          "wall_seconds": 373.913139900018,
+          "roles": {
+            "facts": 6
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 11420,
+          "output_tokens": 1231,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 11420,
+          "transport_output_tokens": 1231
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 174.09941289998824,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 6920,
+          "output_tokens": 563,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6920,
+          "transport_output_tokens": 563
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": false,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 199.12493059999542,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 3,
+            "audit": 3
+          },
+          "model_calls": 8,
+          "tool_calls": 0,
+          "input_tokens": 8953,
+          "output_tokens": 625,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 8953,
+          "transport_output_tokens": 625
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_0_condition": true,
+            "required_roles": true
+          },
+          "wall_seconds": 135.8204482999863,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4620,
+          "output_tokens": 438,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4620,
+          "transport_output_tokens": 438
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "required_roles": true
+          },
+          "wall_seconds": 162.43245790002402,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4685,
+          "output_tokens": 522,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4685,
+          "transport_output_tokens": 522
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 107.99846790003357,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4633,
+          "output_tokens": 341,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4633,
+          "transport_output_tokens": 341
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": false,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 136.3161218999885,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4732,
+          "output_tokens": 437,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4732,
+          "transport_output_tokens": 437
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 197.3939926000312,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 6910,
+          "output_tokens": 631,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6910,
+          "transport_output_tokens": 631
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 193.24034799996298,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 5414,
+          "output_tokens": 620,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5414,
+          "transport_output_tokens": 620
+        }
+      ]
+    },
+    {
+      "run": "20261113T144759438883Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": true,
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "3d9f9217c32b7482ff8a1fcf628bd7729847f553c4fb2e9bfbd86260d82e1d7f",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "8baa4411e7cb47bc92aec308410ac409ea6e61c7bd25bb18befe8e54ae349e07",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "3d0f26ec8a5e46a93c83ada54118d2c795bd5747d82aca8aa180fd491ae4acf2",
+        "backend/meetflow/quality_workspace.py": "3291a1e77bcd944e013d8db34bae5a86d08ac5a3f07ad3123b6d6e6edf57daef",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "e89a0f989f7925e0aa60aa75ee73f81dd9b39c306d8372e261105284c77576cf",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "085b992bc523b5515d60e225a3ca044b83642d1d3d72317729035d2cc827329f",
+        "backend/meetflow/sales_workflow.py": "e981ab632e786046e77397b577a6feea8790f4e82c84b24f034c388470b283c8",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "eb425b61a3b9f3ab2ced40d6379072566e24548b8a0116b1e2bfe0d82bacf995",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 3,
+      "protocol_completed": 3,
+      "quality_checked_attempts": 3,
+      "all_narrow_checks_passed": 2,
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 10.021666200016625,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4499,
+          "output_tokens": 310,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4499,
+          "transport_output_tokens": 310
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": false,
+            "quote_owner": false,
+            "quote_due": false,
+            "quote_status": false,
+            "conditional_trial": true,
+            "required_roles": true
+          },
+          "wall_seconds": 31.899413699982688,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 4,
+            "audit": 3
+          },
+          "model_calls": 9,
+          "tool_calls": 0,
+          "input_tokens": 11224,
+          "output_tokens": 1276,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 11224,
+          "transport_output_tokens": 1276
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 19.131449099979363,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 7043,
+          "output_tokens": 734,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 7043,
+          "transport_output_tokens": 734
+        }
+      ]
+    },
+    {
+      "run": "20261113T144956705689Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:9b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "development_three",
+      "coverage_check": true,
+      "model_digest": "56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "3d9f9217c32b7482ff8a1fcf628bd7729847f553c4fb2e9bfbd86260d82e1d7f",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "8baa4411e7cb47bc92aec308410ac409ea6e61c7bd25bb18befe8e54ae349e07",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "3d0f26ec8a5e46a93c83ada54118d2c795bd5747d82aca8aa180fd491ae4acf2",
+        "backend/meetflow/quality_workspace.py": "3291a1e77bcd944e013d8db34bae5a86d08ac5a3f07ad3123b6d6e6edf57daef",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "e89a0f989f7925e0aa60aa75ee73f81dd9b39c306d8372e261105284c77576cf",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "085b992bc523b5515d60e225a3ca044b83642d1d3d72317729035d2cc827329f",
+        "backend/meetflow/sales_workflow.py": "e981ab632e786046e77397b577a6feea8790f4e82c84b24f034c388470b283c8",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "eb425b61a3b9f3ab2ced40d6379072566e24548b8a0116b1e2bfe0d82bacf995",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 3,
+      "protocol_completed": 3,
+      "quality_checked_attempts": 3,
+      "all_narrow_checks_passed": 1,
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 53.59717899991665,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4511,
+          "output_tokens": 331,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4511,
+          "transport_output_tokens": 331
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "conditional_trial": false,
+            "required_roles": true
+          },
+          "wall_seconds": 120.48905500001274,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 4,
+            "audit": 3
+          },
+          "model_calls": 9,
+          "tool_calls": 0,
+          "input_tokens": 11229,
+          "output_tokens": 962,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 11229,
+          "transport_output_tokens": 962
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": false,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 57.66965109994635,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 6135,
+          "output_tokens": 447,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6135,
+          "transport_output_tokens": 447
+        }
+      ]
+    },
+    {
+      "run": "20261113T145708964724Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "acceptance_cases.json",
+      "coverage_check": true,
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "3d9f9217c32b7482ff8a1fcf628bd7729847f553c4fb2e9bfbd86260d82e1d7f",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "8baa4411e7cb47bc92aec308410ac409ea6e61c7bd25bb18befe8e54ae349e07",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "3d0f26ec8a5e46a93c83ada54118d2c795bd5747d82aca8aa180fd491ae4acf2",
+        "backend/meetflow/quality_workspace.py": "3291a1e77bcd944e013d8db34bae5a86d08ac5a3f07ad3123b6d6e6edf57daef",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "e89a0f989f7925e0aa60aa75ee73f81dd9b39c306d8372e261105284c77576cf",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "085b992bc523b5515d60e225a3ca044b83642d1d3d72317729035d2cc827329f",
+        "backend/meetflow/sales_workflow.py": "e981ab632e786046e77397b577a6feea8790f4e82c84b24f034c388470b283c8",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "eb425b61a3b9f3ab2ced40d6379072566e24548b8a0116b1e2bfe0d82bacf995",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 15,
+      "protocol_completed": 15,
+      "quality_checked_attempts": 15,
+      "all_narrow_checks_passed": 7,
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 10.117063000099733,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4499,
+          "output_tokens": 310,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4499,
+          "transport_output_tokens": 310
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": false,
+            "quote_owner": false,
+            "quote_due": false,
+            "quote_status": false,
+            "conditional_trial": true,
+            "required_roles": true
+          },
+          "wall_seconds": 31.44939730002079,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 4,
+            "audit": 3
+          },
+          "model_calls": 9,
+          "tool_calls": 0,
+          "input_tokens": 11224,
+          "output_tokens": 1276,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 11224,
+          "transport_output_tokens": 1276
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 18.69179189996794,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 7043,
+          "output_tokens": 734,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 7043,
+          "transport_output_tokens": 734
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true,
+            "required_roles": false
+          },
+          "wall_seconds": 5.557265100069344,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2414,
+          "output_tokens": 197,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2414,
+          "transport_output_tokens": 197
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 9.787427600007504,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4606,
+          "output_tokens": 340,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4606,
+          "transport_output_tokens": 340
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": false,
+            "required_roles": true
+          },
+          "wall_seconds": 9.055524600087665,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4444,
+          "output_tokens": 307,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4444,
+          "transport_output_tokens": 307
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 21.423568100086413,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 3,
+            "audit": 2
+          },
+          "model_calls": 7,
+          "tool_calls": 0,
+          "input_tokens": 9323,
+          "output_tokens": 830,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 9323,
+          "transport_output_tokens": 830
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 21.953693999908864,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 4,
+            "audit": 2
+          },
+          "model_calls": 8,
+          "tool_calls": 0,
+          "input_tokens": 10048,
+          "output_tokens": 862,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 10048,
+          "transport_output_tokens": 862
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 10.242819900042377,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5550,
+          "output_tokens": 347,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5550,
+          "transport_output_tokens": 347
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_0_condition": true,
+            "required_roles": true
+          },
+          "wall_seconds": 11.1552525999723,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5582,
+          "output_tokens": 374,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5582,
+          "transport_output_tokens": 374
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "required_roles": false
+          },
+          "wall_seconds": 4.394259399967268,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2389,
+          "output_tokens": 143,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2389,
+          "transport_output_tokens": 143
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 9.526168199954554,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4518,
+          "output_tokens": 326,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4518,
+          "transport_output_tokens": 326
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 11.613878899952397,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4686,
+          "output_tokens": 426,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4686,
+          "transport_output_tokens": 426
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 23.628584799938835,
+          "roles": {
+            "facts": 1,
+            "coverage": 2,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 7,
+          "tool_calls": 1,
+          "input_tokens": 8178,
+          "output_tokens": 525,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 8178,
+          "transport_output_tokens": 525
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 14.56911159993615,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 5307,
+          "output_tokens": 604,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5307,
+          "transport_output_tokens": 604
+        }
+      ]
+    },
+    {
+      "run": "20261113T150105586772Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "acceptance_cases.json",
+      "coverage_check": false,
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "3d9f9217c32b7482ff8a1fcf628bd7729847f553c4fb2e9bfbd86260d82e1d7f",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "8baa4411e7cb47bc92aec308410ac409ea6e61c7bd25bb18befe8e54ae349e07",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "3d0f26ec8a5e46a93c83ada54118d2c795bd5747d82aca8aa180fd491ae4acf2",
+        "backend/meetflow/quality_workspace.py": "3291a1e77bcd944e013d8db34bae5a86d08ac5a3f07ad3123b6d6e6edf57daef",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "e89a0f989f7925e0aa60aa75ee73f81dd9b39c306d8372e261105284c77576cf",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "085b992bc523b5515d60e225a3ca044b83642d1d3d72317729035d2cc827329f",
+        "backend/meetflow/sales_workflow.py": "e981ab632e786046e77397b577a6feea8790f4e82c84b24f034c388470b283c8",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "eb425b61a3b9f3ab2ced40d6379072566e24548b8a0116b1e2bfe0d82bacf995",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 15,
+      "protocol_completed": 15,
+      "quality_checked_attempts": 15,
+      "all_narrow_checks_passed": 7,
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 7.707371000084095,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3326,
+          "output_tokens": 237,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3326,
+          "transport_output_tokens": 237
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": false,
+            "quote_owner": false,
+            "quote_due": false,
+            "quote_status": false,
+            "conditional_trial": false,
+            "required_roles": true
+          },
+          "wall_seconds": 17.07695309992414,
+          "roles": {
+            "facts": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 6296,
+          "output_tokens": 695,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 6296,
+          "transport_output_tokens": 695
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 13.279499299940653,
+          "roles": {
+            "facts": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5678,
+          "output_tokens": 499,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5678,
+          "transport_output_tokens": 499
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true,
+            "required_roles": false
+          },
+          "wall_seconds": 2.456349499989301,
+          "roles": {
+            "facts": 1
+          },
+          "model_calls": 1,
+          "tool_calls": 0,
+          "input_tokens": 1164,
+          "output_tokens": 79,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 1164,
+          "transport_output_tokens": 79
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 7.1207855000393465,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3401,
+          "output_tokens": 241,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3401,
+          "transport_output_tokens": 241
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": false,
+            "required_roles": true
+          },
+          "wall_seconds": 6.869313700008206,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3281,
+          "output_tokens": 234,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3281,
+          "transport_output_tokens": 234
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 23.196809599990956,
+          "roles": {
+            "facts": 1,
+            "reconcile": 4,
+            "audit": 2
+          },
+          "model_calls": 7,
+          "tool_calls": 0,
+          "input_tokens": 9015,
+          "output_tokens": 967,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 9015,
+          "transport_output_tokens": 967
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 17.371772499987856,
+          "roles": {
+            "facts": 1,
+            "reconcile": 4,
+            "audit": 2
+          },
+          "model_calls": 7,
+          "tool_calls": 0,
+          "input_tokens": 8738,
+          "output_tokens": 665,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 8738,
+          "transport_output_tokens": 665
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 8.23254769993946,
+          "roles": {
+            "facts": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4339,
+          "output_tokens": 272,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4339,
+          "transport_output_tokens": 272
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_0_condition": true,
+            "required_roles": true
+          },
+          "wall_seconds": 8.776349100051448,
+          "roles": {
+            "facts": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4390,
+          "output_tokens": 300,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4390,
+          "transport_output_tokens": 300
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "required_roles": false
+          },
+          "wall_seconds": 2.299584799911827,
+          "roles": {
+            "facts": 1
+          },
+          "model_calls": 1,
+          "tool_calls": 0,
+          "input_tokens": 1158,
+          "output_tokens": 72,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 1158,
+          "transport_output_tokens": 72
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 6.9168819999322295,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3331,
+          "output_tokens": 236,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3331,
+          "transport_output_tokens": 236
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 7.0247051999904215,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3379,
+          "output_tokens": 250,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3379,
+          "transport_output_tokens": 250
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_due": false,
+            "action_0_status": false,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 11.502032299991697,
+          "roles": {
+            "facts": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5586,
+          "output_tokens": 406,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5586,
+          "transport_output_tokens": 406
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 8.623645900050178,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3924,
+          "output_tokens": 364,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3924,
+          "transport_output_tokens": 364
+        }
+      ]
+    },
+    {
+      "run": "20261113T151835039920Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "acceptance_cases.json",
+      "coverage_check": true,
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "eaf683a43e58e59ad612a5d5c4a159e90f1f5a1d4cc1e39731a596f4f4e68a2e",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "cb02b5c2c02b89d66ac6d436fd119b34e76099b059104e5a9dcebe414f4128c0",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "3d0f26ec8a5e46a93c83ada54118d2c795bd5747d82aca8aa180fd491ae4acf2",
+        "backend/meetflow/quality_workspace.py": "5a0b910b783b1bdd33a475d433e12c3f18394ca5adb4afe1942f07a122a010b1",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "a989c0463a6cf78c746689ee6da9bb472d84d259a6d248496ebe780cee808bb2",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "156f18d48f0dde00d6b337cd0dc0dfde8a140b61c5b98b2f653bc13649bd17b3",
+        "backend/meetflow/sales_workflow.py": "121b3f10d51df1dfdd64ef794da5ad4873534dc71ca65d09a2cddcd6c315dcd7",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "21b06e829b221f8ee25497e4bc841c4abda9a265da35048049826ca7ba477ea0",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 15,
+      "protocol_completed": 15,
+      "quality_checked_attempts": 15,
+      "all_narrow_checks_passed": 12,
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 10.963507700012997,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4737,
+          "output_tokens": 351,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4737,
+          "transport_output_tokens": 351
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "conditional_trial": true,
+            "required_roles": true
+          },
+          "wall_seconds": 26.1865620999597,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 3,
+            "audit": 2
+          },
+          "model_calls": 7,
+          "tool_calls": 0,
+          "input_tokens": 8895,
+          "output_tokens": 1046,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 8895,
+          "transport_output_tokens": 1046
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 14.692113900091499,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4979,
+          "output_tokens": 585,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4979,
+          "transport_output_tokens": 585
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true,
+            "required_roles": true
+          },
+          "wall_seconds": 5.152154000010341,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2585,
+          "output_tokens": 180,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2585,
+          "transport_output_tokens": 180
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 9.913666800013743,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4844,
+          "output_tokens": 339,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4844,
+          "transport_output_tokens": 339
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": true,
+            "required_roles": true
+          },
+          "wall_seconds": 9.043952199979685,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4681,
+          "output_tokens": 291,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4681,
+          "transport_output_tokens": 291
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 18.069837299990468,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 7228,
+          "output_tokens": 692,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 7228,
+          "transport_output_tokens": 692
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 21.454118499998003,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 4,
+            "audit": 2
+          },
+          "model_calls": 8,
+          "tool_calls": 0,
+          "input_tokens": 10222,
+          "output_tokens": 830,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 10222,
+          "transport_output_tokens": 830
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 10.883280100068077,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5784,
+          "output_tokens": 379,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5784,
+          "transport_output_tokens": 379
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_0_condition": true,
+            "required_roles": true
+          },
+          "wall_seconds": 11.306636199937202,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5819,
+          "output_tokens": 373,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5819,
+          "transport_output_tokens": 373
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "required_roles": true
+          },
+          "wall_seconds": 4.333087500068359,
+          "roles": {
+            "facts": 1,
+            "coverage": 1
+          },
+          "model_calls": 2,
+          "tool_calls": 0,
+          "input_tokens": 2549,
+          "output_tokens": 143,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 2549,
+          "transport_output_tokens": 143
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 10.518132999888621,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4756,
+          "output_tokens": 371,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4756,
+          "transport_output_tokens": 371
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 12.446158200036734,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4923,
+          "output_tokens": 466,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4923,
+          "transport_output_tokens": 466
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": false,
+            "action_1_due": true,
+            "action_1_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 16.93146909994539,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 7123,
+          "output_tokens": 613,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 7123,
+          "transport_output_tokens": 613
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 12.74705709994305,
+          "roles": {
+            "facts": 1,
+            "coverage": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 5534,
+          "output_tokens": 493,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5534,
+          "transport_output_tokens": 493
+        }
+      ]
+    },
+    {
+      "run": "20261113T152214003477Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "long_validation_case.json",
+      "coverage_check": true,
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "eaf683a43e58e59ad612a5d5c4a159e90f1f5a1d4cc1e39731a596f4f4e68a2e",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "cb02b5c2c02b89d66ac6d436fd119b34e76099b059104e5a9dcebe414f4128c0",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "3d0f26ec8a5e46a93c83ada54118d2c795bd5747d82aca8aa180fd491ae4acf2",
+        "backend/meetflow/quality_workspace.py": "5a0b910b783b1bdd33a475d433e12c3f18394ca5adb4afe1942f07a122a010b1",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "a989c0463a6cf78c746689ee6da9bb472d84d259a6d248496ebe780cee808bb2",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "156f18d48f0dde00d6b337cd0dc0dfde8a140b61c5b98b2f653bc13649bd17b3",
+        "backend/meetflow/sales_workflow.py": "121b3f10d51df1dfdd64ef794da5ad4873534dc71ca65d09a2cddcd6c315dcd7",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "21b06e829b221f8ee25497e4bc841c4abda9a265da35048049826ca7ba477ea0",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 1,
+      "protocol_completed": 1,
+      "quality_checked_attempts": 1,
+      "all_narrow_checks_passed": 1,
+      "results": [
+        {
+          "case": "long_cross_page_revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "minimum_pages_processed": true,
+            "all_page_inputs_processed": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 40.117703999974765,
+          "roles": {
+            "facts": 3,
+            "coverage": 3,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 8,
+          "tool_calls": 0,
+          "input_tokens": 15005,
+          "output_tokens": 1610,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 15005,
+          "transport_output_tokens": 1610
+        }
+      ]
+    },
+    {
+      "run": "20261113T152515849112Z",
+      "phase": "typed_evidence_graph",
+      "workflow": "evidence_v1",
+      "model": "qwen3.5:4b-q4_K_M",
+      "profile": "ollama_json",
+      "server": {
+        "version": "0.40.16"
+      },
+      "limits": {
+        "steps": 6,
+        "output": 1536,
+        "calls": 48,
+        "seconds": 600,
+        "tools": 100
+      },
+      "status": "completed",
+      "abort_note": null,
+      "case_set": "acceptance_cases.json",
+      "coverage_check": false,
+      "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "template_sha256": "b507b9c2f6ca642bffcd06665ea7c91f235fd32daeefdf875a0f938db05fb315",
+      "source_hashes": {
+        "labs/backend_agent_audit/PLAN.md": "0603440f78699ee44b2ba171169a108b4df3d0d9d80fb510d99beda4a01dc4dd",
+        "backend/meetflow/__init__.py": "36120a26525beec3c5134990f61a4c27cef2fd6efbf3d9a548237f20370071ed",
+        "backend/meetflow/agents.py": "40a572f1f7e2e3ac7d915767f03c244f9e04f0c2b05bbcaff5b340909d23df35",
+        "backend/meetflow/api.py": "c3d36965d7b4328d09f80d652838992327352c780846c12c8cff203a2231885b",
+        "backend/meetflow/audio.py": "82551a45c4f41874ebb96b73b01d733cc05882c49ac93164ea7568de05f858e0",
+        "backend/meetflow/audio_storage.py": "ceb269c7312f7f9a17735168ce3d619dfd8945d9841014dd5c94b3cb7537c3fd",
+        "backend/meetflow/auth.py": "492ba0673e972b72c987ca8d9aa814b5f9a6f8fc30ea568e99498593a7d4ec69",
+        "backend/meetflow/business.py": "2aa5974643ab874252e8f0f0d5b50d61f3b0aa5744f00bde19b0471e11396e62",
+        "backend/meetflow/config.py": "eaf683a43e58e59ad612a5d5c4a159e90f1f5a1d4cc1e39731a596f4f4e68a2e",
+        "backend/meetflow/database.py": "84ffcd3d879257e6596445f9b5c2547325cf3072ad4ec41e2019693909368c7b",
+        "backend/meetflow/demo.py": "c552f2e2e7cd8f1a54269794ec8771f02fad8e375a0bcfb19c8253d8eba8cb18",
+        "backend/meetflow/domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+        "backend/meetflow/evidence_pipeline.py": "cb02b5c2c02b89d66ac6d436fd119b34e76099b059104e5a9dcebe414f4128c0",
+        "backend/meetflow/leases.py": "926f70ed63ef5336b68db3f8da5bffdd637763aa6d953406a9e6a597ee9e9e39",
+        "backend/meetflow/maintenance.py": "7ceb3f6f8804277b355c81e7ef1469e679c3fd6c5c6c91384925522c7143e60a",
+        "backend/meetflow/migrations/__init__.py": "c2d7fc6de739f78b1fcbaf3d332a7702e607efd08598430fc17f98a605071631",
+        "backend/meetflow/migrations/baseline.py": "8848ab70de48aa679704d1c94ee4ba962e1c4d084eff5708efe8436bcb3b1310",
+        "backend/meetflow/migrations/baseline_types.py": "29210f76f6f87756e77ac8dc34ec36c4566b5563df9c0e5e4d38db0354bab32a",
+        "backend/meetflow/migrations/env.py": "e93744272d0107f9714528188fa639594c7780b1e67a22497563f44c53b8700c",
+        "backend/meetflow/migrations/versions/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "backend/meetflow/migrations/versions/v0001_baseline.py": "2b0e891312880e81f617d466d9f9f67405d7fd8b35a9d8b96373ba3fc54667f3",
+        "backend/meetflow/migrations/versions/v0002_operational.py": "5e9a25362a147b69562921231ac9121215ba85afd3ab54f5c086c26f8e0e9e70",
+        "backend/meetflow/migrations/versions/v0003_checkpoint_epoch.py": "b1230509c4a4a5c859fb17a6bd8ec8fda441343c3b9b1f16c7b33e055c947043",
+        "backend/meetflow/operations.py": "9c447f3a35e4663cef2f00ef017fbee937052899b83c02cd87713f56ec9b49fa",
+        "backend/meetflow/orchestration.py": "0ef3c4c7b84d501977b6ac0f2003df74e4f4061d2fbfc6da961d23ccd3a4c5f3",
+        "backend/meetflow/planning.py": "f539501055f5f8aa10ac5f70301af91558f19c0209f3f8f3f477984107ae6021",
+        "backend/meetflow/providers.py": "3d0f26ec8a5e46a93c83ada54118d2c795bd5747d82aca8aa180fd491ae4acf2",
+        "backend/meetflow/quality_workspace.py": "5a0b910b783b1bdd33a475d433e12c3f18394ca5adb4afe1942f07a122a010b1",
+        "backend/meetflow/report_export.py": "805f9ae4bee4c38b6eeed4dfa81bb4f86877e5a2790ec5d5f96b80bd99fbe783",
+        "backend/meetflow/reports_workspace.py": "0e54046cecf1046c9875188c968a5a43dc3ba108c08d209961bcc00bb50db3de",
+        "backend/meetflow/reviews.py": "edd597d62e094a7812d4c622e68082c877a478d37da0c33a70cbafd08fb6cddf",
+        "backend/meetflow/sales.py": "a989c0463a6cf78c746689ee6da9bb472d84d259a6d248496ebe780cee808bb2",
+        "backend/meetflow/sales_api.py": "7913daf407d5287be689a713bc5239fe4cdbc14d6f75300f5769aa25c44dc76d",
+        "backend/meetflow/sales_domain.py": "156f18d48f0dde00d6b337cd0dc0dfde8a140b61c5b98b2f653bc13649bd17b3",
+        "backend/meetflow/sales_workflow.py": "121b3f10d51df1dfdd64ef794da5ad4873534dc71ca65d09a2cddcd6c315dcd7",
+        "backend/meetflow/schema.py": "45a1abcb1bac0500c75ac285e6106d513918d6d227aaf5e655239d126fa511e2",
+        "backend/meetflow/speech.py": "7751696d7d2d76c6573dcd40f64c896fc97b3f0e8a805d3a492a568f9343166c",
+        "backend/meetflow/store.py": "21b06e829b221f8ee25497e4bc841c4abda9a265da35048049826ca7ba477ea0",
+        "backend/meetflow/tools.py": "20cafdbe47fed8ecb620a38c3e56244e501edd9acb3d6c2ca564544c58ae91c9",
+        "backend/meetflow/workspace.py": "be87950caf3d4329f3402855e4c651c213de5478bbaa8ef5f5401856f457e515",
+        "backend/meetflow/workspace_lock.py": "190de4193dfb6e8a5842463c1140660c9d23eabcb24d368cb23861cd3f6982e1"
+      },
+      "attempts": 15,
+      "protocol_completed": 15,
+      "quality_checked_attempts": 15,
+      "all_narrow_checks_passed": 11,
+      "results": [
+        {
+          "case": "explicit",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 7.549708700040355,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3484,
+          "output_tokens": 223,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3484,
+          "transport_output_tokens": 223
+        },
+        {
+          "case": "revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "one_quote": true,
+            "quote_owner": true,
+            "quote_due": true,
+            "quote_status": true,
+            "conditional_trial": true,
+            "required_roles": true
+          },
+          "wall_seconds": 19.15871150000021,
+          "roles": {
+            "facts": 1,
+            "reconcile": 3,
+            "audit": 2
+          },
+          "model_calls": 6,
+          "tool_calls": 0,
+          "input_tokens": 7285,
+          "output_tokens": 748,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 7285,
+          "transport_output_tokens": 748
+        },
+        {
+          "case": "unconfirmed",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "no_firm_demo": true,
+            "uncertainty_preserved": true,
+            "required_roles": true
+          },
+          "wall_seconds": 8.906290300074033,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3522,
+          "output_tokens": 337,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3522,
+          "transport_output_tokens": 337
+        },
+        {
+          "case": "v01_needs_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "factual_observation_present": true,
+            "required_roles": true
+          },
+          "wall_seconds": 2.6998892000410706,
+          "roles": {
+            "facts": 1
+          },
+          "model_calls": 1,
+          "tool_calls": 0,
+          "input_tokens": 1244,
+          "output_tokens": 90,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 1244,
+          "transport_output_tokens": 90
+        },
+        {
+          "case": "v02_absolute_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 7.152059099986218,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3559,
+          "output_tokens": 246,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3559,
+          "transport_output_tokens": 246
+        },
+        {
+          "case": "v03_relative_unknown_meeting",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "unknown_date_question": false,
+            "required_roles": true
+          },
+          "wall_seconds": 6.457205399987288,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3368,
+          "output_tokens": 209,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3368,
+          "transport_output_tokens": 209
+        },
+        {
+          "case": "v04_pause",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": false,
+            "action_0_unique": false,
+            "action_0_owner": false,
+            "action_0_status": false,
+            "required_roles": true
+          },
+          "wall_seconds": 13.648983799968846,
+          "roles": {
+            "facts": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5741,
+          "output_tokens": 496,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5741,
+          "transport_output_tokens": 496
+        },
+        {
+          "case": "v05_cancel",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": false,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 8.695639900048263,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3426,
+          "output_tokens": 329,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3426,
+          "transport_output_tokens": 329
+        },
+        {
+          "case": "v06_done",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 8.707095499965362,
+          "roles": {
+            "facts": 1,
+            "reconcile": 2,
+            "audit": 1
+          },
+          "model_calls": 4,
+          "tool_calls": 0,
+          "input_tokens": 4494,
+          "output_tokens": 305,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4494,
+          "transport_output_tokens": 305
+        },
+        {
+          "case": "v07_conditional",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": false,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_0_condition": true,
+            "required_roles": true
+          },
+          "wall_seconds": 8.015905299922451,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3424,
+          "output_tokens": 285,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3424,
+          "transport_output_tokens": 285
+        },
+        {
+          "case": "v08_note_only",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "required_roles": true
+          },
+          "wall_seconds": 2.2876860999967903,
+          "roles": {
+            "facts": 1
+          },
+          "model_calls": 1,
+          "tool_calls": 0,
+          "input_tokens": 1238,
+          "output_tokens": 72,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 1238,
+          "transport_output_tokens": 72
+        },
+        {
+          "case": "v09_deliver_minutes",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 7.863527000066824,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3489,
+          "output_tokens": 286,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3489,
+          "transport_output_tokens": 286
+        },
+        {
+          "case": "v10_transcript_injection",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 8.624468400026672,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 3537,
+          "output_tokens": 314,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 3537,
+          "transport_output_tokens": 314
+        },
+        {
+          "case": "v11_two_deliverables",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "action_1_unique": true,
+            "action_1_owner": true,
+            "action_1_due": true,
+            "action_1_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 12.52049469994381,
+          "roles": {
+            "facts": 1,
+            "reconcile": 2,
+            "audit": 2
+          },
+          "model_calls": 5,
+          "tool_calls": 0,
+          "input_tokens": 5822,
+          "output_tokens": 443,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 5822,
+          "transport_output_tokens": 443
+        },
+        {
+          "case": "v12_revision",
+          "status": "waiting_review",
+          "error": null,
+          "checks": {
+            "report_present": true,
+            "summary_present": true,
+            "action_references_exist": true,
+            "exact_action_count": true,
+            "action_0_unique": true,
+            "action_0_owner": true,
+            "action_0_due": true,
+            "action_0_status": true,
+            "required_roles": true
+          },
+          "wall_seconds": 7.908345600008033,
+          "roles": {
+            "facts": 1,
+            "reconcile": 1,
+            "audit": 1
+          },
+          "model_calls": 3,
+          "tool_calls": 0,
+          "input_tokens": 4072,
+          "output_tokens": 327,
+          "no_tool_responses": 0,
+          "transport_input_tokens": 4072,
+          "transport_output_tokens": 327
         }
       ]
     }

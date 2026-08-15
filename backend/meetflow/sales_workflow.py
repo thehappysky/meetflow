@@ -21,6 +21,7 @@ from .sales_domain import (
     DIMENSIONS,
     ROLE_LABELS,
     AuditResult,
+    ComparisonAudit,
     ExpertResult,
     SalesSpan,
     score,
@@ -74,6 +75,37 @@ def validate_sales_result(value, role, snapshot):
     for item in result["insights"]:
         if not any(spans[ref]["speaker"] == "customer" for ref in item["evidence"]):
             raise DomainError("客户信号必须引用已确认客户身份的发言")
+    return result
+
+
+def compare_sales_decisions(value, snapshot, upstream):
+    checked = ComparisonAudit.model_validate(value)
+    latest = {}
+    for key, result in sorted(upstream.items()):
+        if key.split(':', 1)[-1] in DIMENSIONS:
+            latest[key.split(':', 1)[-1]] = result
+    decisions = {item['rule_id']: item for result in latest.values() for item in result['decisions']}
+    if set(decisions) != {r['id'] for r in snapshot['playbook']['body']['rules']}:
+        raise DomainError('上游规则判断尚未完整，不能提交审查')
+    if len(checked.checks) != len(decisions) or {c.rule_id for c in checked.checks} != set(decisions):
+        raise DomainError('审查必须逐条覆盖全部上游判断，不能重复或遗漏规则')
+    challenges = []
+    comparisons = []
+    for item in checked.checks:
+        original = decisions[item.rule_id]['status']
+        agrees = item.suggested_status == original
+        comparisons.append({**item.model_dump(), 'upstream_status': original,
+                            'verdict': 'supported' if agrees else 'disagreed'})
+        if not agrees:
+            if not item.evidence:
+                raise DomainError('质疑须引用具体原文依据，不能只给泛泛意见')
+            challenges.append({'rule_id': item.rule_id, 'reason': item.reason, 'evidence': item.evidence})
+    result = validate_sales_result({'challenges': challenges}, 'auditor', snapshot)
+    result['checks'] = comparisons
+    # Supported checks also require evidence to stay inside the frozen source.
+    refs = {s['id'] for s in snapshot['conversation']['body']['spans']}
+    if any(not set(item.evidence) <= refs for item in checked.checks):
+        raise DomainError('审查依据不属于本次冻结会话')
     return result
 
 
@@ -154,8 +186,9 @@ class SalesDriver:
         service = self.service
         row = service.get(analysis_id)
         snapshot = row["snapshot"]
+        comparison = role == 'auditor' and row['mode'] == 'live' and snapshot.get('audit_protocol') == 'comparison_v2'
         provider = self.provider or (SalesDemoProvider() if row["mode"] == "demo" else LiveProvider(service.settings))
-        schema = AuditResult if role == "auditor" else ExpertResult
+        schema = ComparisonAudit if comparison else AuditResult if role == "auditor" else ExpertResult
         definitions = [{"type": "function", "function": {"name": name, "description": description,
                        "parameters": {"type": "object", "properties": {}, "additionalProperties": False}}}
                        for name, description in [("read_context", "读取本次冻结会话、适用规则与产品资料"),
@@ -168,8 +201,10 @@ class SalesDriver:
         submission = definitions[-1]['function']['parameters']
         if role != 'discovery' and role != 'auditor':
             submission['properties'].pop('insights')
-        item_model = 'Challenge' if role == 'auditor' else 'Decision'
+        item_model = ('DecisionCheck' if comparison else 'Challenge') if role == 'auditor' else 'Decision'
         submission['$defs'][item_model]['properties']['rule_id']['enum'] = [rule['id'] for rule in rules]
+        if comparison:
+            submission['properties']['checks'].update(minItems=len(rules), maxItems=len(rules))
         if role != 'auditor':
             submission['required'] = ['decisions']
             submission['properties']['decisions'].update(minItems=len(rules), maxItems=len(rules))
@@ -189,7 +224,10 @@ class SalesDriver:
         def reason(state):
             self.check(analysis_id)
             if state.get("steps", 0) >= min(service.settings.max_agent_steps, 6):
-                raise DomainError("专家达到有限迭代上限，未生成伪报告", 409)
+                last_error = next((json.loads(m['content']).get('error') for m in reversed(state['messages'])
+                                   if m.get('role') == 'tool' and 'error' in json.loads(m['content'])), None)
+                raise DomainError(f'{ROLE_LABELS[role]}达到有限迭代上限，未生成伪报告'
+                                  + (f'；最后校验反馈：{last_error}' if last_error else ''), 409)
             service.reserve(analysis_id, "model")
             message, usage = provider.complete(role, state["messages"], definitions, {})
             service.usage(analysis_id, usage)
@@ -217,7 +255,8 @@ class SalesDriver:
                         if (role == "auditor" or upstream) and not any(
                                 message.get("name") == "read_upstream" for message in state["messages"]):
                             raise DomainError("审查或返工前必须读取上游结果及反馈")
-                        final = validate_sales_result(arguments, role, snapshot)
+                        final = (compare_sales_decisions(arguments, snapshot, upstream) if comparison else
+                                 validate_sales_result(arguments, role, snapshot))
                         response = {"accepted": True}
                     elif name in {"read_context", "read_upstream"} and not arguments:
                         response = context if name == "read_context" else upstream
@@ -227,6 +266,7 @@ class SalesDriver:
                     if isinstance(exc, DomainError) and exc.status == 409:
                         raise
                     response = {"error": str(exc)[:1200], "instruction": "修正后重新提交"}
+                    service.event(analysis_id, f'{ROLE_LABELS[role]}提交未通过：{response["error"][:800]}')
                 replies.append({"role": "tool", "tool_call_id": call["id"], "name": name,
                                 "content": json.dumps(response, ensure_ascii=False)})
             return {"messages": replies, **({"result": final} if final is not None else {})}
@@ -238,7 +278,11 @@ class SalesDriver:
         graph.add_conditional_edges("reason", lambda s: "tools" if s["messages"][-1].get("tool_calls") else "reason")
         graph.add_conditional_edges("tools", lambda s: END if "result" in s else "reason")
         result = graph.compile().invoke({"messages": [
-            {"role": "system", "content": PROMPTS[role] + COMMON},
+            {"role": "system", "content": PROMPTS[role] + COMMON + (
+                ' 本轮审查对象是专家判断是否正确，禁止重新评价销售后把相同问题当挑战。'
+                '逐规则checks独立给suggested_status；同意原判断就填相同状态，不同意就填修正后的状态。'
+                '如专家已判unmet且证据确实证明违规，应认可unmet，不是再次挑战该销售违规。'
+                '代码读取真实上游状态并比较，只将不同状态作为争议；不要生成上游状态或verdict。说明判断依据。' if comparison else '')},
             {"role": "user", "content": "评价本次会话。" + ("已有审查反馈，请先读上游。" if upstream else "")}],
             "steps": 0}, {"recursion_limit": 30})
         return result["result"]

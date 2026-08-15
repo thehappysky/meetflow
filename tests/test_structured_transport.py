@@ -22,7 +22,7 @@ def test_structured_tool_decision_preserves_history_schema_and_budget():
         assert request.extensions['timeout']['read'] == 0.125
         assert 'tools' not in body
         assert body['think'] is False and body['stream'] is False
-        assert body['options'] == {'num_predict': 512, 'num_ctx': 8192}
+        assert body['options'] == {'num_predict': 512, 'num_ctx': 8192, 'temperature': 0, 'seed': 2026}
         assert body['format']['oneOf'][0]['properties']['name'] == {'const': 'submit_result'}
         assert 'Claim' in body['format']['$defs']
         assert '$defs' not in body['format']['oneOf'][0]['properties']['arguments']

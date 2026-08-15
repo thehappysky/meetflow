@@ -138,6 +138,17 @@ class AuditResult(Contract):
     challenges: list[Challenge] = Field(default_factory=list, max_length=15)
 
 
+class DecisionCheck(Contract):
+    rule_id: str
+    suggested_status: Judgment
+    reason: str = Field(min_length=1, max_length=1500)
+    evidence: list[str] = Field(default_factory=list, max_length=10)
+
+
+class ComparisonAudit(Contract):
+    checks: list[DecisionCheck] = Field(min_length=1, max_length=15)
+
+
 class ReviewDecision(Contract):
     rule_id: str
     status: Judgment

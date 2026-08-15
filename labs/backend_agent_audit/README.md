@@ -4,6 +4,17 @@
 
 用户已固定最终采用多Agent，单Agent仅实验参照。内部设计、门控和对应结果见[三种多Agent对照](../../docs/27-multi-agent-design-comparison.md)，不据不利开发结果擅自取消多Agent产品。
 
+最新后端真实运行见[docs/35](../../docs/35-backend-runtime-acceptance.md)及[运行汇总](results/runtime_summary.json)：50项音频/重启和30项主服务纪要/质检通过；[state_v2四/三角色](results/coverage_ablation.json)15例12/11通过，69/49调用，原[base_v1](results/coverage_ablation_base_v1.json)单独保留；[管理质检](results/quality_summary.json)F5三类开发检查通过。失败不删，不将这些开发场景写成独立准确率。
+
+```powershell
+.venv\Scripts\python.exe labs/backend_agent_audit/summarize_live.py
+.venv\Scripts\python.exe labs/backend_agent_audit/summarize_quality.py
+# 两个原始目录必须同模型、同案例、同产品代码；只切覆盖核查开关：
+.venv\Scripts\python.exe labs/backend_agent_audit/summarize_coverage.py --with-coverage test-results/backend-agent-audit/live-workflow/20261113T151835039920Z --without-coverage test-results/backend-agent-audit/live-workflow/20261113T152515849112Z
+```
+
+此汇总保留原始角色适用误报，另计算有事项才要求归并/审查的适用检查，不修改负责人/日期/状态/条件等预期。R4两轮最初源码包未包含该适用性辅助脚本，已执行后另附annotation，后续已补入，不能把补记当作预先冻结证明。主服务/实验采样曾不一致并实际失败，P1已对齐，本轮所有失败仍在运行汇总中。
+
 职责本身另做R1，见[划分依据与对照](../../docs/28-agent-role-partition-evidence.md)：三种职责重点在同串行图下各24条，关键槽位均16/24，含证据条件均10/24，没有职责赢家。拓扑比较不等于职责比较，固定模型调用微基准不等于完整自主工具Agent验证。
 
 内部另做I1（20例×4协议单次）与实际meeting工具循环探针，见[内部构造与结果](../../docs/29-agent-internals-and-ablation.md)。枚举减少一次非法ID失败，去重只证明实验封装省token；实际角色Schema首请求1449→877 token，但两种Schema均6步超限。I1候选当批未改产品；后续L2将角色字段裁剪纳入产品，见[真实工具链修复](../../docs/31-live-workflow-repair.md)及独立live_workflow_summary.json，不用静态体积或小基准冒充全角色质量。
