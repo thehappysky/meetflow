@@ -16,6 +16,8 @@
 
 ## 尚未完成或未验证
 
+已完成的验证：21 项后端行为测试、六项独立框架实验、前端类型与生产构建、Windows 新环境一键启动、Edge 桌面/手机布局流程；代码 `8cf94c8` 的 Linux/Python 3.12/Chromium [远端 CI](https://github.com/thehappysky/meetflow/actions/runs/40017347655)全部通过。它们不证明真实模型和音频的语义质量。
+
 - 真实模型端到端效果与费用、真实录音质量、说话人分离/姓名映射界面、Word/PDF 导出。
 - PostgreSQL checkpointer、Redis/Celery、多实例租约/fencing、集群故障接管；本版为单 driver 本地运行。
 - 外部任务平台投递/未知结果对账；当前正式执行对象仅本地任务。

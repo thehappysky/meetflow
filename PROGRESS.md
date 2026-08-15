@@ -37,11 +37,13 @@ v0.1 本地版本已可运行。文字/示例→协作→证据→审核→本�
 - P4：完成 Vue 页面、文字文件导入、可配置录音入口、SSE、证据侧栏、集中澄清、任务编辑/批量确认、看板和资料页；前端类型与生产构建通过。
 - 验证补充：21 项后端行为测试通过；包含反证定向返工、模拟模型传输、音频拒绝/适配器时间戳、事件重连和审核等待不计处理时限。另六项独立框架实验通过。
 - 浏览器：使用 Edge 无头模式实际走通示例、证据、澄清、审批、下载、任务状态与手机布局，未出现页面脚本错误。截图在忽略的 test-results/browser。
-- 工程：增加一键启动、锁定依赖、配置示例、实现范围和 GitHub Actions；远端 CI 结果将在完成后追加。
+- 工程：增加一键启动、锁定依赖、配置示例、实现范围和 GitHub Actions。
+- 远端验证：代码提交 `8cf94c8` 的 [首次 CI](https://github.com/thehappysky/meetflow/actions/runs/40017347655)全部通过：Linux/Python 3.12 后端、前端构建、框架实验和 Chromium 浏览器流程。
+- 新环境验证：实际运行 scripts/start.ps1，创建独立 .venv、安装锁定依赖、npm ci/build 并启动；健康检查、页面和 Edge 浏览器流程再次通过，不依赖原研究环境。
 
 ## 运行入口与复现
 
-- 本机当前开发环境：`.venv-framework-lab\Scripts\python.exe -m uvicorn meetflow.api:app --host 127.0.0.1 --port 8765`。
+- 本机当前运行环境：`.venv\Scripts\python.exe`，由 scripts/start.ps1 启动，地址 http://127.0.0.1:8765；原 .venv-framework-lab 仅保留研究/开发验证。
 - 新检出：`.\scripts\start.ps1`，访问 http://127.0.0.1:8765；完整说明见 README。
 - 检查：`python -m pytest -q`、`python -m ruff check backend tests scripts/smoke_browser.py`、frontend 的 `npm run build`。
 - 浏览器：应用运行后 `python scripts/smoke_browser.py --channel msedge`，会创建明确标记的合成示例。
@@ -49,4 +51,4 @@ v0.1 本地版本已可运行。文字/示例→协作→证据→审核→本�
 
 ## 下一步
 
-核对首次远端 CI。后续优先真实模型与录音验证、说话人映射/渐进草稿、自动事件重分析与评测，再推进 PG/队列和外部任务平台。逐项范围见 docs/12-implementation-status.md。
+首次远端 CI 已通过。后续优先真实模型与录音验证、说话人映射/渐进草稿、自动事件重分析与评测，再推进 PG/队列和外部任务平台。逐项范围见 docs/12-implementation-status.md。真实调用需要用户在本地配置模型/ASR，当前没有相应实测结论。
