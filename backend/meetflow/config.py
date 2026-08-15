@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     asr_device: str = "cpu"
     start_worker: bool = True
     auth_enabled: bool = True
+    report_font: str = ""
 
     @property
     def db_url(self) -> str:

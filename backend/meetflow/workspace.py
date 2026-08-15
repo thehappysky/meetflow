@@ -1,5 +1,6 @@
 """Owner-private recordings and fixed team/company evidence submissions."""
 import copy
+import hashlib
 import json
 import re
 from datetime import date, datetime
@@ -16,15 +17,19 @@ from sqlalchemy.exc import IntegrityError
 from .audio import audio_available
 from .database import (
     Account,
+    Audit,
     Correction,
     Meeting,
     MeetingClarification,
+    MeetingContact,
     PersonalRecording,
     Run,
     Submission,
+    Team,
+    UploadReceipt,
     row_dict,
 )
-from .domain import Contract, DomainError, MeetingInput, SourceInput, digest, now, uid
+from .domain import Contract, DomainError, SourceInput, digest, now, uid
 from .tools import normalize_date
 
 
@@ -33,6 +38,7 @@ class RecordingInput(Contract):
     customer: str = Field(default="", max_length=400)
     meeting_date: str = ""
     opportunity_id: str | None = None
+    request_key: str | None = Field(default=None, min_length=8, max_length=150)
     transcript: str = Field(min_length=2, max_length=200000)
 
 
@@ -51,6 +57,14 @@ class SubmitInput(Contract):
     request_key: str = Field(min_length=8, max_length=150)
 
 
+class BulkSubmission(SubmitInput):
+    recording_id: str
+
+
+class BulkSubmitInput(Contract):
+    items: list[BulkSubmission] = Field(min_length=1, max_length=30)
+
+
 class CorrectionInput(Contract):
     base_revision: int = Field(ge=1)
     title: str = Field(min_length=1, max_length=200)
@@ -58,6 +72,7 @@ class CorrectionInput(Contract):
     meeting_date: str = ""
     reason: str = Field(min_length=1, max_length=1000)
     opportunity_id: str | None = None
+    use_personal_revision: bool = False
 
 
 class DecisionInput(Contract):
@@ -71,12 +86,25 @@ class ClarificationInput(Contract):
 
 class DeleteInput(Contract):
     reason: str = Field(min_length=1, max_length=1000)
+    revision: int | None = Field(default=None, ge=1)
+
+
+class TranscriptEdit(Contract):
+    version: int = Field(ge=1)
+    text: str = Field(min_length=2, max_length=200000)
+    reason: str = Field(min_length=2, max_length=1000)
+
+
+def transcript_text(run):
+    return "\n".join(span["text"] for source in run["manifest"]["sources"] if source["kind"] == "transcript"
+                     for span in source["body"]["spans"])
 
 
 def valid_date(value):
     if value:
         try:
-            date.fromisoformat(value)
+            if date.fromisoformat(value).isoformat() != value:
+                raise ValueError
         except ValueError:
             raise DomainError("会议日期格式应为 YYYY-MM-DD") from None
     return value
@@ -108,6 +136,30 @@ class WorkspaceService:
                     with self.sessions.begin() as session:
                         self.store.audit(session, "derived.prepare_pending", key, {"message": exc.message})
 
+    def index_existing_uploads(self):
+        """Add owner-only fingerprints for old audio without changing any source or run."""
+        with self.sessions.begin() as session:
+            indexed = set(session.scalars(select(UploadReceipt.recording_id)))
+            hashes = {(r.owner_id,r.content_hash) for r in session.scalars(select(UploadReceipt)) if r.content_hash}
+            for row in session.scalars(select(PersonalRecording).order_by(PersonalRecording.deleted, PersonalRecording.created_at)):
+                if row.id in indexed:
+                    continue
+                run = session.get(Run,row.run_id)
+                meeting = session.get(Meeting,run.meeting_id)
+                path = Path(meeting.audio_path or "").resolve()
+                if not meeting.audio_path or not path.is_relative_to(self.settings.data_dir.resolve()/"audio") or not path.is_file():
+                    continue
+                try:
+                    with path.open('rb') as stream:
+                        checksum = "audio:" + hashlib.file_digest(stream,"sha256").hexdigest()
+                except OSError:
+                    self.store.audit(session,"workspace.upload_index_unavailable",row.id)
+                    continue
+                if (row.owner_id,checksum) not in hashes:
+                    session.add(UploadReceipt(id=uid('upload_'),owner_id=row.owner_id, request_key='existing-'+row.id,
+                        request_hash=digest({'existing':row.id}),content_hash=checksum,recording_id=row.id))
+                    hashes.add((row.owner_id,checksum))
+
     def private(self, session, key, user):
         row = session.get(PersonalRecording, key)
         if not row or row.deleted or row.owner_id != user["id"] or row.company_id != user["company_id"]:
@@ -128,44 +180,65 @@ class WorkspaceService:
             raise DomainError("中心记录不存在或无权访问", 404)
         return row
 
-    def recording_dict(self, row):
-        run = self.store.get_run(row.run_id)
+    def recording_dict(self, row, run=None):
+        run = run or self.store.get_run(row.run_id)
         return {"id": row.id, "body": row.body, "version": row.version, "uploaded_at": row.created_at,
-                "run_id": row.run_id, "status": run["status"], "phase": run["phase"], "error": run["error"]}
+                "run_id": row.run_id, "status": run["status"], "phase": run["phase"], "error": run["error"],
+                "cancel_requested": run["cancel_requested"]}
 
     @staticmethod
     def clarifications(session, key):
         return [row_dict(row) for row in session.scalars(select(MeetingClarification).where(
             MeetingClarification.recording_id == key).order_by(MeetingClarification.created_at))]
 
-    def create(self, user, value):
+    def create(self, user, value, audio_path=None, content_hash=None):
         if user["role"] != "sales":
             raise DomainError("请使用销售账号上传到个人区", 403)
         valid_date(value.meeting_date)
-        if value.opportunity_id:
-            with self.sessions() as session:
-                value.customer = self.business.label(session, value.opportunity_id, user)
         title = value.title.strip() or datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%m月%d日 %H:%M 上传的会议录音")
-        with self.sessions() as session:
-            account = session.get(Account, user["id"])
-            project_id = account.project_id
-        # Each owner has an isolated project; another salesperson's private context is never included.
-        result = self.store.create_meeting(MeetingInput(project_id=project_id, title=title,
-            salesperson=user["name"], customer=value.customer, transcript=value.transcript,
-            mode="live" if self.settings.live_available else "demo"))
-        return self.attach(user, result, title, value.customer, value.meeting_date, value.opportunity_id)
-
-    def attach(self, user, result, title, customer, meeting_date, opportunity_id=None):
+        request_hash = digest({**value.model_dump(exclude={"request_key"}), "content_hash": content_hash})
         with self.sessions.begin() as session:
-            run = session.get(Run, result["run"]["id"])
-            run.manifest = {**run.manifest, "meeting_date": meeting_date or None}
+            if self.settings.db_url.startswith("sqlite"):
+                session.connection().exec_driver_sql("BEGIN IMMEDIATE")
+            prior = session.scalar(select(UploadReceipt).where(UploadReceipt.owner_id == user["id"],
+                UploadReceipt.request_key == value.request_key)) if value.request_key else None
+            if prior and prior.request_hash != request_hash:
+                raise DomainError("同一上传请求对应其他内容，请重新选择后提交", 409)
+            duplicate = prior or (session.scalar(select(UploadReceipt).where(UploadReceipt.owner_id == user["id"],
+                UploadReceipt.content_hash == content_hash)) if content_hash else None)
+            if duplicate:
+                existing = session.get(PersonalRecording, duplicate.recording_id)
+                if existing and existing.deleted and existing.owner_id == user["id"]:
+                    raise DomainError("该资料已在个人回收站，请先恢复原会谈，不重复创建", 409)
+                row = self.private(session, duplicate.recording_id, user)
+                return {**self.recording_dict(row), "duplicate": True,
+                    "notice": "该资料已保存，已打开原会谈，不重复转写或创建。新填信息未覆盖原记录，需要时请修改个人信息。"}
+            account = session.get(Account, user["id"])
+            if value.opportunity_id:
+                value.customer = self.business.label(session, value.opportunity_id, user)
+            meeting = Meeting(id=uid("m_"), project_id=account.project_id, title=title,
+                              timezone="Asia/Shanghai", audio_path=audio_path)
+            session.add(meeting)
+            session.flush()
+            session.add(MeetingContact(meeting_id=meeting.id, salesperson=user["name"], customer=value.customer))
+            if not audio_path:
+                self.store.add_source(session, account.project_id, SourceInput(title=title, kind="transcript",
+                    text=value.transcript), meeting.id)
+            session.flush()
+            run = self.store.create_run(session, meeting, "live" if self.settings.live_available else "demo")
+            run.manifest = {**run.manifest, "meeting_date": value.meeting_date or None}
             row = PersonalRecording(id=uid("rec_"), owner_id=user["id"], company_id=user["company_id"],
-                team_id=user["team_id"], run_id=result["run"]["id"],
-                body={"title": title, "customer": customer, "meeting_date": valid_date(meeting_date), "opportunity_id": opportunity_id})
+                team_id=user["team_id"], run_id=run.id,
+                body={"title": title, "customer": value.customer, "meeting_date": value.meeting_date, "opportunity_id": value.opportunity_id})
             session.add(row)
             session.flush()
+            if value.request_key or content_hash:
+                session.add(UploadReceipt(id=uid("upload_"), owner_id=user["id"],
+                    request_key=value.request_key or uid(), request_hash=request_hash,
+                    content_hash=content_hash, recording_id=row.id))
             self.store.audit(session, "workspace.recording_created", row.id, {"owner": user["id"]})
-            output = self.recording_dict(row)
+            self.store.audit(session, "meeting.created", meeting.id, {"run_id": run.id, "mode": run.mode})
+            output = self.recording_dict(row, row_dict(run))
         if self.settings.start_worker:
             self.driver.submit(row.run_id)
         return output
@@ -220,7 +293,7 @@ class WorkspaceService:
     @staticmethod
     def central_dict(row, detail=False):
         result = {"id": row.id, "recording_id": row.recording_id, "revision": row.revision,
-                  "team_id": row.team_id, "owner": row.snapshot["owner_name"],
+                  "team_id": row.team_id, "owner_id": row.owner_id, "owner": row.snapshot["owner_name"],
                   "metadata": row.snapshot["metadata"], "submitted_at": row.created_at}
         if detail:
             result.update(report=row.snapshot["report"], evidence=row.snapshot["evidence"],
@@ -253,6 +326,21 @@ def workspace_router(service):
     def create(value: RecordingInput, user=current_user):
         return service.create(user, value)
 
+    @router.post("/submissions/batch")
+    def bulk_submit(value: BulkSubmitInput, user=current_user):
+        if user["role"] != "sales":
+            raise DomainError("仅销售本人可上报个人会谈",403)
+        if len({i.recording_id for i in value.items}) != len(value.items):
+            raise DomainError("同一批次不能重复选择会谈")
+        succeeded,failed=[],[]
+        for item in value.items:
+            try:
+                result=service.submit(user,item.recording_id,SubmitInput.model_validate(item.model_dump(exclude={'recording_id'})))
+                succeeded.append({'recording_id':item.recording_id,**result})
+            except DomainError as exc:
+                failed.append({'recording_id':item.recording_id,'message':exc.message,'status':exc.status})
+        return {'succeeded':succeeded,'failed':failed,'notice':'逐场保存，上报成功的资料已进入中心，失败的可补充后单独重试。'}
+
     @router.post("/audio", status_code=201)
     async def audio_upload(file: Annotated[UploadFile, File()], metadata: Annotated[str, Form()] = "{}",
                            user=current_user):
@@ -264,17 +352,13 @@ def workspace_router(service):
             value = RecordingInput.model_validate({**json.loads(metadata), "transcript": "等待真实转写"})
         except (ValueError, TypeError):
             raise DomainError("会谈信息格式错误") from None
-        title = value.title.strip() or datetime.now(ZoneInfo("Asia/Shanghai")).strftime("%m月%d日 %H:%M 上传的会议录音")
         valid_date(value.meeting_date)
-        if value.opportunity_id:
-            with service.sessions() as session:
-                value.customer = service.business.label(session, value.opportunity_id, user)
         extension = Path(file.filename or "").suffix.lower()
         if extension not in {".wav", ".mp3", ".m4a", ".flac", ".ogg", ".webm"}:
             raise DomainError("录音格式不支持", 422)
         directory = service.settings.data_dir.resolve() / "audio"
         directory.mkdir(exist_ok=True)
-        path, size = directory / (uid("audio_") + extension), 0
+        path, size, checksum = directory / (uid("audio_") + extension), 0, hashlib.sha256()
         try:
             with path.open("wb") as destination:
                 while chunk := await file.read(1024 * 1024):
@@ -282,18 +366,13 @@ def workspace_router(service):
                     if size > service.settings.max_upload_mb * 1024 * 1024:
                         raise DomainError("录音超过上传上限", 413)
                     destination.write(chunk)
+                    checksum.update(chunk)
             if not size:
                 raise DomainError("录音为空", 422)
-            with service.sessions.begin() as session:
-                account = session.get(Account, user["id"])
-                meeting = Meeting(id=uid("m_"), project_id=account.project_id, title=title,
-                                  timezone="Asia/Shanghai", audio_path=str(path))
-                session.add(meeting)
-                session.flush()
-                run = service.store.create_run(session, meeting,
-                    "live" if service.settings.live_available else "demo")
-                result = {"run": row_dict(run)}
-            return service.attach(user, result, title, value.customer, value.meeting_date, value.opportunity_id)
+            result = service.create(user, value, audio_path=str(path), content_hash="audio:" + checksum.hexdigest())
+            if result.get("duplicate"):
+                path.unlink(missing_ok=True)
+            return result
         except Exception:
             path.unlink(missing_ok=True)
             raise
@@ -310,7 +389,40 @@ def workspace_router(service):
             return {**service.recording_dict(row), "report": service.store.latest_report(row.run_id),
                     "evidence": service.store.source_map(row.run_id), "has_audio": bool(meeting.audio_path),
                     "clarifications": service.clarifications(session, key),
+                    "transcript_text": transcript_text(run),
+                    "transcript_history": [{"at": a.created_at, "reason": a.body["reason"],
+                        "text": transcript_text(service.store.get_run(a.body["before_run_id"]))}
+                        for a in session.scalars(select(Audit).where(Audit.target_id == key,
+                            Audit.action == "workspace.transcript_corrected").order_by(Audit.id.desc()))],
                     "submission": {"id": submitted.id, "deleted": submitted.deleted} if submitted else None}
+
+    @router.post("/recordings/{key}/transcript", status_code=201)
+    def correct_transcript(key: str, value: TranscriptEdit, user=current_user):
+        if not value.text.strip() or not value.reason.strip():
+            raise DomainError("请填写修订文字和原因")
+        with service.sessions.begin() as session:
+            if service.settings.db_url.startswith("sqlite"):
+                session.connection().exec_driver_sql("BEGIN IMMEDIATE")
+            row = service.private(session, key, user)
+            run = service.store.get_run(row.run_id)
+            if row.version != value.version or run["status"] not in {"waiting_review", "completed", "failed", "cancelled"}:
+                raise DomainError("会谈已变化或还在处理，请刷新", 409)
+            if transcript_text(run).strip() == value.text.strip():
+                raise DomainError("转写文字没有变化，无需重复分析", 409)
+            previous = max((s["version"] for s in run["manifest"]["sources"] if s["kind"] == "transcript"), default=0)
+            source = service.store.add_source(session, run["project_id"], SourceInput(title="销售修订转写（未重新对齐音频）",
+                kind="transcript", text=value.text), run["meeting_id"])
+            source.version = previous + 1
+            session.flush()
+            next_run = service.store.create_run(session, session.get(Meeting, run["meeting_id"]), run["mode"])
+            next_run.manifest = {**next_run.manifest, "meeting_date": row.body.get("meeting_date") or None}
+            service.store.audit(session, "workspace.transcript_corrected", key, {"actor": user["id"],
+                "before_run_id": row.run_id, "after_run_id": next_run.id, "reason": value.reason})
+            row.run_id, row.version = next_run.id, row.version + 1
+            run_id = next_run.id
+        if service.settings.start_worker:
+            service.driver.submit(run_id)
+        return {"version": row.version, "run_id": run_id}
 
     @router.post("/recordings/{key}/clarifications", status_code=201)
     def clarify(key: str, value: ClarificationInput, user=current_user):
@@ -409,7 +521,7 @@ def workspace_router(service):
         with service.sessions() as session:
             rows = session.scalars(select(Submission).where(Submission.company_id == user["company_id"],
                 Submission.deleted.is_(False)).order_by(Submission.created_at.desc())).all()
-            return [service.central_dict(row) for row in rows if service.visible(row, user)
+            return [{**service.central_dict(row), "team": session.get(Team, row.team_id).name} for row in rows if service.visible(row, user)
                     and q.lower() in (row.snapshot["metadata"]["title"] + row.snapshot["metadata"]["customer"]).lower()]
 
     @router.get("/center/{key}")
@@ -422,6 +534,15 @@ def workspace_router(service):
         with service.sessions() as session:
             path = service.central(session, key, user).snapshot.get("audio_path")
         return service.audio(path)
+
+    @router.get("/center/{key}/versions/{revision}")
+    def old_version(key: str, revision: int, user=current_user):
+        with service.sessions() as session:
+            row = service.central(session, key, user)
+            snapshot = row.snapshot if revision == row.revision else next((h["snapshot"] for h in row.history if h["revision"] == revision), None)
+            if not snapshot:
+                raise DomainError("中心版本不存在", 404)
+            return {"revision": revision, "metadata": snapshot["metadata"], "report": snapshot["report"], "evidence": snapshot["evidence"]}
 
     @router.get("/center/{key}/export")
     def export(key: str, user=current_user):
@@ -438,6 +559,10 @@ def workspace_router(service):
             row = service.central(session, key, user)
             if user["role"] != "manager" or row.team_id != user["team_id"]:
                 raise DomainError("中心删除需由负责团队的主管处理", 403)
+            if not value.reason.strip():
+                raise DomainError("请填写撤下原因")
+            if value.revision is not None and value.revision != row.revision:
+                raise DomainError("中心版本已变化，请刷新后确认影响", 409)
             row.deleted = True
             service.store.audit(session, "workspace.center_deleted", key,
                                 {"actor": user["id"], "reason": value.reason})
@@ -454,17 +579,28 @@ def workspace_router(service):
                 raise DomainError("仅来源销售可以提出更正", 403)
             if row.revision != value.base_revision:
                 raise DomainError("中心已更新，请刷新后提出更正", 409)
-            proposed = value.model_dump(exclude={"base_revision", "reason"})
+            proposed = value.model_dump(exclude={"base_revision", "reason", "use_personal_revision"})
             opportunity_id = value.opportunity_id or row.snapshot["metadata"].get("opportunity_id")
             proposed["opportunity_id"] = opportunity_id
             if opportunity_id:
                 proposed["customer"] = service.business.label(session, opportunity_id, user)
+            if value.use_personal_revision:
+                personal = service.private(session, row.recording_id, user)
+                run = service.store.get_run(personal.run_id)
+                report = service.store.latest_report(personal.run_id)
+                if not report or run["status"] not in {"waiting_review", "completed"}:
+                    raise DomainError("请先完成个人新版整理再申请中心更正", 409)
+                proposed["replacement"] = {"report": report["body"], "evidence": service.store.source_map(personal.run_id),
+                    "run_id": personal.run_id, "recording_version": personal.version,
+                    "quality_context": service.quality.freeze(session,"personal", personal.id,personal.version) if service.quality else {},
+                    "clarifications": service.clarifications(session, personal.id)}
             request = Correction(id=uid("cor_"), submission_id=key, requester_id=user["id"],
                 base_revision=value.base_revision, proposed=proposed,
                 reason=value.reason)
             session.add(request)
             session.flush()
-            service.store.audit(session, "workspace.correction_requested", request.id)
+            service.store.audit(session, "workspace.correction_requested", request.id,
+                {"actor": user["id"], "reason":value.reason})
             return {"id": request.id}
 
     @router.get("/corrections")
@@ -473,9 +609,14 @@ def workspace_router(service):
             rows = session.execute(select(Correction, Submission).join(
                 Submission, Correction.submission_id == Submission.id).where(
                     Submission.company_id == user["company_id"], Submission.deleted.is_(False))).all()
-            return [{**row_dict(c), "before": next((h["snapshot"]["metadata"] for h in s.history
-                      if h["revision"] == c.base_revision), s.snapshot["metadata"])} for c, s in rows
-                    if service.visible(s, user)]
+            result = []
+            for c, s in rows:
+                if not service.visible(s, user):
+                    continue
+                before = next((h["snapshot"] for h in s.history if h["revision"] == c.base_revision), s.snapshot)
+                result.append({**row_dict(c), "before": before["metadata"], "before_summary": before["report"]["summary"],
+                    "before_evidence": before["evidence"]})
+            return result
 
     @router.post("/corrections/{key}/review")
     def review(key: str, value: DecisionInput, user=current_user):
@@ -495,9 +636,11 @@ def workspace_router(service):
             if value.approve:
                 row.history = [*row.history, {"revision": row.revision, "snapshot": row.snapshot, "at": now()}]
                 context = service.quality.freeze(session, "center", row.id, row.revision) if service.quality else {}
-                row.snapshot = {**row.snapshot, "metadata": request.proposed,
-                                "quality_context": context or row.snapshot.get("quality_context", {}),
-                                "report": rebase_report(row.snapshot["report"], row.snapshot["evidence"], request.proposed["meeting_date"])}
+                metadata = {k:v for k,v in request.proposed.items() if k != "replacement"}
+                base = {**row.snapshot, **request.proposed.get("replacement", {})}
+                row.snapshot = {**base, "metadata": metadata,
+                                "quality_context": base.get("quality_context", {}) if "replacement" in request.proposed else context or base.get("quality_context", {}),
+                                "report": rebase_report(base["report"], base["evidence"], metadata["meeting_date"])}
                 row.revision += 1
             request.status = "approved" if value.approve else "rejected"
             request.reviewed_by = user["id"]

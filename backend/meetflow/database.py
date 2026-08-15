@@ -325,6 +325,33 @@ class Followup(Base):
     updated_at: Mapped[str] = mapped_column(default=now)
 
 
+class UploadReceipt(Base):
+    __tablename__ = "workspace_upload_receipts"
+    __table_args__ = (UniqueConstraint("owner_id", "request_key"), UniqueConstraint("owner_id", "content_hash"))
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    request_key: Mapped[str]
+    request_hash: Mapped[str]
+    content_hash: Mapped[str | None]
+    recording_id: Mapped[str] = mapped_column(ForeignKey("workspace_recordings.id"))
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class SalesReport(Base):
+    __tablename__ = "workspace_sales_reports"
+    __table_args__ = (UniqueConstraint("owner_id", "request_key"),)
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    body: Mapped[dict] = mapped_column(JSON)
+    version: Mapped[int] = mapped_column(default=1)
+    parent_id: Mapped[str | None] = mapped_column(ForeignKey("workspace_sales_reports.id"))
+    request_key: Mapped[str]
+    request_hash: Mapped[str]
+    confirmed_at: Mapped[str | None]
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
 class MeetingClarification(Base):
     __tablename__ = "workspace_meeting_clarifications"
     id: Mapped[str] = mapped_column(String(80), primary_key=True)

@@ -12,6 +12,10 @@ import QualityWorkspace from "./QualityWorkspace.vue";
 import TrainingRules from "./TrainingRules.vue";
 import BusinessWorkspace from "./BusinessWorkspace.vue";
 import OpportunityPicker from "./OpportunityPicker.vue";
+import ReportsWorkspace from "./ReportsWorkspace.vue";
+import MaintenanceWorkspace from "./MaintenanceWorkspace.vue";
+import RecordingFilters from "./RecordingFilters.vue";
+import "./workspace-controls.css";
 import { api, post, NETWORK_ERROR } from "./api";
 
 type Row = Record<string, any>;
@@ -63,10 +67,105 @@ const edit = reactive({
   meeting_date: "",
   reason: "",
   opportunity_id: null as string | null,
+  use_personal_revision: false,
 });
+const transcriptOpen = ref(false),
+  transcriptDraft = ref(""),
+  transcriptReason = ref(""),
+  historicalVersion = ref<Row | null>(null);
+const batchSelected = ref<string[]>([]),
+  batchConfirmed = ref(false),
+  batchMeta = reactive<Row>({}),
+  batchErrors = ref<Row[]>([]);
+const batchRows = computed(() =>
+  rows.value.filter(
+    (r) => batchSelected.value.includes(r.id) && batchMeta[r.id],
+  ),
+);
+const batchReady = computed(
+  () =>
+    batchRows.value.length > 0 &&
+    batchRows.value.length <= 30 &&
+    batchRows.value.every(
+      (r) =>
+        batchMeta[r.id]?.opportunity_id &&
+        batchMeta[r.id]?.version === r.version,
+    ),
+);
+function toggleBatch(row: Row) {
+  if (!batchSelected.value.includes(row.id)) {
+    batchMeta[row.id] = {
+      opportunity_id: row.body.opportunity_id,
+      version: row.version,
+      key: crypto.randomUUID(),
+    };
+    batchSelected.value = [...batchSelected.value, row.id];
+  } else {
+    batchSelected.value = batchSelected.value.filter((id) => id !== row.id);
+    delete batchMeta[row.id];
+  }
+  batchConfirmed.value = false;
+  batchErrors.value = [];
+}
+async function submitBatch() {
+  await perform(async () => {
+    const result = await post("/workspace/submissions/batch", {
+      items: batchRows.value.map((r) => ({
+        recording_id: r.id,
+        version: batchMeta[r.id].version,
+        opportunity_id: batchMeta[r.id].opportunity_id,
+        request_key: batchMeta[r.id].key,
+      })),
+    });
+    const done = new Set(result.succeeded.map((r: Row) => r.recording_id));
+    batchSelected.value = batchSelected.value.filter((id) => !done.has(id));
+    batchErrors.value = result.failed.map((r: Row) => ({
+      ...r,
+      title: rows.value.find((row) => row.id === r.recording_id)?.body.title,
+    }));
+    batchConfirmed.value = false;
+    await refresh();
+    notice.value = `已上报 ${result.succeeded.length} 场，${result.failed.length} 场需补充或刷新后再试。`;
+  });
+}
+function editTranscript() {
+  transcriptDraft.value = detail.value!.transcript_text;
+  transcriptReason.value = "";
+  transcriptOpen.value = true;
+}
+async function saveTranscript() {
+  await perform(async () => {
+    const id = detail.value!.id;
+    await post(`/workspace/recordings/${id}/transcript`, {
+      version: detail.value!.version,
+      text: transcriptDraft.value,
+      reason: transcriptReason.value,
+    });
+    await open(id);
+    await refresh();
+    notice.value =
+      "修订已保存为新转写版本，正在重新整理。原始录音、旧转写和已上报中心不变。";
+  });
+}
+async function viewHistorical(revision: number) {
+  await perform(async () => {
+    historicalVersion.value = await api(
+      `/workspace/center/${detail.value!.id}/versions/${revision}`,
+    );
+  });
+}
 const file = ref<File | null>(null),
   checkSubmit = ref(false);
 const qualitySource = ref<{ kind: string; id: string } | null>(null);
+const removalImpact = ref<Row | null>(null),
+  removalReason = ref(""),
+  activity = ref<Row[]>([]);
+const dateMode = ref("meeting"),
+  dateFrom = ref(""),
+  dateTo = ref(""),
+  ownerFilter = ref(""),
+  teamFilter = ref(""),
+  statusFilter = ref("");
 const questionAnswers = reactive<Row>({});
 const evidenceOpen = ref(false),
   evidenceHighlight = ref("");
@@ -75,6 +174,11 @@ let timer: number | undefined,
   sequence = 0,
   lastRefresh = 0;
 let submitAttempt: { signature: string; key: string } | null = null;
+let uploadAttempt: {
+  signature: string;
+  key: string;
+  file: File | null;
+} | null = null;
 const roleNames: Row = {
   admin: "管理员",
   boss: "老板",
@@ -114,12 +218,103 @@ const report = computed(() =>
   centralDetail.value ? detail.value?.report : detail.value?.report?.body,
 );
 const visibleCenter = computed(() =>
-  center.value.filter((r) =>
-    [r.metadata.title, r.metadata.customer, r.owner]
-      .join(" ")
-      .includes(search.value),
+  center.value.filter(
+    (r) =>
+      [r.metadata.title, r.metadata.customer, r.owner]
+        .join(" ")
+        .includes(search.value) &&
+      (!ownerFilter.value || r.owner_id === ownerFilter.value) &&
+      (!teamFilter.value || r.team_id === teamFilter.value) &&
+      matchDates(r.metadata.meeting_date, r.submitted_at),
   ),
 );
+const visibleRows = computed(() =>
+  rows.value.filter(
+    (r) =>
+      [r.body.title, r.body.customer].join(" ").includes(search.value) &&
+      (!statusFilter.value || r.status === statusFilter.value) &&
+      matchDates(r.body.meeting_date, r.uploaded_at),
+  ),
+);
+const centerOwners = computed(() =>
+  Array.from(
+    new Map(
+      center.value.map((r) => [r.owner_id, { id: r.owner_id, label: r.owner }]),
+    ).values(),
+  ),
+);
+const centerTeams = computed(() =>
+  Array.from(
+    new Map(
+      center.value.map((r) => [r.team_id, { id: r.team_id, label: r.team }]),
+    ).values(),
+  ),
+);
+function matchDates(meeting: string, received: string) {
+  if (dateMode.value === "unknown") return !meeting;
+  const day =
+    dateMode.value === "meeting"
+      ? meeting
+      : new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Shanghai" }).format(
+          new Date(received),
+        );
+  if (!dateFrom.value && !dateTo.value) return true;
+  return (
+    !!day &&
+    (!dateFrom.value || day >= dateFrom.value) &&
+    (!dateTo.value || day <= dateTo.value)
+  );
+}
+function clearFilters() {
+  search.value = "";
+  dateFrom.value = "";
+  dateTo.value = "";
+  ownerFilter.value = "";
+  teamFilter.value = "";
+  statusFilter.value = "";
+  dateMode.value = "meeting";
+}
+async function processing(action: string) {
+  await perform(async () => {
+    await post(
+      `/workspace/maintenance/personal/${detail.value!.id}/${action}`,
+      { version: detail.value!.version },
+    );
+    await open(detail.value!.id);
+    await refresh();
+    notice.value =
+      action === "retry"
+        ? "已请求从检查点恢复，累计预算保留。"
+        : "已请求停止，在途处理结束后生效。";
+  });
+}
+async function showActivity() {
+  await perform(async () => {
+    activity.value = await api(
+      `/workspace/maintenance/${centralDetail.value ? "center" : "personal"}/${detail.value!.id}/activity`,
+    );
+  });
+}
+async function previewRemoval() {
+  await perform(async () => {
+    removalImpact.value = await api(
+      `/workspace/maintenance/center/${detail.value!.id}/impact`,
+    );
+    removalReason.value = "";
+  });
+}
+async function removeCenter() {
+  await perform(async () => {
+    await post(`/workspace/center/${detail.value!.id}/delete`, {
+      revision: removalImpact.value!.version,
+      reason: removalReason.value,
+    });
+    removalImpact.value = null;
+    navigate("center");
+    await refresh();
+    notice.value = "中心资料已撤下，历史保留，可在回收站恢复。";
+  });
+}
 function displayTime(value: string) {
   if (!value) return "时间待确认";
   return new Intl.DateTimeFormat("zh-CN", {
@@ -237,6 +432,14 @@ function navigate(next: string, refreshData = true) {
   notice.value = "";
   editOpen.value = false;
   requestOpen.value = false;
+  transcriptOpen.value = false;
+  historicalVersion.value = null;
+  removalImpact.value = null;
+  activity.value = [];
+  clearFilters();
+  batchSelected.value = [];
+  batchErrors.value = [];
+  batchConfirmed.value = false;
   if (refreshData && !busy.value) void perform(refresh);
 }
 function enterQuality(kind?: string, id?: string) {
@@ -298,6 +501,10 @@ async function open(key: string, central = false) {
   clearAudio();
   editOpen.value = false;
   requestOpen.value = false;
+  transcriptOpen.value = false;
+  historicalVersion.value = null;
+  activity.value = [];
+  removalImpact.value = null;
   checkSubmit.value = false;
   const result = await api(
     `/workspace/${central ? "center" : "recordings"}/${key}`,
@@ -317,6 +524,12 @@ async function open(key: string, central = false) {
 }
 async function saveRecording() {
   await perform(async () => {
+    const signature = JSON.stringify(form);
+    if (
+      uploadAttempt?.signature !== signature ||
+      uploadAttempt?.file !== file.value
+    )
+      uploadAttempt = { signature, key: crypto.randomUUID(), file: file.value };
     let result: Row;
     if (file.value) {
       const body = new FormData();
@@ -328,10 +541,16 @@ async function saveRecording() {
           customer: form.customer,
           meeting_date: form.meeting_date,
           opportunity_id: form.opportunity_id,
+          request_key: uploadAttempt!.key,
         }),
       );
       result = await api("/workspace/audio", { method: "POST", body });
-    } else result = await post("/workspace/recordings", form);
+    } else
+      result = await post("/workspace/recordings", {
+        ...form,
+        request_key: uploadAttempt!.key,
+      });
+    uploadAttempt = null;
     formOpen.value = false;
     file.value = null;
     form.title = "";
@@ -342,6 +561,7 @@ async function saveRecording() {
     await refresh();
     await open(result.id);
     notice.value =
+      result.notice ||
       "已保存到个人区，整理在后台继续。确认上报前不会进入管理中心。";
   });
 }
@@ -373,6 +593,7 @@ async function submit() {
 function editing(correction = false) {
   Object.assign(edit, metadata.value, {
     reason: "",
+    use_personal_revision: false,
     opportunity_id: metadata.value?.opportunity_id || null,
   });
   editOpen.value = !correction;
@@ -673,6 +894,10 @@ onBeforeUnmount(() => {
               }}
             </button>
             <button @click="navigate('business')">客户与跟进</button>
+            <button v-if="user.role === 'sales'" @click="navigate('reports')">
+              简报与周报
+            </button>
+            <button @click="navigate('maintenance')">回收站</button>
           </template>
         </nav>
         <div class="wk-identity" aria-label="当前登录身份">
@@ -702,6 +927,10 @@ onBeforeUnmount(() => {
           :initial="page === 'business' ? 'customers' : 'overview'"
           @meeting="meetingFromQuality"
         />
+        <ReportsWorkspace
+          v-else-if="page === 'reports' && user.role === 'sales'"
+        />
+        <MaintenanceWorkspace v-else-if="page === 'maintenance'" :user="user" />
         <QualityWorkspace
           v-else-if="page === 'quality' && user.role !== 'admin'"
           :user="user"
@@ -799,6 +1028,18 @@ onBeforeUnmount(() => {
               申请更正中心记录
             </button>
             <button
+              v-if="
+                !centralDetail &&
+                ['waiting_review', 'completed', 'failed', 'cancelled'].includes(
+                  detail.status,
+                )
+              "
+              @click="editTranscript"
+              :disabled="busy"
+            >
+              修订转写文字
+            </button>
+            <button
               v-if="report"
               @click="
                 enterQuality(centralDetail ? 'center' : 'personal', detail.id)
@@ -807,6 +1048,41 @@ onBeforeUnmount(() => {
               查看本场复盘质检
             </button>
           </div>
+          <form
+            v-if="transcriptOpen"
+            class="wk-panel"
+            @submit.prevent="saveTranscript"
+          >
+            <h2>修订本场转写</h2>
+            <p>
+              生成新版本并重新整理；旧转写和原始录音保留。手工修订文字不会自动重新对齐音频时间点，已上报中心需另行申请更正。
+            </p>
+            <label
+              >修订后的转写文字<textarea
+                v-model="transcriptDraft"
+                required
+                minlength="2"
+                maxlength="200000"
+                rows="12"
+              /></label
+            ><label
+              >修订原因<textarea
+                v-model="transcriptReason"
+                required
+                minlength="2"
+                maxlength="1000"
+                rows="2"
+              /></label
+            ><button class="wk-primary" :disabled="busy">
+              保存新转写并重新整理</button
+            ><button
+              type="button"
+              @click="transcriptOpen = false"
+              :disabled="busy"
+            >
+              取消修订
+            </button>
+          </form>
           <form
             v-if="editOpen || requestOpen"
             class="wk-panel"
@@ -823,15 +1099,77 @@ onBeforeUnmount(() => {
                 type="date" /></label
             ><label v-if="requestOpen"
               >更正原因<textarea v-model="edit.reason" required /></label
+            ><label v-if="requestOpen"
+              ><input
+                type="checkbox"
+                v-model="edit.use_personal_revision"
+              />一并申请采用个人区最新纪要与转写（将该版本提供给主管审核）</label
             ><button class="wk-primary" :disabled="busy">
               {{ requestOpen ? "提交更正申请" : "保存个人修改" }}
             </button>
           </form>
           <div v-if="detail.error" class="wk-error">{{ detail.error }}</div>
+          <div v-if="!centralDetail" class="wk-actions">
+            <button
+              v-if="detail.status === 'failed'"
+              @click="processing('retry')"
+              :disabled="busy"
+            >
+              恢复失败处理
+            </button>
+            <button
+              v-if="['queued', 'running'].includes(detail.status)"
+              @click="processing('cancel')"
+              :disabled="busy || detail.cancel_requested"
+            >
+              {{ detail.cancel_requested ? "已请求停止" : "停止本次整理" }}
+            </button>
+          </div>
+          <details>
+            <summary @click="showActivity">操作时间与记录</summary>
+            <p v-for="(event, index) in activity" :key="index">
+              {{ displayTime(event.at) }} · {{ event.actor }} ·
+              {{ event.action }} {{ event.reason }}
+            </p>
+          </details>
+          <section
+            v-if="centralDetail && user.role === 'manager'"
+            class="wk-panel"
+          >
+            <button @click="previewRemoval" :disabled="busy">
+              查看撤下此中心资料的影响
+            </button>
+            <form v-if="removalImpact" @submit.prevent="removeCenter">
+              <p>{{ removalImpact.notice }}</p>
+              <p>
+                关联质检版本 {{ removalImpact.quality_versions }} · 后续事项版本
+                {{ removalImpact.followup_versions }}
+              </p>
+              <label
+                >撤下原因<textarea
+                  v-model="removalReason"
+                  required
+                  maxlength="1000"
+                /></label
+              ><button :disabled="busy || !removalReason.trim()">
+                确认撤下中心资料
+              </button>
+            </form>
+          </section>
           <div v-if="report?.mode === 'demo'" class="wk-note">
             当前为规则纪要，未调用大模型；录音配置启用时转写为真实
             ASR。内容需核对。
           </div>
+          <details v-if="!centralDetail && detail.transcript_history?.length">
+            <summary>查看修订前的转写</summary>
+            <section
+              v-for="(h, index) in detail.transcript_history"
+              :key="index"
+            >
+              <p>{{ displayTime(h.at) }} · 修订原因 {{ h.reason }}</p>
+              <p class="wk-summary">{{ h.text }}</p>
+            </section>
+          </details>
           <div v-if="report" class="wk-columns">
             <section class="wk-panel">
               <h2>会谈纪要</h2>
@@ -1023,6 +1361,35 @@ onBeforeUnmount(() => {
                   v{{ h.revision }} · {{ h.metadata.title }} ·
                   {{ h.metadata.meeting_date || "日期未知" }}
                 </p>
+                <button
+                  v-for="h in detail.history"
+                  :key="'version-' + h.revision"
+                  @click="viewHistorical(h.revision)"
+                  :disabled="busy"
+                >
+                  查看中心 v{{ h.revision }} 的纪要与原文
+                </button>
+                <section v-if="historicalVersion">
+                  <h4>
+                    历史中心 v{{ historicalVersion.revision }} ·
+                    {{ historicalVersion.metadata.title }}
+                  </h4>
+                  <p class="wk-summary">
+                    {{ historicalVersion.report.summary }}
+                  </p>
+                  <p v-for="a in historicalVersion.report.actions" :key="a.id">
+                    {{ a.title }} · {{ a.due || "日期待确认" }}
+                  </p>
+                  <details>
+                    <summary>该版原文依据</summary>
+                    <p
+                      v-for="(span, id) in historicalVersion.evidence"
+                      :key="id"
+                    >
+                      {{ span.text }}
+                    </p>
+                  </details>
+                </section>
                 <p v-if="!detail.history.length">
                   当前为首个上报版本。
                 </p></template
@@ -1082,11 +1449,66 @@ onBeforeUnmount(() => {
               /></label
             ><button class="wk-primary" :disabled="busy">保存并自动整理</button>
           </form>
+          <RecordingFilters
+            v-if="rows.length"
+            v-model:query="search"
+            v-model:mode="dateMode"
+            v-model:from="dateFrom"
+            v-model:to="dateTo"
+            v-model:state="statusFilter"
+            :states="stateNames"
+            received-label="上传"
+            @clear="clearFilters"
+          />
+          <p v-if="rows.length">
+            当前显示 {{ visibleRows.length }} / {{ rows.length }} 场个人会谈。
+          </p>
           <div v-if="!rows.length" class="wk-empty">
             个人区暂无会谈。其他销售、主管和老板无法读取你的未上报资料。
           </div>
-          <article v-for="r in rows" :key="r.id" class="wk-row">
+          <section v-if="batchRows.length" class="wk-panel">
+            <h2>选中上报 {{ batchRows.length }} 场</h2>
+            <p>
+              仅本次选中的资料进入中心，最多 30
+              场；缺客户商机时在这里补选。逐场保存，失败不影响其他成功记录。
+            </p>
+            <section v-for="r in batchRows" :key="r.id">
+              <h3>{{ r.body.title }}</h3>
+              <p v-if="batchMeta[r.id].version !== r.version" class="wk-error">
+                本场版本已变化，请取消后重新选择。
+              </p>
+              <OpportunityPicker v-model="batchMeta[r.id].opportunity_id" />
+            </section>
+            <p v-for="(f, index) in batchErrors" :key="index" class="wk-error">
+              {{ f.title }}：{{ f.message }}
+            </p>
+            <label
+              ><input
+                type="checkbox"
+                v-model="batchConfirmed"
+              />确认将以上录音和纪要上报，供主管和老板在权限内查看。</label
+            ><button
+              class="wk-primary"
+              @click="submitBatch"
+              :disabled="busy || !batchConfirmed || !batchReady"
+            >
+              确认上报选中会谈
+            </button>
+          </section>
+          <article v-for="r in visibleRows" :key="r.id" class="wk-row">
             <div>
+              <label
+                v-if="
+                  ['waiting_review', 'completed'].includes(r.status) &&
+                  !center.some((s) => s.recording_id === r.id)
+                "
+                ><input
+                  type="checkbox"
+                  :checked="batchSelected.includes(r.id)"
+                  :value="r.id"
+                  @change="toggleBatch(r)"
+                />选中上报本场</label
+              >
               <strong>{{ r.body.title }}</strong>
               <p>
                 {{ r.body.customer || "客户待归属" }} · 会谈
@@ -1126,6 +1548,26 @@ onBeforeUnmount(() => {
               {{ c.proposed.meeting_date || "日期未知" }}
             </p>
             <blockquote>{{ c.reason }}</blockquote>
+            <details v-if="c.proposed.replacement">
+              <summary>对比本次申请替换的纪要与转写</summary>
+              <h3>中心原版纪要</h3>
+              <p class="wk-summary">{{ c.before_summary }}</p>
+              <h3>拟采用的个人新版纪要</h3>
+              <p class="wk-summary">
+                {{ c.proposed.replacement.report.summary }}
+              </p>
+              <h3>原版转写与依据</h3>
+              <p v-for="(span, id) in c.before_evidence" :key="id">
+                {{ span.text }}
+              </p>
+              <h3>拟采用的新版转写与依据</h3>
+              <p
+                v-for="(span, id) in c.proposed.replacement.evidence"
+                :key="id"
+              >
+                {{ span.text }}
+              </p>
+            </details>
             <div
               v-if="user.role === 'manager' && c.status === 'pending'"
               class="wk-actions"
@@ -1164,11 +1606,18 @@ onBeforeUnmount(() => {
             </div>
             <button @click="perform(refresh)" :disabled="busy">刷新中心</button>
           </div>
-          <label
-            >搜索中心会谈<input
-              v-model="search"
-              placeholder="客户、销售或会谈标题"
-          /></label>
+          <RecordingFilters
+            v-model:query="search"
+            v-model:mode="dateMode"
+            v-model:from="dateFrom"
+            v-model:to="dateTo"
+            v-model:owner="ownerFilter"
+            v-model:team="teamFilter"
+            :owners="centerOwners"
+            :teams="centerTeams"
+            received-label="上报"
+            @clear="clearFilters"
+          />
           <div class="wk-note">
             当前可见 {{ visibleCenter.length }} 场上报。范围：{{
               scope

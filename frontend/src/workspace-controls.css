@@ -1,0 +1,15 @@
+/* Shared controls must also reach child workspaces, not only the root component. */
+.wk-root button { border:1px solid #d6dfd6; border-radius:7px; padding:9px 14px; background:#fff; color:#244a38; font:inherit; cursor:pointer; }
+.wk-root button:hover:not(:disabled) { border-color:#6b8870; background:#f0f5ec; }
+.wk-root button:disabled { opacity:.5; cursor:default; }
+.wk-root button.wk-primary { background:#315c43; color:white; border-color:#315c43; }
+.wk-root label { display:block; margin:12px 0; }
+.wk-root input:not([type="checkbox"]):not([type="file"]), .wk-root select, .wk-root textarea { display:block; width:100%; min-width:0; padding:10px 12px; border:1px solid #d6dfd6; border-radius:6px; background:#fff; color:#203b33; font:inherit; margin-top:6px; box-sizing:border-box; }
+.wk-root textarea { resize:vertical; }
+.wk-root input[type="checkbox"] { width:auto; accent-color:#315c43; }
+.wk-root input:focus-visible,.wk-root select:focus-visible,.wk-root textarea:focus-visible,.wk-root button:focus-visible { outline:2px solid #6b8870; outline-offset:2px; }
+.wk-root .wk-note { background:#e6eee5; padding:12px 16px; border-radius:7px; margin:16px 0; overflow-wrap:anywhere; }
+.wk-root .wk-error { background:#f9e9e6; color:#8a3525; padding:12px 16px; border-radius:7px; margin:16px 0; overflow-wrap:anywhere; }
+.wk-root details { margin:16px 0; }
+.wk-root summary { cursor:pointer; }
+@media(max-width:720px){.wk-root input:not([type="checkbox"]),.wk-root select,.wk-root textarea{font-size:16px;}}

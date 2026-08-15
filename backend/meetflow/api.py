@@ -31,8 +31,10 @@ from .database import (
 )
 from .demo import import_demo, import_sales_meeting_demo
 from .domain import DomainError, MeetingInput, ReviewInput, SourceInput, TaskUpdate, now, uid
+from .maintenance import maintenance_router
 from .orchestration import RunDriver
 from .quality_workspace import QualityWorkspace, quality_router
+from .reports_workspace import ReportService, reports_router
 from .reviews import approve, render_markdown
 from .sales import SalesService
 from .sales_api import sales_router
@@ -68,6 +70,8 @@ def create_app(settings=None, provider=None, sales_provider=None):
 
     @asynccontextmanager
     async def lifespan(app):
+        if settings.auth_enabled:
+            workspace.index_existing_uploads()
         if settings.start_worker:
             driver.recover()
             sales_driver.recover()
@@ -85,8 +89,11 @@ def create_app(settings=None, provider=None, sales_provider=None):
     app.state.auth, app.state.workspace = auth, workspace
     app.state.quality = quality
     app.state.business = business
+    app.state.reports = ReportService(business)
     app.include_router(quality_router(quality))
     app.include_router(business_router(business))
+    app.include_router(reports_router(app.state.reports))
+    app.include_router(maintenance_router(workspace))
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
                        allow_methods=["GET", "POST", "PATCH", "DELETE"],
                        allow_headers=["Content-Type", "Last-Event-ID", "Authorization"])

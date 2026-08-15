@@ -97,6 +97,10 @@ class Store:
         sources = session.scalars(select(Source).where(Source.project_id == meeting.project_id)).all()
         sources = [source for source in sources if source.meeting_id is None
                    or source.meeting_id == meeting.id or source.kind == "history"]
+        transcripts = [source for source in sources if source.kind == "transcript" and source.meeting_id == meeting.id]
+        if transcripts:
+            latest = max(transcripts, key=lambda source: (source.version, source.created_at))
+            sources = [source for source in sources if source not in transcripts or source.id == latest.id]
         tasks = session.scalars(select(Task).where(Task.project_id == meeting.project_id)).all()
         manifest = {"contact": self.meeting_dict(session, meeting),
                     "sources": [row_dict(source) for source in sources],
