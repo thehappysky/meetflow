@@ -6,6 +6,8 @@
 
 职责本身另做R1，见[划分依据与对照](../../docs/28-agent-role-partition-evidence.md)：三种职责重点在同串行图下各24条，关键槽位均16/24，含证据条件均10/24，没有职责赢家。拓扑比较不等于职责比较，固定模型调用微基准不等于完整自主工具Agent验证。
 
+内部另做I1（20例×4协议单次）与实际meeting工具循环探针，见[内部构造与结果](../../docs/29-agent-internals-and-ablation.md)。枚举减少一次非法ID失败，去重只证明实验封装省token；实际角色Schema首请求1449→877 token，但两种Schema均6步超限。候选未修改产品契约，不用静态体积或小基准冒充全角色质量。
+
 ## 文件与复算
 
 | 文件 | 用途 |
@@ -14,6 +16,10 @@
 | agent_experiment.py | 本地真实模型、三种调用策略、原始请求响应、逐例失败与指标 |
 | topology_experiment.py | 三种多Agent交接／审查机制；逐例至少两个Agent，记录未审查同错与净修复 |
 | role_partition_experiment.py | 同拓扑下三组职责提示R1对照；复用计量／校验，审查提示与交接结构相同 |
+| internal_cases.py | 原12例不改，另加8个代理编写开发场景；仍非独立gold |
+| internal_experiment.py | 固定外部分工，引用解码／有效上游去重2×2对照 |
+| role_schema_probe.py | 六角色Schema体积／大枚举代价与实际AgentRunner单角色诊断；候选不改产品 |
+| test_internals.py／test_role_schemas.py | 去重不变性、非法产物保留、字段语义／Schema引用完整性及探针超时透传 |
 | test_topologies.py | 交接上下文隔离、争议门控、无效产物与一致但错误的计量 |
 | test_role_partitions.py | 职责对照的阶段顺序、相同审查和交接控制变量 |
 | query_experiment.py | Git 基线与候选 SQL 查询、严格返回等价、交错计时 |
@@ -28,11 +34,13 @@
 在仓库根目录 PowerShell 中运行，使用已有 Python 3.12 虚拟环境及依赖。真实模型命令要求本机 Ollama 服务和模型；下载及运行会占用磁盘／显存。不会修改产品 `.env`，测试数据库使用临时目录。
 
 ```powershell
-.venv\Scripts\python.exe -m pytest tests labs/backend_agent_audit/test_measurement.py labs/backend_agent_audit/test_topologies.py labs/backend_agent_audit/test_role_partitions.py -q
+.venv\Scripts\python.exe -m pytest tests labs/backend_agent_audit -q
 .venv\Scripts\python.exe labs/backend_agent_audit/query_experiment.py --sizes 10 100 500 --repeats 7
 .venv\Scripts\python.exe labs/backend_agent_audit/agent_experiment.py --model qwen3:4b --repeats 2
 .venv\Scripts\python.exe labs/backend_agent_audit/topology_experiment.py --model qwen3:4b --repeats 2
 .venv\Scripts\python.exe labs/backend_agent_audit/role_partition_experiment.py --model qwen3:4b --repeats 2
+.venv\Scripts\python.exe labs/backend_agent_audit/internal_experiment.py --model qwen3:4b --repeats 1
+.venv\Scripts\python.exe labs/backend_agent_audit/role_schema_probe.py
 .venv\Scripts\python.exe labs/backend_agent_audit/current_graph_probe.py --model qwen3:4b --profile ollama
 .venv\Scripts\python.exe labs/backend_agent_audit/sqlite_writes.py
 .venv\Scripts\python.exe labs/backend_agent_audit/capacity.py

@@ -2534,6 +2534,1315 @@
       ]
     }
   ],
+  "agent_internal_experiments": [
+    {
+      "directory": "test-results\\backend-agent-audit\\internals\\20261112T162355Z",
+      "manifest": {
+        "status": "completed",
+        "model": "qwen3:4b",
+        "args": {
+          "url": "http://127.0.0.1:11434",
+          "model": "qwen3:4b",
+          "repeats": 1,
+          "timeout": 90
+        },
+        "git_head": "913476a64a5f60f12ed37b1dd5fb5053d0308536",
+        "dirty_files": [
+          " M labs/backend_agent_audit/PLAN.md",
+          " M labs/backend_agent_audit/topology_experiment.py",
+          "?? labs/backend_agent_audit/internal_cases.py",
+          "?? labs/backend_agent_audit/internal_experiment.py",
+          "?? labs/backend_agent_audit/test_internals.py"
+        ],
+        "source_sha256": {
+          "agent_experiment.py": "bd909fad5620b0ba07615d4b9e07517aaef1b51c790a435bdc872ce5c723fc16",
+          "capacity.py": "109671ff247acf6aa8fceffd2deef5fc81adccca32caea9c63fe3ef0365c5d91",
+          "cases.py": "35f0d067dd6380baca35a51ad10c9dc6c0ab1f12c8e6743d2c8a9ebecc687354",
+          "current_graph_probe.py": "57c104c018c0290e765086e52c6db3719b774216de41c9da6444c49205b9ab65",
+          "internal_cases.py": "a2f0e22d4ba7935d6f26f738c95abcf78f6f09047322c8e6c155ad8f24c3221c",
+          "internal_experiment.py": "65d58ba5ba86f772e527c5e5cfd0f7140e8475b866c6aac09b28351dda873cd6",
+          "protocol_probe.py": "bbf7df90ece62301265cea9161178e5994030f6cb7efa1c5bd1ba6e44dacc182",
+          "query_experiment.py": "a94252e7446699a9733ce9336ec3a3602841478dd4b41157c7fad1c78a4c1b58",
+          "role_partition_experiment.py": "507c42798b797ea962bd3f41efe3d3902643d33bf1575bd9c91fba6aae611c0c",
+          "sqlite_writes.py": "7a97001ab34089e63549469b64ab910ba7df9e3cd1f1c26d5d2ea52408315e95",
+          "summarize.py": "0b659a9485637e571661fdf24f1698684eb859406db13adc167e78fb72f8a307",
+          "test_internals.py": "c0bc4ec92259daa8e2e8a5103ee9aa31824be71b227cbc268123af28cfced21b",
+          "test_measurement.py": "039238cda79ff0bf9bc00db8d28505def0371053e7408273af9623888887460b",
+          "test_role_partitions.py": "a1c9ec10aaaf1f4327f0fa9348d1ffb15129d532ba2a99e30f4ee876d64e91da",
+          "test_topologies.py": "46aa87c277e0001f69e55e7657b6284112b8e717545ed2f3b13ba6ac1e2237a6",
+          "topology_experiment.py": "40e3d5709df1c6dbb215bef1e7d4b19c05977eb70734db4e87c7172d0494b7cc"
+        },
+        "plan_sha256": "1f262ee0645898e2faed13cae0903779a3908645cc9e411a189059e7b6edc3e2",
+        "data_sha256": "87771ddb6fc0aaaf00c7652eb4d660783ffc06ed478011a03ca1dfdb134d267d",
+        "python": "3.12.6 (tags/v3.12.6:a4a2d2b, Sep  6 2024, 20:11:23) [MSC v.1940 64 bit (AMD64)]",
+        "platform": "Windows-11-10.0.22631-SP0",
+        "scope": "20 agent-authored synthetic DEVELOPMENT cases, no independent gold or holdout",
+        "execution": "independent expert contexts executed serially on one local GPU; not cloud parallel latency",
+        "generation_cap": "512 per call, max 3 calls; common 1536 upper cap, not matched actual tokens",
+        "role_sets": {
+          "baseline": {
+            "stage1": "你负责本次发言取证：检查是否明确承诺、谁负责、日期和实际完成情况；结合历史给出全部字段的最佳判断。",
+            "stage2": "你负责历史与状态核对：检查原安排是否被改期、移交、暂停或取消，前置条件是否仍未满足；给出全部字段的最佳判断。",
+            "reviewer": "你负责独立证据审查：专家产物可能错误，不按多数采信；回原话逐字段处理差异和验证错误，给出全部字段的最佳判断。"
+          },
+          "id_enum": {
+            "stage1": "你负责本次发言取证：检查是否明确承诺、谁负责、日期和实际完成情况；结合历史给出全部字段的最佳判断。",
+            "stage2": "你负责历史与状态核对：检查原安排是否被改期、移交、暂停或取消，前置条件是否仍未满足；给出全部字段的最佳判断。",
+            "reviewer": "你负责独立证据审查：专家产物可能错误，不按多数采信；回原话逐字段处理差异和验证错误，给出全部字段的最佳判断。"
+          },
+          "compact": {
+            "stage1": "你负责本次发言取证：检查是否明确承诺、谁负责、日期和实际完成情况；结合历史给出全部字段的最佳判断。",
+            "stage2": "你负责历史与状态核对：检查原安排是否被改期、移交、暂停或取消，前置条件是否仍未满足；给出全部字段的最佳判断。",
+            "reviewer": "你负责独立证据审查：专家产物可能错误，不按多数采信；回原话逐字段处理差异和验证错误，给出全部字段的最佳判断。"
+          },
+          "id_enum_compact": {
+            "stage1": "你负责本次发言取证：检查是否明确承诺、谁负责、日期和实际完成情况；结合历史给出全部字段的最佳判断。",
+            "stage2": "你负责历史与状态核对：检查原安排是否被改期、移交、暂停或取消，前置条件是否仍未满足；给出全部字段的最佳判断。",
+            "reviewer": "你负责独立证据审查：专家产物可能错误，不按多数采信；回原话逐字段处理差异和验证错误，给出全部字段的最佳判断。"
+          }
+        },
+        "comparison": "role prompts only, fixed serial topology",
+        "request_transform": "__main__.transform_request",
+        "contract_sha256": "4adb097a998ddf3b37bfeee5a04cbbc09c1273289d6ff2400135c7ac44e398ce",
+        "price": null,
+        "ended_utc": "2026-11-12T16:29:08.328295+00:00"
+      },
+      "model_identity": {
+        "name": "qwen3:4b",
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M"
+        }
+      },
+      "metrics": {
+        "baseline": {
+          "cases": 20,
+          "successful": 19,
+          "all_slots_correct": 16,
+          "invented_actions": 1,
+          "p50_seconds": 4.0346686499833595,
+          "p95_seconds": 4.285932200029492,
+          "input_tokens": 53608,
+          "output_tokens": 3192,
+          "model_calls": 60,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 17,
+            "owner": 17,
+            "due": 17,
+            "status": 16
+          },
+          "evidence": {
+            "tp": 27,
+            "fp": 4,
+            "fn": 7,
+            "f1": 0.8307692307692308
+          },
+          "conditions": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.5
+          },
+          "fully_exact": 9,
+          "distinct_cases": 20,
+          "reviews": 20,
+          "review_rate": 1.0,
+          "unchecked_consensus": 0,
+          "unchecked_core_errors": 0,
+          "unchecked_full_errors": 0,
+          "repaired_core_slots": 0,
+          "damaged_core_slots": 0,
+          "completion_cap_violations": 0,
+          "invalid_intermediate": 2,
+          "net_repair_rate": 0.0,
+          "mean_calls": 3.0,
+          "p50_model_call_seconds": 1.3080449999833945
+        },
+        "compact": {
+          "cases": 20,
+          "successful": 19,
+          "all_slots_correct": 16,
+          "invented_actions": 1,
+          "p50_seconds": 3.9189644499856513,
+          "p95_seconds": 4.195782100025099,
+          "input_tokens": 49627,
+          "output_tokens": 3192,
+          "model_calls": 60,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 17,
+            "owner": 17,
+            "due": 17,
+            "status": 16
+          },
+          "evidence": {
+            "tp": 27,
+            "fp": 4,
+            "fn": 7,
+            "f1": 0.8307692307692308
+          },
+          "conditions": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.5
+          },
+          "fully_exact": 9,
+          "distinct_cases": 20,
+          "reviews": 20,
+          "review_rate": 1.0,
+          "unchecked_consensus": 0,
+          "unchecked_core_errors": 0,
+          "unchecked_full_errors": 0,
+          "repaired_core_slots": 0,
+          "damaged_core_slots": 0,
+          "completion_cap_violations": 0,
+          "invalid_intermediate": 2,
+          "net_repair_rate": 0.0,
+          "mean_calls": 3.0,
+          "p50_model_call_seconds": 1.298837350012036
+        },
+        "id_enum": {
+          "cases": 20,
+          "successful": 20,
+          "all_slots_correct": 17,
+          "invented_actions": 1,
+          "p50_seconds": 4.027040050015785,
+          "p95_seconds": 4.432456799957436,
+          "input_tokens": 53664,
+          "output_tokens": 3192,
+          "model_calls": 60,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 18,
+            "owner": 18,
+            "due": 18,
+            "status": 17
+          },
+          "evidence": {
+            "tp": 28,
+            "fp": 4,
+            "fn": 6,
+            "f1": 0.8484848484848485
+          },
+          "conditions": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.5
+          },
+          "fully_exact": 9,
+          "distinct_cases": 20,
+          "reviews": 20,
+          "review_rate": 1.0,
+          "unchecked_consensus": 0,
+          "unchecked_core_errors": 0,
+          "unchecked_full_errors": 0,
+          "repaired_core_slots": 0,
+          "damaged_core_slots": 0,
+          "completion_cap_violations": 0,
+          "invalid_intermediate": 0,
+          "net_repair_rate": 0.0,
+          "mean_calls": 3.0,
+          "p50_model_call_seconds": 1.3168491499964148
+        },
+        "id_enum_compact": {
+          "cases": 20,
+          "successful": 20,
+          "all_slots_correct": 17,
+          "invented_actions": 1,
+          "p50_seconds": 3.9192300000286195,
+          "p95_seconds": 4.247221200028434,
+          "input_tokens": 49506,
+          "output_tokens": 3192,
+          "model_calls": 60,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 18,
+            "owner": 18,
+            "due": 18,
+            "status": 17
+          },
+          "evidence": {
+            "tp": 28,
+            "fp": 4,
+            "fn": 6,
+            "f1": 0.8484848484848485
+          },
+          "conditions": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.5
+          },
+          "fully_exact": 9,
+          "distinct_cases": 20,
+          "reviews": 20,
+          "review_rate": 1.0,
+          "unchecked_consensus": 0,
+          "unchecked_core_errors": 0,
+          "unchecked_full_errors": 0,
+          "repaired_core_slots": 0,
+          "damaged_core_slots": 0,
+          "completion_cap_violations": 0,
+          "invalid_intermediate": 0,
+          "net_repair_rate": 0.0,
+          "mean_calls": 3.0,
+          "p50_model_call_seconds": 1.3014237500028685
+        }
+      },
+      "stage_diagnostics": {
+        "baseline": {
+          "posthoc_explanatory_not_new_selection_metric": true,
+          "core_slots_repaired_relative_to_stage1": 0,
+          "core_slots_damaged_relative_to_stage1": 0,
+          "at_least_one_core_correct_expert_but_final_core_wrong": 0
+        },
+        "compact": {
+          "posthoc_explanatory_not_new_selection_metric": true,
+          "core_slots_repaired_relative_to_stage1": 0,
+          "core_slots_damaged_relative_to_stage1": 0,
+          "at_least_one_core_correct_expert_but_final_core_wrong": 0
+        },
+        "id_enum": {
+          "posthoc_explanatory_not_new_selection_metric": true,
+          "core_slots_repaired_relative_to_stage1": 0,
+          "core_slots_damaged_relative_to_stage1": 0,
+          "at_least_one_core_correct_expert_but_final_core_wrong": 0
+        },
+        "id_enum_compact": {
+          "posthoc_explanatory_not_new_selection_metric": true,
+          "core_slots_repaired_relative_to_stage1": 0,
+          "core_slots_damaged_relative_to_stage1": 0,
+          "at_least_one_core_correct_expert_but_final_core_wrong": 0
+        }
+      },
+      "prediction_sha256": "0170e746bc87db0a2e5ee24d4ea16ba8251733e44d1b196e0aca18254649db39",
+      "unchecked_full_error_cases": [],
+      "case_results": [
+        {
+          "case_id": "cancel",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "refused_handover",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "deadline_revoked",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition_removed",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "refused_handover",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "injection",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "explicit",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "not_yet_sent",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "conditional_suggestion",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "failed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unrelated_customer_deadline",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "conditional_suggestion",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel_retracted",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "injection",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "explicit",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel_retracted",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "refused_handover",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "deadline_revoked",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "two_distinct_targets",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition_removed",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition_removed",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "deadline_revoked",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "reschedule",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel_retracted",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "injection",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "two_distinct_targets",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "failed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "deadline_revoked",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "pause",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "explicit",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "injection",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel_retracted",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "not_yet_sent",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unrelated_customer_deadline",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "suggestion",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "done",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "explicit",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "two_distinct_targets",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "conditional_suggestion",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unrelated_customer_deadline",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "not_yet_sent",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unrelated_customer_deadline",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_owner",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "handover",
+          "policy": "id_enum",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "condition_removed",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "conditional_suggestion",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "cancel",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "customer_only",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": false,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "refused_handover",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "not_yet_sent",
+          "policy": "id_enum_compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": false,
+          "review_triggered": true
+        },
+        {
+          "case_id": "two_distinct_targets",
+          "policy": "baseline",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        },
+        {
+          "case_id": "unknown_date",
+          "policy": "compact",
+          "repeat": 0,
+          "status": "completed",
+          "core_correct": true,
+          "fully_exact": true,
+          "review_triggered": true
+        }
+      ],
+      "manifest_annotation": {
+        "original_comparison": "role prompts only, fixed serial topology",
+        "actual_comparison": "2x2 reference decoding and valid handoff deduplication; fixed roles/topology",
+        "reason": "Shared runner used a default descriptive label; request_transform, recorded role_sets, source snapshot and preregistration identify actual factors. Original manifest and all trials remain unchanged."
+      },
+      "role_usage": {
+        "id_enum/stage1": {
+          "model_calls": 20,
+          "input_tokens": 15258,
+          "output_tokens": 1064,
+          "invalid_outputs": 0
+        },
+        "id_enum/stage2": {
+          "model_calls": 20,
+          "input_tokens": 17886,
+          "output_tokens": 1064,
+          "invalid_outputs": 0
+        },
+        "id_enum/reviewer": {
+          "model_calls": 20,
+          "input_tokens": 20520,
+          "output_tokens": 1064,
+          "invalid_outputs": 0
+        },
+        "baseline/stage1": {
+          "model_calls": 20,
+          "input_tokens": 15258,
+          "output_tokens": 1064,
+          "invalid_outputs": 1
+        },
+        "baseline/stage2": {
+          "model_calls": 20,
+          "input_tokens": 17866,
+          "output_tokens": 1064,
+          "invalid_outputs": 1
+        },
+        "baseline/reviewer": {
+          "model_calls": 20,
+          "input_tokens": 20484,
+          "output_tokens": 1064,
+          "invalid_outputs": 1
+        },
+        "compact/stage1": {
+          "model_calls": 20,
+          "input_tokens": 15258,
+          "output_tokens": 1064,
+          "invalid_outputs": 1
+        },
+        "compact/stage2": {
+          "model_calls": 20,
+          "input_tokens": 16522,
+          "output_tokens": 1064,
+          "invalid_outputs": 1
+        },
+        "compact/reviewer": {
+          "model_calls": 20,
+          "input_tokens": 17847,
+          "output_tokens": 1064,
+          "invalid_outputs": 1
+        },
+        "id_enum_compact/stage1": {
+          "model_calls": 20,
+          "input_tokens": 15258,
+          "output_tokens": 1064,
+          "invalid_outputs": 0
+        },
+        "id_enum_compact/stage2": {
+          "model_calls": 20,
+          "input_tokens": 16482,
+          "output_tokens": 1064,
+          "invalid_outputs": 0
+        },
+        "id_enum_compact/reviewer": {
+          "model_calls": 20,
+          "input_tokens": 17766,
+          "output_tokens": 1064,
+          "invalid_outputs": 0
+        }
+      },
+      "compaction_prediction_equality": {
+        "baseline->compact": {
+          "cases": 20,
+          "prediction_differences": []
+        },
+        "id_enum->id_enum_compact": {
+          "cases": 20,
+          "prediction_differences": []
+        }
+      }
+    }
+  ],
+  "product_role_schema_diagnostics": [
+    {
+      "directory": "test-results\\backend-agent-audit\\role-schema\\20261112T162936Z",
+      "manifest": {
+        "status": "completed",
+        "scope": "one meeting specialist, one synthetic case, original AgentRunner",
+        "model": "qwen3:4b",
+        "profiles": [
+          "shared_schema",
+          "role_schema"
+        ],
+        "generation_per_call": 512,
+        "max_steps": 6,
+        "thinking": false,
+        "temperature": 0,
+        "seed": 2026,
+        "context": 8192,
+        "plan_sha256": "1f262ee0645898e2faed13cae0903779a3908645cc9e411a189059e7b6edc3e2",
+        "source_sha256": {
+          "labs\\backend_agent_audit\\role_schema_probe.py": "c64bd98291098467702f87484aeb2aae2746ecf7246fd81b850ad88be4a6136c",
+          "labs\\backend_agent_audit\\current_graph_probe.py": "57c104c018c0290e765086e52c6db3719b774216de41c9da6444c49205b9ab65",
+          "backend\\meetflow\\agents.py": "fa1c7afbe979ff8db279e36ef908d47867fd9343dc8f25eb1c7c76b247d59e3d",
+          "backend\\meetflow\\providers.py": "359d5cd616fcb7086a74bb30230159df7c07584c66f12827fd0b40a592a96a2c",
+          "backend\\meetflow\\domain.py": "0eb2436963fc09a34499dcb6ed5fe6b2b446e8099e04659b1299643a3bb8c339",
+          "backend\\meetflow\\tools.py": "4c85ba105d1bd6d21df1b14f6d8e21b5c60a5e06f6f4322b432d8f7a1e21ca55"
+        },
+        "limitations": "ordered single-case integration diagnostic, no quality or speed ranking; no product change"
+      },
+      "model_identity": {
+        "name": "qwen3:4b",
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M"
+        }
+      },
+      "results": [
+        {
+          "profile": "shared_schema",
+          "status": "failed",
+          "error": {
+            "type": "DomainError",
+            "message": "会议理解达到迭代上限，未伪造成功产物"
+          },
+          "wall_seconds": 89.37630639999406,
+          "model_calls": 6,
+          "tool_calls": 2,
+          "input_tokens": 16544,
+          "output_tokens": 2900
+        },
+        {
+          "profile": "role_schema",
+          "status": "failed",
+          "error": {
+            "type": "DomainError",
+            "message": "会议理解达到迭代上限，未伪造成功产物"
+          },
+          "wall_seconds": 80.89452510001138,
+          "model_calls": 6,
+          "tool_calls": 2,
+          "input_tokens": 12752,
+          "output_tokens": 2777
+        }
+      ],
+      "footprint": [
+        {
+          "role": "coordinator",
+          "shared_schema_characters": 4099,
+          "role_schema_characters": 2169,
+          "role_schema_fields": [
+            "summary",
+            "claims",
+            "risks",
+            "questions",
+            "delegations"
+          ],
+          "enum_characters_by_reference_count": {
+            "10": 2449,
+            "100": 4789,
+            "1000": 28189
+          }
+        },
+        {
+          "role": "meeting",
+          "shared_schema_characters": 4099,
+          "role_schema_characters": 1548,
+          "role_schema_fields": [
+            "summary",
+            "claims",
+            "risks",
+            "questions"
+          ],
+          "enum_characters_by_reference_count": {
+            "10": 1828,
+            "100": 4168,
+            "1000": 27568
+          }
+        },
+        {
+          "role": "context",
+          "shared_schema_characters": 4099,
+          "role_schema_characters": 1548,
+          "role_schema_fields": [
+            "summary",
+            "claims",
+            "risks",
+            "questions"
+          ],
+          "enum_characters_by_reference_count": {
+            "10": 1828,
+            "100": 4168,
+            "1000": 27568
+          }
+        },
+        {
+          "role": "planner",
+          "shared_schema_characters": 4099,
+          "role_schema_characters": 2837,
+          "role_schema_fields": [
+            "summary",
+            "claims",
+            "actions",
+            "risks",
+            "questions"
+          ],
+          "enum_characters_by_reference_count": {
+            "10": 3257,
+            "100": 6767,
+            "1000": 41867
+          }
+        },
+        {
+          "role": "risk",
+          "shared_schema_characters": 4099,
+          "role_schema_characters": 1545,
+          "role_schema_fields": [
+            "summary",
+            "claims",
+            "risks",
+            "questions"
+          ],
+          "enum_characters_by_reference_count": {
+            "10": 1825,
+            "100": 4165,
+            "1000": 27565
+          }
+        },
+        {
+          "role": "auditor",
+          "shared_schema_characters": 4099,
+          "role_schema_characters": 2199,
+          "role_schema_fields": [
+            "summary",
+            "claims",
+            "risks",
+            "questions",
+            "challenges"
+          ],
+          "enum_characters_by_reference_count": {
+            "10": 2619,
+            "100": 6129,
+            "1000": 41229
+          }
+        }
+      ],
+      "first_call_usage": {
+        "shared_schema": {
+          "prompt_tokens": 1449,
+          "completion_tokens": 512
+        },
+        "role_schema": {
+          "prompt_tokens": 877,
+          "completion_tokens": 512
+        }
+      },
+      "completion_counts": {
+        "shared_schema": [
+          512,
+          421,
+          431,
+          512,
+          512,
+          512
+        ],
+        "role_schema": [
+          512,
+          361,
+          512,
+          368,
+          512,
+          512
+        ]
+      },
+      "first_messages_identical": true,
+      "first_options_identical": true
+    }
+  ],
   "production_graph_diagnostics": [
     {
       "directory": "test-results\\backend-agent-audit\\current-graph\\20261112T125854Z",

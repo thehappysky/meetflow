@@ -83,7 +83,7 @@ def metrics(rows):
 
 
 def run(args, *, role_sets=None, collaboration=collaborate, output_group="topologies",
-        repair_reference="history_state draft before review"):
+        repair_reference="history_state draft before review", cases=CASES, request_transform=None, comparison=None):
     policies = tuple(role_sets) if role_sets else POLICIES
     folder = ROOT/"test-results/backend-agent-audit"/output_group/datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     folder.mkdir(parents=True, exist_ok=False)
@@ -94,19 +94,20 @@ def run(args, *, role_sets=None, collaboration=collaborate, output_group="topolo
         "git_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "dirty_files": subprocess.check_output(["git", "status", "--short"], cwd=ROOT, text=True).splitlines(),
         "source_sha256": {k: sha(v.encode()) for k, v in sources.items()}, "plan_sha256": sha(plan),
-        "data_sha256": sha(json.dumps(CASES, ensure_ascii=False, sort_keys=True).encode()),
+        "data_sha256": sha(json.dumps(cases, ensure_ascii=False, sort_keys=True).encode()),
         "python": sys.version, "platform": platform.platform(),
-        "scope": "12 agent-authored synthetic DEVELOPMENT cases, no independent gold or holdout",
+        "scope": f"{len(cases)} agent-authored synthetic DEVELOPMENT cases, no independent gold or holdout",
         "execution": "independent expert contexts executed serially on one local GPU; not cloud parallel latency",
         "generation_cap": "512 per call, max 3 calls; common 1536 upper cap, not matched actual tokens",
         "role_sets": role_sets or {policy: ROLES for policy in policies},
-        "comparison": "role prompts only, fixed serial topology" if role_sets else "topology and review gate",
+        "comparison": comparison or ("role prompts only, fixed serial topology" if role_sets else "topology and review gate"),
+        "request_transform": f"{request_transform.__module__}.{request_transform.__name__}" if request_transform else None,
         "contract_sha256": sha(CONTRACT.encode()), "price": None}
     write_json(folder/"manifest.json", manifest)
     write_json(folder/"source_bundle.json", sources)
-    write_json(folder/"cases.json", CASES)
+    write_json(folder/"cases.json", cases)
     (folder/"plan_snapshot.md").write_bytes(plan)
-    trials = [(c, p, r) for c in CASES for p in policies for r in range(args.repeats)]
+    trials = [(c, p, r) for c in cases for p in policies for r in range(args.repeats)]
     random.Random(20261112).shuffle(trials)
     results = []
     with httpx.Client(timeout=args.timeout) as client:
@@ -121,12 +122,14 @@ def run(args, *, role_sets=None, collaboration=collaborate, output_group="topolo
             active_roles = role_sets[policy] if role_sets else ROLES
 
             def call(role, upstream, *, case=case, repeat=repeat, usage=usage, trial=trial, times=times,
-                     active_roles=active_roles):
+                     active_roles=active_roles, policy=policy):
                 request = {"model": args.model, "stream": False, "think": False, "format": Outcome.model_json_schema(),
                     "keep_alive": "30m", "options": {"temperature": 0, "seed": 2026+repeat*10+list(active_roles).index(role),
                     "num_ctx": 4096, "num_predict": 512}, "messages": [
                     {"role": "system", "content": CONTRACT+"\n"+active_roles[role]+"\n输出JSON Schema："+json.dumps(Outcome.model_json_schema(), ensure_ascii=False)},
                     {"role": "user", "content": json.dumps({"frozen_evidence": packet(case), "upstream": upstream}, ensure_ascii=False)}]}
+                if request_transform:
+                    request = request_transform(policy, role, case, request)
                 usage["model_calls"] += 1
                 append(folder/"trace.jsonl", {"trial": trial, "role": role, "event": "request", "request": request})
                 started = time.perf_counter()

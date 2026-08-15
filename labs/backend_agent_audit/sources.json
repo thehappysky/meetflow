@@ -28,5 +28,6 @@
   {"id":"S27","title":"Alembic tutorial","url":"https://alembic.sqlalchemy.org/en/latest/tutorial.html","use":"版本化数据库迁移候选，当前项目仍主要是create_all增表"},
   {"id":"S28","title":"Ollama OpenAI compatibility","url":"https://docs.ollama.com/api/openai-compatibility","use":"兼容接口支持子集；实测 max_completion_tokens 未限制返回，不假设所有兼容服务参数一致"},
   {"id":"S29","title":"Ollama native tool calling","url":"https://docs.ollama.com/capabilities/tool-calling","use":"原生 object arguments、tool_name 与内部调用ID／string arguments之间的适配"},
-  {"id":"S30","title":"Ollama chat API","url":"https://docs.ollama.com/api/chat","use":"原生 num_predict／num_ctx、think与实际 prompt_eval_count／eval_count计量"}
+  {"id":"S30","title":"Ollama chat API","url":"https://docs.ollama.com/api/chat","use":"原生 num_predict／num_ctx、think与实际 prompt_eval_count／eval_count计量"},
+  {"id":"S31","title":"Pydantic dynamic model creation","url":"https://docs.pydantic.dev/latest/concepts/models/#dynamic-model-creation","read_scope":"官方动态模型／create_model文档，重定向validation文档","use":"生成保持原字段约束的角色Schema候选；机制不作为质量成绩"}
 ]
