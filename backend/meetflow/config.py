@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     asr_model: str = ""
     asr_device: str = "cpu"
     start_worker: bool = True
+    auth_enabled: bool = True
 
     @property
     def db_url(self) -> str:

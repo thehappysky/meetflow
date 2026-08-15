@@ -42,6 +42,8 @@ jobs:
       - name: Browser journey
         env:
           MEETFLOW_DATA_DIR: ${{ runner.temp }}/meetflow-browser-data
+          # Only the isolated legacy regression server; normal deployments require accounts.
+          MEETFLOW_AUTH_ENABLED: 'false'
         run: |
           python -m playwright install --with-deps chromium
           python -m uvicorn meetflow.api:app --host 127.0.0.1 --port 8765 > "$RUNNER_TEMP/meetflow-server.log" 2>&1 &

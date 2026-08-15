@@ -208,6 +208,96 @@ class SalesReview(Base):
     created_at: Mapped[str] = mapped_column(default=now)
 
 
+class Company(Base):
+    __tablename__ = "access_companies"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    name: Mapped[str]
+
+
+class Team(Base):
+    __tablename__ = "access_teams"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    name: Mapped[str]
+
+
+class Account(Base):
+    __tablename__ = "access_accounts"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    team_id: Mapped[str | None] = mapped_column(ForeignKey("access_teams.id"))
+    username: Mapped[str] = mapped_column(String(120), unique=True)
+    name: Mapped[str]
+    role: Mapped[str]
+    password_hash: Mapped[str]
+    active: Mapped[bool] = mapped_column(default=True)
+    project_id: Mapped[str | None] = mapped_column(ForeignKey("projects.id"))
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class AccessSession(Base):
+    __tablename__ = "access_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"), index=True)
+    expires_at: Mapped[str]
+
+
+class Invitation(Base):
+    __tablename__ = "access_invitations"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"))
+    team_id: Mapped[str] = mapped_column(ForeignKey("access_teams.id"))
+    created_by: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    expires_at: Mapped[str]
+    used_by: Mapped[str | None] = mapped_column(ForeignKey("access_accounts.id"))
+    revoked: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class PersonalRecording(Base):
+    __tablename__ = "workspace_recordings"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"), index=True)
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    team_id: Mapped[str] = mapped_column(ForeignKey("access_teams.id"))
+    run_id: Mapped[str] = mapped_column(ForeignKey("runs.id"), unique=True)
+    body: Mapped[dict] = mapped_column(JSON)
+    version: Mapped[int] = mapped_column(default=1)
+    deleted: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class Submission(Base):
+    __tablename__ = "workspace_submissions"
+    __table_args__ = (UniqueConstraint("recording_id"), UniqueConstraint("request_key"))
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    recording_id: Mapped[str] = mapped_column(ForeignKey("workspace_recordings.id"))
+    owner_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("access_companies.id"), index=True)
+    team_id: Mapped[str] = mapped_column(ForeignKey("access_teams.id"))
+    snapshot: Mapped[dict] = mapped_column(JSON)
+    revision: Mapped[int] = mapped_column(default=1)
+    history: Mapped[list] = mapped_column(JSON, default=list)
+    request_key: Mapped[str]
+    request_hash: Mapped[str]
+    deleted: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class Correction(Base):
+    __tablename__ = "workspace_corrections"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    submission_id: Mapped[str] = mapped_column(ForeignKey("workspace_submissions.id"))
+    requester_id: Mapped[str] = mapped_column(ForeignKey("access_accounts.id"))
+    base_revision: Mapped[int]
+    proposed: Mapped[dict] = mapped_column(JSON)
+    reason: Mapped[str]
+    status: Mapped[str] = mapped_column(default="pending")
+    reviewed_by: Mapped[str | None] = mapped_column(ForeignKey("access_accounts.id"))
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
 def make_database(settings):
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     connect_args = {"check_same_thread": False, "timeout": 30} if settings.db_url.startswith("sqlite") else {}
