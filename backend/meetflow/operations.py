@@ -48,8 +48,10 @@ def backup(data_dir, output):
                     dst.execute('PRAGMA journal_mode=DELETE')
                     dst.commit()
                 sqlite_check(output / name)
-        audio = data_dir / 'audio'
-        if audio.exists():
+        for folder in ('audio', 'sales-audio'):
+            audio = data_dir / folder
+            if not audio.exists():
+                continue
             for source in sorted(audio.rglob('*')):
                 if source.is_file():
                     if not source.resolve().is_relative_to(audio.resolve()):
@@ -76,10 +78,11 @@ def restore(bundle, destination):
         path = PurePosixPath(item['path'])
         if path.is_absolute() or '..' in path.parts or '\\' in item['path'] or ':' in item['path']:
             raise DomainError('备份包含越界路径', 409)
-        allowed = item['path'] in DB_FILES or path.parts and path.parts[0] == 'audio'
-        if not allowed or item['path'] in seen:
+        allowed = item['path'] in DB_FILES or path.parts and path.parts[0] in {'audio', 'sales-audio'}
+        canonical = item['path'].casefold()
+        if not allowed or canonical in seen:
             raise DomainError('备份包含未允许或重复的文件', 409)
-        seen.add(item['path'])
+        seen.add(canonical)
         source = bundle / item['path']
         if not source.resolve().is_relative_to(bundle) or not source.is_file() or source.stat().st_size != item['size'] or sha(source) != item['sha256']:
             raise DomainError('备份文件缺失或校验不一致，未写入目标目录', 409)

@@ -6,6 +6,13 @@ from meetflow.store import Store
 from meetflow.tools import ToolGateway, normalize_date
 
 
+def test_explicit_date_does_not_require_meeting_date_and_ranges_stay_uncertain():
+    assert normalize_date('2026年12月3日', None, 'Asia/Shanghai')['date'] == '2026-12-03'
+    assert normalize_date('2026年2月30日', None, 'Asia/Shanghai')['date'] is None
+    assert normalize_date('下周一到下周三', '2026-11-12', 'Asia/Shanghai')['date'] is None
+    assert normalize_date('2026-11-12至2026-11-16', '2026-11-12', 'Asia/Shanghai')['date'] is None
+
+
 @pytest.fixture
 def store(tmp_path):
     settings = Settings(data_dir=tmp_path, start_worker=False, max_model_calls=2)

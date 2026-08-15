@@ -11,6 +11,7 @@ from langgraph.types import Command, Send
 from pydantic import ValidationError
 from sqlalchemy import select
 
+from .audio_storage import audio_file
 from .database import SalesAnalysis, SalesConversation
 from .domain import DomainError, digest
 from .leases import LeaseLost, LeaseManager, current_lease
@@ -321,20 +322,18 @@ class SalesDriver:
                 self._transcribe_owned(conversation_id)
 
     def _transcribe_owned(self, conversation_id):
-        from .audio import audio_available, load_model
+        from .audio import audio_available, transcribe_spans
         try:
             if not audio_available(self.service.settings):
                 raise DomainError("ASR 未配置，不会生成演示转写")
             with self.service.sessions() as session:
                 row = session.get(SalesConversation, conversation_id)
                 path = row.audio_path
-            model = load_model(self.service.settings.asr_model, self.service.settings.asr_device)
-            segments, _ = model.transcribe(path, vad_filter=True, word_timestamps=True)
             spans = []
-            for segment in segments:
-                if segment.text.strip():
-                    spans.append(SalesSpan(id=f"s{len(spans) + 1}", text=segment.text.strip(),
-                                           start=segment.start, end=segment.end).model_dump())
+            for segment in transcribe_spans(audio_file(self.service.settings.data_dir, path, 'sales-audio'),
+                                           self.service.settings, lambda: current_lease().check()):
+                spans.append(SalesSpan(id=f"s{len(spans) + 1}", text=segment['text'],
+                                       start=segment['start'], end=segment['end']).model_dump())
                 if len(spans) > 400 or sum(len(s["text"]) for s in spans) > 50000:
                     raise DomainError("转写超过首版 400 段/50000 字上限，请拆分会话")
             if not spans:

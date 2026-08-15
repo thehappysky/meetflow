@@ -15,6 +15,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
 from .audio import audio_available
+from .audio_storage import audio_file
 from .database import (
     Account,
     Audit,
@@ -302,10 +303,7 @@ class WorkspaceService:
         return result
 
     def audio(self, path):
-        path = Path(path or "").resolve()
-        if not path.is_relative_to(self.settings.data_dir.resolve() / "audio") or not path.is_file():
-            raise DomainError("录音不可用", 404)
-        return FileResponse(path)
+        return FileResponse(audio_file(self.settings.data_dir, path))
 
 
 def workspace_router(service):

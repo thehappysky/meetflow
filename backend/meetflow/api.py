@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
@@ -12,6 +13,7 @@ from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import select, update
 
 from .audio import audio_available
+from .audio_storage import audio_file
 from .auth import AuthService, auth_routers
 from .business import BusinessService, business_router
 from .config import Settings
@@ -78,8 +80,11 @@ def create_app(settings=None, provider=None, sales_provider=None):
                     await asyncio.wait_for(stop_recovery.wait(), timeout=15)
                 except TimeoutError:
                     if not (settings.data_dir / 'maintenance.lock').exists():
-                        await asyncio.to_thread(driver.recover)
-                        await asyncio.to_thread(sales_driver.recover)
+                        try:
+                            await asyncio.to_thread(driver.recover)
+                            await asyncio.to_thread(sales_driver.recover)
+                        except Exception:
+                            logging.getLogger('meetflow.recovery').exception('后台任务恢复暂时失败，下轮重试')
         recovery = None
         try:
             if settings.auth_enabled:
@@ -257,9 +262,7 @@ def create_app(settings=None, provider=None, sales_provider=None):
             meeting = session.get(Meeting, meeting_id)
             if not meeting or not meeting.audio_path:
                 raise DomainError("该会议没有录音", 404)
-            path = Path(meeting.audio_path).resolve()
-        if not path.is_relative_to(settings.data_dir.resolve() / "audio") or not path.is_file():
-            raise DomainError("录音文件不可用", 404)
+            path = audio_file(settings.data_dir, meeting.audio_path)
         return FileResponse(path)
 
     @app.get("/api/meetings")

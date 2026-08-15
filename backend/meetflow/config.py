@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     max_upload_mb: int = 100
     asr_model: str = ""
     asr_device: str = "cpu"
+    asr_backend: Literal['whisper', 'sensevoice'] = 'whisper'
+    speech_model_dir: Path = Path('data/models/speech')
+    speaker_diarization: bool = False
     start_worker: bool = True
     auth_enabled: bool = True
     report_font: str = ""

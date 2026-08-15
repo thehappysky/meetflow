@@ -26,7 +26,7 @@ def typed_store(tmp_path):
 class TypedAdapter:
     def complete(self, role, messages, tools, info):
         initial = json.loads(messages[1]['content'])
-        if role == 'facts':
+        if role in {'facts', 'coverage'}:
             span = initial['spans'][0]
             value = {'summary': '王宁承诺明天发送报价', 'mentions': [{'task': '发送报价', 'quote': span['text'],
                 'ref': span['id'], 'kind': 'commitment', 'owner': '王宁', 'due_text': '明天', 'condition': None}]}
@@ -47,12 +47,12 @@ def test_typed_three_agents_create_dated_report_without_formal_business_writes(t
         driver.process(run['id'])
         result = store.get_run(run['id'])
         assert result['status'] == 'waiting_review', result['error']
-        assert result['model_calls'] == 3
+        assert result['model_calls'] == 4
         body = store.latest_report(run['id'])['body']
         assert body['mode'] == 'live' and body['workflow'] == 'evidence_v1'
         assert body['actions'][0]['owner'] == '王宁'
         assert body['actions'][0]['due'] == '2026-11-13'
-        assert {a['role'] for a in store.artifacts(run['id'])} == {'facts', 'reconcile', 'audit'}
+        assert {a['role'] for a in store.artifacts(run['id'])} == {'facts', 'coverage', 'reconcile', 'audit'}
     finally:
         driver.close()
 
@@ -130,7 +130,7 @@ def test_mid_agent_messages_and_consumed_budget_survive_retry(typed_store):
             return super().complete(role, messages, tools, info)
 
     assert EvidencePipeline(store, run['id'], Resumed()).analyze()['actions'][0]['owner'] == '王宁'
-    assert store.get_run(run['id'])['model_calls'] == 5
+    assert store.get_run(run['id'])['model_calls'] == 6
     assert store.get_run(run['id'])['tool_calls'] == tool_calls
 
 
@@ -157,7 +157,7 @@ def test_saved_model_submission_is_consumed_without_repeating_inference(typed_st
             return super().complete(role, *args)
 
     assert EvidencePipeline(store, run['id'], NoRepeatedFacts()).analyze()['actions']
-    assert store.get_run(run['id'])['model_calls'] == 3
+    assert store.get_run(run['id'])['model_calls'] == 4
 
 
 def test_stale_worker_cannot_publish_and_new_owner_recovers(typed_store):
@@ -184,7 +184,7 @@ def test_stale_worker_cannot_publish_and_new_owner_recovers(typed_store):
         driver.provider = TypedAdapter()
         driver.process(run['id'])
         assert store.get_run(run['id'])['status'] == 'waiting_review'
-        assert store.get_run(run['id'])['model_calls'] == 4
+        assert store.get_run(run['id'])['model_calls'] == 5
     finally:
         driver.close()
 
@@ -214,4 +214,58 @@ def test_partial_audit_field_patches_accumulate_without_losing_previous_checks(t
     assert report['actions'][0]['owner'] == '王宁'
     audit = next(r['body'] for r in store.artifacts(run['id']) if r['role'] == 'audit')
     assert {field for review in audit['reviews'] for field in review['fields']} == {'owner', 'date', 'condition', 'status', 'commitment'}
-    assert store.get_run(run['id'])['model_calls'] == 4
+    assert store.get_run(run['id'])['model_calls'] == 5
+
+
+def test_cross_page_revision_and_factual_risk_survive_with_full_character_coverage(typed_store):
+    store, original_run = typed_store
+    text = '销售王宁：我明天发送报价。\n' + ('客户：讨论现状，没有新的安排。\n' * 140) + '销售王宁：报价改为下周一发送。\n客户：安全评审尚未通过。'
+    run = store.create_meeting(MeetingInput(project_id=original_run['project_id'], mode='live',
+        transcript=text, meeting_time='2026-11-12T15:00:00+08:00'))['run']
+
+    class Paged(TypedAdapter):
+        def complete(self, role, messages, tools, info):
+            initial = json.loads(messages[1]['content'])
+            if role == 'coverage':
+                value = initial['initial_extraction']
+            elif role == 'facts':
+                mentions, observations = [], []
+                for span in initial['spans']:
+                    if '发送报价' in span['text']:
+                        mentions.append({'task': '发送报价', 'quote': span['text'], 'ref': span['id'],
+                            'kind': 'commitment', 'owner': '王宁', 'due_text': '明天'})
+                    elif '报价改为' in span['text']:
+                        mentions.append({'task': '发送报价', 'quote': span['text'], 'ref': span['id'],
+                            'kind': 'revision', 'owner': '王宁', 'due_text': '下周一'})
+                    if '安全评审' in span['text']:
+                        observations.append({'quote': span['text'], 'ref': span['id'], 'kind': 'risk'})
+                value = {'summary': '本页已核查', 'mentions': mentions, 'observations': observations}
+            elif role == 'reconcile':
+                keys = list(initial['mentions'])
+                value = {'items': [{'title': '发送报价', 'mentions': keys, 'owner_from': keys[0],
+                                   'date_from': keys[-1], 'conditions_from': []}]}
+            else:
+                return super().complete(role, messages, tools, info)
+            return {'role': 'assistant', 'tool_calls': [tool_call('submit_result', value)]}, {}
+
+    report = EvidencePipeline(store, run['id'], Paged()).analyze()
+    assert report['source_processing']['pages'] >= 2
+    assert report['source_processing']['input_chars'] == report['source_processing']['processed_chars']
+    assert report['actions'][0]['due'] == '2026-11-16'
+    assert report['risks'][0]['text'] == '客户：安全评审尚未通过。'
+
+
+def test_meeting_note_policy_preserves_real_customer_deliverables():
+    from meetflow.evidence_pipeline import MEETING_NOTES
+    assert '记录建议' in MEETING_NOTES
+    assert '发送会议纪要' not in MEETING_NOTES
+    assert '整理需求文档' not in MEETING_NOTES
+
+
+def test_oversized_entity_history_fails_explicitly_instead_of_silently_truncating(typed_store):
+    store, run = typed_store
+    pipeline = EvidencePipeline(store, run['id'], TypedAdapter())
+    mention = {'task': '发送报价', 'quote': '我明天发送报价', 'ref': 's0', 'kind': 'commitment',
+               'owner': '王宁', 'due_text': '明天', 'condition': None}
+    with pytest.raises(DomainError, match='未截断历史'):
+        pipeline.reconcile_task('发送报价', {f'm{i}': mention for i in range(21)}, 0)

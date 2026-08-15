@@ -19,6 +19,8 @@ def test_offline_backup_restore_preserves_report_audio_and_checkpoint(tmp_path):
         report = app.state.store.latest_report(run_id)
         (data / 'audio').mkdir()
         (data / 'audio/test.wav').write_bytes(b'test-audio-preservation')
+        (data / 'sales-audio').mkdir()
+        (data / 'sales-audio/legacy.wav').write_bytes(b'legacy-test-audio')
         with pytest.raises(DomainError, match='停止'):
             backup(data, tmp_path / 'blocked')
     bundle = tmp_path / 'bundle'
@@ -26,6 +28,9 @@ def test_offline_backup_restore_preserves_report_audio_and_checkpoint(tmp_path):
     recovered = tmp_path / 'recovered'
     assert restore(bundle, recovered)['status'] == 'restored'
     assert (recovered / 'audio/test.wav').read_bytes() == b'test-audio-preservation'
+    from meetflow.audio_storage import audio_file
+    assert audio_file(recovered, str(data / 'audio/test.wav')) == (recovered / 'audio/test.wav').resolve()
+    assert audio_file(recovered, str(data / 'sales-audio/legacy.wav'), 'sales-audio').read_bytes() == b'legacy-test-audio'
     restored_app = create_app(Settings(data_dir=recovered, start_worker=False, auth_enabled=False))
     with TestClient(restored_app):
         assert restored_app.state.store.latest_report(run_id)['content_hash'] == report['content_hash']

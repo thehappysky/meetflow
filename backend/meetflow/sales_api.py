@@ -8,6 +8,7 @@ from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import FileResponse, Response
 
 from .audio import audio_available
+from .audio_storage import audio_file
 from .database import SalesConversation
 from .domain import DomainError, uid
 from .sales_domain import (
@@ -99,9 +100,7 @@ def sales_router(service, driver):
             row = session.get(SalesConversation, key)
             if not row or not row.audio_path:
                 raise DomainError("该会话没有录音", 404)
-            path = Path(row.audio_path).resolve()
-        if not path.is_relative_to(service.settings.data_dir.resolve() / "sales-audio") or not path.is_file():
-            raise DomainError("录音不可用", 404)
+            path = audio_file(service.settings.data_dir, row.audio_path, 'sales-audio')
         return FileResponse(path)
 
     @router.post("/conversations/{key}/analyze", status_code=201)

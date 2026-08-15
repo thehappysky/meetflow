@@ -12,6 +12,9 @@ from .domain import Claim, Contract, DomainError, digest
 from .providers import LiveProvider
 from .tools import normalize_date
 
+# Conversation acknowledgements are minutes content, not customer follow-ups.
+# Exact policy labels deliberately do not match sending minutes or documenting a requirement.
+MEETING_NOTES = {'记录建议', '记下建议', '记录讨论', '记录意见', '记下意见'}
 
 class Mention(Contract):
     task: str = Field(min_length=1, max_length=160, description='同一事项用简短稳定名称，报价与试用分开')
@@ -23,9 +26,16 @@ class Mention(Contract):
     condition: str | None = Field(default=None, description='只属于本事项的前提原话；未明确条件为空')
 
 
+class Observation(Contract):
+    quote: str = Field(min_length=1, max_length=1600)
+    ref: str = Field(min_length=1)
+    kind: Literal['fact', 'decision', 'unresolved', 'risk']
+
+
 class Extracted(Contract):
     summary: str = Field(min_length=1, max_length=2000)
     mentions: list[Mention] = Field(default_factory=list, max_length=40)
+    observations: list[Observation] = Field(default_factory=list, max_length=20)
 
 
 class Group(Contract):
@@ -54,7 +64,30 @@ class Audited(Contract):
     reviews: list[Issue] = Field(max_length=100, description='每项5字段各覆盖一次；同判定的字段可合并一条')
 
 
+class FieldAudit(Contract):
+    item: int = Field(ge=0)
+    owner: Literal['supported', 'contradicted', 'unknown']
+    date: Literal['supported', 'contradicted', 'unknown']
+    condition: Literal['supported', 'contradicted', 'unknown']
+    status: Literal['supported', 'contradicted', 'unknown']
+    commitment: Literal['supported', 'contradicted', 'unknown']
+    reason: str = Field(min_length=1, max_length=800)
+    evidence: list[str] = Field(min_length=1, max_length=12)
+
+
+class AuditSubmission(Contract):
+    verdicts: list[FieldAudit] = Field(min_length=1, max_length=50)
+
+
 PROMPTS = {
+    'coverage': ('你是原文覆盖核查Agent。独立逐句检查原文与初次提取，提交完整的修订提取结果。'
+                 '每一处承诺、明确改期、暂停、取消、完成和未确认建议都要保留，不能只复述第一句话。'
+                 '客户提出改期且销售同意时，最后日期原词必须有对应revision提及。'
+                 '同一段话包含报价改期和条件试用时，拆成两条不同task，分别复制各自逐字原句。'
+                 '“只有前提成立才安排”的承诺kind为condition，不因日期未知而变成suggestion。'
+                 'task沿用同一事项的简短名称；owner可从该片段销售姓名继承，不能猜上传人。'
+                 'quote、due_text、condition必须逐字来自对应ref。纯记下建议不额外建任务。'
+                 'observations保留有原文支持的需求、预算、异议、决定与风险，使用对应kind，不评价人员。'),
     'facts': ('你是原文证据提取Agent。提取事项的每次提及，改期前后分别记录。报价与试用必须分开。'
               '纯粹记下建议、复述讨论等会谈元话语留summary，不列为独立履约事项。'
               'task是动作和对象，如发送资料、安排试用，不是commitment/revision等类别名。'
@@ -62,7 +95,8 @@ PROMPTS = {
               '可以考虑但没确定属于suggestion，不是承诺。quote逐字复制原文，ref用真实ID。'
               'owner是原文明示姓名，销售王宁说我明天发报价，owner写王宁；不要填销售账号。'
               'due_text仅复制日期原词；condition仅复制该事项的前提，没条件填null。'
-              'summary简明概括事实和未决信息，不评价人员表现。'),
+              'summary简明概括事实和未决信息，不评价人员表现。'
+              'observations另提客户需求、预算与异议等事实fact、明确决定decision、未决unresolved和风险risk的逐字原句与ref；没有待办也要整理这些信息。'),
     'reconcile': ('你是事项归并Agent。把提及归并为当前事项，输出提及ID的选择，不能另造事实。'
                   '承诺性质和状态由提取结果的kind及条件引用计算，你只选择提及ID、负责人、日期与有效条件。'
                   '同一事项改期取最后确认日期，负责人从已明确的提及继承。不同事项的条件绝不互串。'
@@ -75,7 +109,8 @@ PROMPTS = {
                   '不要把调整日期另外建成一项任务；它是原事项的新状态。'),
     'audit': ('你是字段证据审查Agent。独立对照原文核对全部事项下标，每项owner/date/condition/status/commitment五字段各覆盖一次。'
               'resolved_items是代码按原文提及ID计算出的真实字段值，先看这里；items中的owner_from/date_from是ID不是字段值。'
-              '用reviews填写fields字段列表、verdict和原文evidence；正确supported、存在反证contradicted、无法判断unknown。'
+              '用verdicts逐项填写owner/date/condition/status/commitment五个必填判定，reason与原文evidence。正确supported、存在反证contradicted、无法判断unknown。'
+              '每个字段独立判断：缺日期不等于没有承诺，缺姓名不等于条件不存在。明确只有前提成立才做仍是有条件承诺。'
               '同判定的多个字段可合并一条。正确结果要明确supported，不能把“无误”写成错误。'
               '检查负责人有无漏提、改期是否取最后确认日期、条件是否属于该事项、状态和承诺性质。'
               'ISO日期由代码算好，不另算日期；只检查选了正确的日期原词与提及。'
@@ -91,7 +126,7 @@ class IncompleteReview(DomainError):
         super().__init__(f'仅补以下字段，已核查字段保留：{missing}')
 
 
-def pages_for(spans, limit=6000):
+def pages_for(spans, limit=1600):
     """All text is represented, including a single span larger than a page."""
     pages, current, size = [], [], 0
     for span in spans:
@@ -131,7 +166,9 @@ class EvidencePipeline:
         elif name == 'read_evidence' and set(args) == {'ref'}:
             span = self.evidence.get(args['ref'])
             if span and span['source_kind'] == 'transcript':
-                return span
+                return {**span, 'text': span['text'][:1600], 'total_chars': len(span['text']),
+                        'complete': len(span['text']) <= 1600,
+                        'pages': [i for i, page in enumerate(self.pages) if any(p['id'] == args['ref'] for p in page)]}
         elif name == 'read_upstream' and not args:
             return upstream
         elif name == 'normalize_date' and set(args) == {'expression'} and isinstance(args['expression'], str):
@@ -148,7 +185,7 @@ class EvidencePipeline:
         tools = [('read_evidence', {'ref': {'type': 'string', 'enum': list(self.evidence)}})]
         if len(self.pages) > 1:
             tools.append(('read_page', {'page': {'type': 'integer', 'minimum': 0, 'maximum': len(self.pages) - 1}}))
-        if role != 'facts':
+        if role not in {'facts', 'coverage'}:
             tools.append(('normalize_date', {'expression': {'type': 'string'}}))
         for name, props in tools:
             definitions.append({'type': 'function', 'function': {'name': name,
@@ -156,6 +193,8 @@ class EvidencePipeline:
                 'properties': props, 'required': list(props), 'additionalProperties': False}}})
         definitions.append({'type': 'function', 'function': {'name': 'submit_result', 'description': '提交本角色产物',
                                                             'parameters': schema.model_json_schema()}})
+        if role == 'audit':
+            definitions[-1]['function']['parameters'] = AuditSubmission.model_json_schema()
         if role == 'reconcile':
             if 'task' in initial:
                 definitions[-1]['function']['parameters']['properties']['items'].update(minItems=1, maxItems=1)
@@ -172,11 +211,13 @@ class EvidencePipeline:
                 properties['conditions_from']['items']['enum'] = allowed
             else:
                 properties['conditions_from']['maxItems'] = 0
-        if role == 'facts':
+        if role in {'facts', 'coverage'}:
             definitions[-1]['function']['parameters']['$defs']['Mention']['properties']['ref']['enum'] = list(
                 dict.fromkeys(s['id'] for s in initial['spans']))
+            definitions[-1]['function']['parameters']['$defs']['Observation']['properties']['ref']['enum'] = list(
+                dict.fromkeys(s['id'] for s in initial['spans']))
         if role == 'audit':
-            properties = definitions[-1]['function']['parameters']['$defs']['Issue']['properties']
+            properties = definitions[-1]['function']['parameters']['$defs']['FieldAudit']['properties']
             properties['item']['enum'] = list(range(len(initial['items'])))
             if initial.get('evidence'):
                 properties['evidence']['items']['enum'] = list(initial['evidence'])
@@ -192,6 +233,14 @@ class EvidencePipeline:
 
         def persist():
             self.store.save_conversation(self.run_id, key, fingerprint, messages, steps)
+
+        def parse(args):
+            if role == 'audit' and 'verdicts' in args:
+                submission = AuditSubmission.model_validate(args)
+                return Audited(reviews=[Issue(item=item.item, fields=[field], verdict=getattr(item, field),
+                    reason=item.reason, evidence=item.evidence) for item in submission.verdicts
+                    for field in ('owner', 'date', 'condition', 'status', 'commitment')])
+            return schema.model_validate(args)
 
         def pending_tools():
             last = next((index for index in range(len(messages) - 1, -1, -1)
@@ -209,7 +258,7 @@ class EvidencePipeline:
                             continue
                         status = json.loads(reply['content'])
                         if status.get('accepted_partial') or status.get('accepted'):
-                            for item in schema.model_validate_json(call['function']['arguments']).reviews:
+                            for item in parse(json.loads(call['function']['arguments'])).reviews:
                                 for field in item.fields:
                                     accumulated[item.item, field] = item.model_copy(update={'fields': [field]})
             final = None
@@ -217,7 +266,7 @@ class EvidencePipeline:
                 name = call['function']['name']
                 if call['id'] in replies:
                     if name == 'submit_result' and json.loads(replies[call['id']]['content']).get('accepted'):
-                        final = schema.model_validate_json(call['function']['arguments'])
+                        final = parse(json.loads(call['function']['arguments']))
                         validator(final)
                     continue
                 try:
@@ -227,13 +276,14 @@ class EvidencePipeline:
                     if name == 'submit_result':
                         if final is not None:
                             raise DomainError('只能提交一个结果')
-                        value = schema.model_validate(args)
+                        value = parse(args)
                         if role == 'audit':
                             additions = dict(accumulated)
                             for item in value.reviews:
                                 for field in item.fields:
                                     additions[item.item, field] = item.model_copy(update={'fields': [field]})
                             value = Audited(reviews=list(additions.values()))
+                            accumulated = additions
                         validator(value)
                         final = value
                         result = {'accepted': True}
@@ -271,6 +321,10 @@ class EvidencePipeline:
             self.store.event(self.run_id, 'typed_agent_step', f'{role}核查证据', {'role': role, 'usage': usage})
 
     def validate_extracted(self, value):
+        for observation in value.observations:
+            span = self.evidence.get(observation.ref)
+            if not span or observation.quote not in span['text']:
+                raise DomainError('事实与风险须逐字引用授权原文，不能自行补全')
         for index, mention in enumerate(value.mentions):
             span = self.evidence.get(mention.ref)
             if not span or span['source_kind'] != 'transcript' or mention.quote not in span['text']:
@@ -351,10 +405,20 @@ class EvidencePipeline:
         return problems
 
     def reconcile_task(self, task, mentions, number):
-        evidence = {ref: self.evidence[ref]['text'] for ref in {m['ref'] for m in mentions.values()}}
+        # Supply quote-neighbour windows, never a 20,000-char source span in an
+        # otherwise small entity handoff. Full original remains paged/readable.
+        evidence = {}
+        for m in mentions.values():
+            original = self.evidence[m['ref']]['text']
+            start = original.find(m['quote'])
+            window = original[max(0, start - 80):min(len(original), start + len(m['quote']) + 80)]
+            if window not in evidence.get(m['ref'], ''):
+                evidence[m['ref']] = '\n…\n'.join(filter(None, [evidence.get(m['ref']), window]))
         dates = {key: normalize_date(m['due_text'], self.context['meeting_date'] or self.context['meeting_time'],
                  self.context['timezone']) for key, m in mentions.items() if m['due_text']}
         upstream = {'task': task, 'mentions': mentions, 'evidence': evidence, 'normalized_dates': dates}
+        if len(mentions) > 20 or len(json.dumps(upstream, ensure_ascii=False)) > 10000:
+            raise DomainError(f'“{task}”的修订历史超过当前模型的安全上下文，请拆分会谈或配置更大上下文；未截断历史', 422)
         groups = self.agent('reconcile', Reconciled, upstream, lambda v: self.validate_groups(v, mentions),
                             upstream, f'evidence:reconcile:t{number}:0')
         audit_input = {**upstream, 'items': groups.model_dump()['items'], 'resolved_items': self.resolved(groups, mentions)}
@@ -376,11 +440,22 @@ class EvidencePipeline:
         for index, page in enumerate(self.pages):
             value = self.agent('facts', Extracted, {'page': index, 'pages': len(self.pages), 'spans': page},
                                self.validate_extracted, key=f'evidence:facts:{index}')
+            initial_observations = value.observations
+            value = self.agent('coverage', Extracted, {'page': index, 'pages': len(self.pages), 'spans': page,
+                                'initial_extraction': value.model_dump()}, self.validate_extracted,
+                                key=f'evidence:coverage:{index}')
+            combined = {(item.ref, item.quote): item for item in [*initial_observations, *value.observations]}
+            value.observations = list(combined.values())
             extracted.append(value)
-            for number, item in enumerate(value.mentions):
+            positions = {span['id']: n for n, span in enumerate(page)}
+            ordered = sorted(value.mentions, key=lambda item: (positions.get(item.ref, len(page)),
+                              self.evidence[item.ref]['text'].find(item.quote)))
+            for number, item in enumerate(ordered):
                 mentions[f'p{index}m{number}'] = item.model_dump()
         by_task = {}
         for key, mention in mentions.items():
+            if mention['task'] in MEETING_NOTES:
+                continue
             by_task.setdefault(mention['task'], {})[key] = mention
         items, problems = [], []
         for number, (task, task_mentions) in enumerate(by_task.items()):
@@ -388,7 +463,17 @@ class EvidencePipeline:
             offset = len(items)
             items.extend(task_items)
             problems.extend(p.model_copy(update={'item': p.item + offset}) for p in task_problems)
-        actions, questions, claims = [], [], []
+        actions, questions, claims, risks = [], [], [], []
+        seen_observations = set()
+        for page in extracted:
+            for observation in page.observations:
+                identity = (observation.ref, observation.quote, observation.kind)
+                if identity in seen_observations:
+                    continue
+                seen_observations.add(identity)
+                claim = Claim(text=observation.quote, kind='fact' if observation.kind == 'risk' else observation.kind,
+                              evidence=[self.original_refs[observation.ref]]).model_dump()
+                (risks if observation.kind == 'risk' else claims).append(claim)
         blocked = {i.item for i in problems}
         for mention in mentions.values():
             kind = {'revision': 'decision', 'paused': 'decision', 'cancelled': 'decision', 'done': 'fact', 'in_progress': 'fact'}.get(
@@ -414,6 +499,10 @@ class EvidencePipeline:
                 questions.append({'key': f'date:{index}', 'text': f'{group.title}的“{raw_date}”日期待确认', 'options': [],
                                   'affected_actions': [action_id], 'evidence': refs})
         return {'mode': 'live', 'summary': '\n'.join(e.summary for e in extracted), 'claims': claims,
-                'actions': actions, 'risks': [], 'questions': questions, 'challenges': [],
+                'actions': actions, 'risks': risks, 'questions': questions, 'challenges': [],
                 'audit_summary': f'独立字段核查，{len(problems)}项疑点交人工确认',
-                'source_count': len(self.run['manifest']['sources']), 'workflow': 'evidence_v1'}
+                'source_count': len(self.run['manifest']['sources']), 'workflow': 'evidence_v1',
+                'source_processing': {'pages': len(self.pages), 'processed_pages': len(extracted),
+                    'input_chars': sum(len(span['text']) for span in self.spans),
+                    'processed_chars': sum(len(part['text']) for page in self.pages for part in page),
+                    'meaning': '已提交逐页处理的字符覆盖，不代表语义提取召回率'}}

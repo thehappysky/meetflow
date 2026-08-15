@@ -7,16 +7,23 @@ from .domain import DomainError
 
 
 def normalize_date(expression, meeting_time, timezone):
+    pattern = r"(20\d{2})[-年/](\d{1,2})[-月/](\d{1,2})"
+    explicit = list(re.finditer(pattern, expression))
+    relative = re.findall(r'(?:下下|下|本|这)?(?:周|星期)[一二三四五六日天]|今天|明天|后天', expression)
+    if len(explicit) + len(relative) > 1:
+        return {'raw': expression, 'date': None, 'reason': '包含多个日期或范围，请确认具体到期日'}
+    if len(explicit) == 1:
+        from datetime import date
+        try:
+            return {"raw": expression, "date": date(*map(int, explicit[0].groups())).isoformat()}
+        except ValueError:
+            return {'raw': expression, 'date': None, 'reason': '日期无效，请确认'}
     if not meeting_time:
         return {"raw": expression, "date": None, "reason": "实际会议时间待确认"}
     base = datetime.fromisoformat(meeting_time)
     if base.tzinfo is not None:
         base = base.astimezone(ZoneInfo(timezone))
     day = base.date()
-    explicit = re.search(r"(20\d{2})[-年/](\d{1,2})[-月/](\d{1,2})", expression)
-    if explicit:
-        from datetime import date
-        return {"raw": expression, "date": date(*map(int, explicit.groups())).isoformat()}
     weekdays = {"一": 0, "二": 1, "三": 2, "四": 3, "五": 4, "六": 5, "日": 6, "天": 6}
     match = re.search(r"(下下|下|本|这)?(?:周|星期)([一二三四五六日天])", expression)
     if match:
