@@ -1,5 +1,7 @@
 # MeetFlow：从会议录音到纪要与待办
 
+**功能完整性：**见 [需求缺口与下一步验收](docs/19-requirements-gap-audit.md)。目前主管／老板主要是中心会谈和更正，销售质检尚未接入真实账号工作区；客户推进、承诺提醒和模板 Word/PDF 报告尚未交付。
+
 **当前默认入口已改为真实账号工作区。** 已实现团队邀请码注册、个人私有／确认上报、公司和团队范围以及主管更正审核；本地 Chrome 多账号实测与 54 项后端测试通过。账号使用、启动、实测限制见 [权限验收记录](docs/18-account-permission-test.md)。安装依赖后另开终端执行 `.venv\Scripts\python.exe scripts/bootstrap_access_demo.py` 创建本地合成测试公司，密码仅保存在忽略的 `data/access-demo.json`。旧资料没有账号归属，旧会议／质检接口默认隔离；下文为历史模块说明。新工作区尚未接入 Word/PDF 报告和独立质检，不将原型当成已交付。
 
 **操作设计预览：**[日常页面原型说明](docs/17-ux-prototype.md)，可打开 design/prototypes/meetflow-daily-workflow.html 体验三角色流程。它是独立示例，不连接业务数据，尚未替换正式页面或实现真实权限/Word-PDF 导出。
