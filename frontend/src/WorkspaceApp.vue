@@ -6,6 +6,7 @@ import {
   reactive,
   ref,
   watch,
+  nextTick,
 } from "vue";
 import LegacyApp from "./App.vue";
 import QualityWorkspace from "./QualityWorkspace.vue";
@@ -167,7 +168,7 @@ const dateMode = ref("meeting"),
   teamFilter = ref(""),
   statusFilter = ref("");
 const questionAnswers = reactive<Row>({});
-const evidenceOpen = ref(false),
+const detailView = ref("information"),
   evidenceHighlight = ref("");
 const audioPlayer = ref<HTMLAudioElement | null>(null);
 let timer: number | undefined,
@@ -216,6 +217,18 @@ const metadata = computed(() =>
 );
 const report = computed(() =>
   centralDetail.value ? detail.value?.report : detail.value?.report?.body,
+);
+const transcriptSpans = computed<Row[]>(() =>
+  (Object.values(detail.value?.evidence || {}) as Row[]).filter(
+    (span) => span.source_kind === "transcript",
+  ),
+);
+const referencedSupplement = computed<Row | null>(() => {
+  const span = detail.value?.evidence?.[evidenceHighlight.value];
+  return span && span.source_kind !== "transcript" ? span : null;
+});
+const recordingOwner = computed(() =>
+  centralDetail.value ? detail.value?.owner : user.value?.name,
 );
 const visibleCenter = computed(() =>
   center.value.filter(
@@ -455,8 +468,12 @@ async function meetingFromQuality(kind: string, id: string) {
   });
 }
 async function seekEvidence(id: string) {
-  evidenceOpen.value = true;
+  detailView.value = "transcript";
   evidenceHighlight.value = id;
+  await nextTick();
+  document
+    .getElementById(`recording-span-${id}`)
+    ?.scrollIntoView({ behavior: "smooth", block: "center" });
   const span = detail.value?.evidence?.[id];
   if (detail.value?.has_audio && span?.start != null) {
     await audio();
@@ -512,7 +529,7 @@ async function open(key: string, central = false) {
   );
   if (current !== sequence || user.value?.id !== owner) return;
   detail.value = result;
-  evidenceOpen.value = false;
+  detailView.value = "information";
   evidenceHighlight.value = "";
   for (const key of Object.keys(questionAnswers)) delete questionAnswers[key];
   for (const note of result.clarifications || [])
@@ -1174,7 +1191,92 @@ onBeforeUnmount(() => {
               <p class="wk-summary">{{ h.text }}</p>
             </section>
           </details>
-          <div v-if="report" class="wk-columns">
+          <nav class="wk-detail-tabs" aria-label="会谈内容" role="tablist">
+            <button
+              role="tab"
+              :aria-selected="detailView === 'information'"
+              @click="detailView = 'information'"
+            >
+              整理信息
+            </button>
+            <button
+              role="tab"
+              :aria-selected="detailView === 'transcript'"
+              @click="detailView = 'transcript'"
+            >
+              完整转写原文（{{ transcriptSpans.length }} 段）
+            </button>
+          </nav>
+          <section
+            v-if="detailView === 'transcript'"
+            class="wk-panel"
+            aria-label="完整转写原文"
+          >
+            <h2>完整转写原文</h2>
+            <p>
+              录音归属销售：<strong>{{ recordingOwner }}</strong> ·
+              {{ metadata?.title }}
+            </p>
+            <p class="wk-transcript-meta">
+              {{
+                centralDetail
+                  ? `中心版本 v${detail.revision}`
+                  : `个人资料 v${detail.version}`
+              }}
+              · {{ transcriptSpans.length }} 段 ·
+              显示本版本全部转写，不只显示被纪要引用的片段。
+            </p>
+            <template v-if="detail.has_audio">
+              <button v-if="!audioUrl" @click="audio" :disabled="busy">
+                加载原始录音
+              </button>
+              <audio v-else ref="audioPlayer" :src="audioUrl" controls />
+            </template>
+            <p v-else class="wk-transcript-meta">
+              本场为文字导入，没有对应录音文件。
+            </p>
+            <p v-if="!transcriptSpans.length">
+              {{
+                ["queued", "running"].includes(detail.status)
+                  ? "转写尚未就绪，完成后在这里显示。"
+                  : "当前没有可用转写，处理失败时可恢复处理。"
+              }}
+            </p>
+            <article
+              v-for="(s, index) in transcriptSpans"
+              :key="s.id"
+              :id="`recording-span-${s.id}`"
+              class="wk-transcript-span"
+              :class="{ 'wk-evidence-highlight': evidenceHighlight === s.id }"
+            >
+              <header>
+                <span
+                  >第 {{ index + 1 }} 段<span v-if="s.speaker">
+                    · {{ s.speaker }}</span
+                  >
+                  · 转写 v{{ s.source_version }}</span
+                ><button
+                  v-if="detail.has_audio && s.start != null"
+                  @click="seekEvidence(s.id)"
+                >
+                  回听 {{ Math.floor(s.start) }} 秒</button
+                ><span v-else-if="s.start != null"
+                  >{{ Math.floor(s.start) }} 秒</span
+                >
+              </header>
+              <p>{{ s.text }}</p>
+            </article>
+            <section
+              v-if="referencedSupplement"
+              :id="`recording-span-${referencedSupplement.id}`"
+              class="wk-finding"
+            >
+              <h3>另附引用的补充材料（不属于录音原文）</h3>
+              <p>{{ referencedSupplement.source_title }}</p>
+              <p>{{ referencedSupplement.text }}</p>
+            </section>
+          </section>
+          <div v-else-if="report" class="wk-columns">
             <section class="wk-panel">
               <h2>会谈纪要</h2>
               <p class="wk-summary">{{ report.summary || "暂无摘要" }}</p>
@@ -1293,20 +1395,9 @@ onBeforeUnmount(() => {
                   </p>
                 </article>
               </details>
-              <h3>原文依据</h3>
-              <details :open="evidenceOpen">
-                <summary>展开本次原文</summary>
-                <p
-                  v-for="s in Object.values(detail.evidence || {}) as Row[]"
-                  :key="s.id"
-                  :class="{
-                    'wk-evidence-highlight': evidenceHighlight === s.id,
-                  }"
-                >
-                  {{ s.start != null ? `${Math.floor(s.start)}秒 · ` : ""
-                  }}{{ s.text }}
-                </p>
-              </details>
+              <button @click="detailView = 'transcript'">
+                查看完整转写原文（{{ transcriptSpans.length }} 段）
+              </button>
             </section>
             <aside class="wk-panel">
               <h2>{{ centralDetail ? "中心证据" : "个人工作区" }}</h2>
@@ -1389,10 +1480,12 @@ onBeforeUnmount(() => {
                     {{ a.title }} · {{ a.due || "日期待确认" }}
                   </p>
                   <details>
-                    <summary>该版原文依据</summary>
+                    <summary>该版完整转写原文</summary>
                     <p
-                      v-for="(span, id) in historicalVersion.evidence"
-                      :key="id"
+                      v-for="span in (
+                        Object.values(historicalVersion.evidence) as Row[]
+                      ).filter((s) => s.source_kind === 'transcript')"
+                      :key="span.id"
                     >
                       {{ span.text }}
                     </p>
@@ -1860,6 +1953,38 @@ onBeforeUnmount(() => {
 }
 .wk-summary {
   white-space: pre-wrap;
+}
+.wk-detail-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.wk-detail-tabs [aria-selected="true"] {
+  background: #244b3d;
+  color: white;
+}
+.wk-transcript-meta {
+  color: #61746a;
+  font-size: 13px;
+}
+.wk-transcript-span {
+  border-bottom: 1px solid #e2e7df;
+  padding: 14px 0;
+  scroll-margin-top: 20px;
+}
+.wk-transcript-span header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: #61746a;
+  font-size: 12px;
+}
+.wk-transcript-span p {
+  white-space: pre-wrap;
+  line-height: 1.8;
 }
 .wk-finding {
   border-left: 3px solid #dce7d8;
