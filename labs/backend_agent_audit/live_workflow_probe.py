@@ -55,15 +55,17 @@ def check_report(case, report, artifacts, evidence):
 def main(args):
     folder = ROOT / 'test-results/backend-agent-audit/live-workflow' / datetime.now(UTC).strftime('%Y%m%dT%H%M%S%fZ')
     folder.mkdir(parents=True, exist_ok=False)
-    files = [Path(__file__), Path(__file__).with_name('PLAN.md'),
+    files = [Path(__file__), Path(__file__).with_name('PLAN.md'), ROOT / 'docs/32-completion-plan.md',
              Path(__file__).with_name('current_graph_probe.py'), Path(__file__).with_name('role_schema_probe.py'),
-             *sorted((ROOT / 'backend/meetflow').glob('*.py'))]
+             *sorted((ROOT / 'backend/meetflow').rglob('*.py'))]
     model_info = httpx.post('http://127.0.0.1:11434/api/show', json={'model': args.model}, timeout=30).json()
     save(folder / 'model.json', model_info)
     manifest = {'status': 'running', 'scope': args.scope, 'model': args.model, 'profile': args.profile,
+        'workflow': args.workflow,
         'server': httpx.get('http://127.0.0.1:11434/api/version').json(),
         'models': httpx.get('http://127.0.0.1:11434/api/tags').json(),
         'limits': {'steps': args.steps, 'output': args.output, 'calls': args.calls, 'seconds': args.seconds, 'tools': 100},
+        'model_timeout': args.model_timeout,
         'context': 8192, 'temperature': 0, 'seed': 2026, 'requested_think': False,
         'git_head': __import__('subprocess').check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT).decode().strip(),
         'source_hashes': {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
@@ -79,6 +81,7 @@ def main(args):
             try:
                 store = a.app.state.store; settings = store.settings
                 # Create without inference first; freeze the same account input before enabling the local provider.
+                settings.meeting_workflow = args.workflow
                 response = a.client.post('/api/workspace/recordings', headers=a.actors['sales.a'], json={
                     'title': f'L1 synthetic {case["id"]}', 'meeting_date': case['date'], 'transcript': case['text']})
                 response.raise_for_status(); row = response.json(); run_id = row['run_id']
@@ -86,7 +89,7 @@ def main(args):
                 settings.model_base_url = 'http://127.0.0.1:11434'; settings.model_context_window = 8192
                 settings.max_agent_steps = args.steps; settings.max_output_tokens = args.output
                 settings.max_model_calls = args.calls; settings.max_tool_calls = 100; settings.run_timeout = args.seconds
-                settings.model_timeout = 90
+                settings.model_timeout = args.model_timeout
                 store.update_run(run_id, mode='live')
                 provider = TracedProvider(settings, out)
                 provider.inner.transport = DeterministicTransport(out)
@@ -108,6 +111,8 @@ def main(args):
                     item = {'status': run['status'], 'error': run['error'], 'report': report['body'] if report else None,
                             'artifacts': store.artifacts(run_id)}
                     item['checks'] = check_report(case, item['report'], item['artifacts'], store.source_map(run_id))
+                    if args.workflow == 'evidence_v1' and item['report']:
+                        item['checks']['dynamic_roles'] = {'facts', 'reconcile', 'audit'} <= {a['role'] for a in item['artifacts']}
                 run = store.get_run(run_id)
                 item.update(case=case['id'], wall_seconds=time.perf_counter() - start,
                             roles=dict(Counter(c['role'] for c in provider.calls)),
@@ -127,8 +132,10 @@ if __name__ == '__main__':
     parser.add_argument('--scope', choices=['meeting', 'graph'], default='meeting')
     parser.add_argument('--model', default='qwen2.5:7b')
     parser.add_argument('--profile', choices=['ollama', 'ollama_json'], default='ollama')
+    parser.add_argument('--workflow', choices=['dynamic', 'evidence_v1'], default='dynamic')
     parser.add_argument('--steps', type=int, default=6)
     parser.add_argument('--output', type=int, default=512)
     parser.add_argument('--calls', type=int, default=6)
     parser.add_argument('--seconds', type=int, default=180)
+    parser.add_argument('--model-timeout', type=float, default=90)
     main(parser.parse_args())

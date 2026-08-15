@@ -10,6 +10,7 @@ from sqlalchemy import select
 from .agents import AgentRunner
 from .database import Approval, Run
 from .domain import ROLE_NAMES, DomainError
+from .leases import LeaseLost, LeaseManager, current_lease
 from .planning import validate_plan
 
 
@@ -144,6 +145,41 @@ def build_graph(store, checkpointer, provider=None):
     return graph.compile(checkpointer=checkpointer)
 
 
+def build_evidence_graph(store, checkpointer, provider=None):
+    from .evidence_pipeline import EvidencePipeline
+
+    def analyze(state):
+        run_id = state['run_id']
+        store.update_run(run_id, phase='证据提取与事项核查')
+        body = EvidencePipeline(store, run_id, provider).analyze()
+        report = store.save_report(run_id, body)
+        store.update_run(run_id, status='waiting_review', phase='等待确认')
+        store.event(run_id, 'report_ready', '纪要与事项已整理，请确认待办', {'revision': report['revision']})
+        return {'report_id': report['id']}
+
+    def review(state):
+        answer = interrupt({'report_id': state['report_id'], 'message': '确认所选任务变化后继续'})
+        with store.sessions() as session:
+            approval = session.get(Approval, answer.get('approval_id'))
+            if not approval or approval.run_id != state['run_id'] or approval.report_id != state['report_id']:
+                raise DomainError('恢复值未匹配已保存的审批', 409)
+        return {'approval_id': answer['approval_id']}
+
+    def finish(state):
+        store.update_run(state['run_id'], status='completed', phase='已完成')
+        return {}
+
+    graph = StateGraph(ParentState)
+    graph.add_node('analyze', analyze)
+    graph.add_node('review', review)
+    graph.add_node('finish', finish)
+    graph.add_edge(START, 'analyze')
+    graph.add_edge('analyze', 'review')
+    graph.add_edge('review', 'finish')
+    graph.add_edge('finish', END)
+    return graph.compile(checkpointer=checkpointer)
+
+
 class RunDriver:
     """One local driver; no distributed failover claim."""
     def __init__(self, store, provider=None):
@@ -151,6 +187,7 @@ class RunDriver:
         self.on_report = None
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="meetflow-runner")
         self.active, self.lock = set(), threading.Lock()
+        self.leases = LeaseManager(store.sessions, store.settings.data_dir)
 
     def submit(self, run_id, resume=None):
         with self.lock:
@@ -167,26 +204,39 @@ class RunDriver:
                 self.active.discard(run_id)
 
     def process(self, run_id, resume=None):
+        with self.leases.own(f'meeting:{run_id}') as lease:
+            if lease is not None:
+                self._process_owned(run_id, resume)
+
+    def _process_owned(self, run_id, resume=None):
         self.store.begin_processing(run_id)
         try:
             run = self.store.get_run(run_id)
-            if run["status"] in {"completed", "cancelled"}:
+            if run["status"] in {"completed", "cancelled"} or run['status'] == 'waiting_review' and resume is None:
                 return
             self.store.check_active(run_id)
             self.store.update_run(run_id, status="running", error=None)
             from .audio import ensure_transcript
             ensure_transcript(self.store, run_id)
             with SqliteSaver.from_conn_string(str(self.store.settings.data_dir / "checkpoints.db")) as saver:
-                graph = build_graph(self.store, saver, self.provider)
-                config = {"configurable": {"thread_id": run_id}, "max_concurrency": 2, "recursion_limit": 100}
+                factory = build_evidence_graph if run['manifest'].get('workflow') == 'evidence_v1' and run['mode'] == 'live' else build_graph
+                graph = factory(self.store, saver, self.provider)
+                epoch = current_lease().checkpoint_epoch
+                thread_id = f'{run_id}:lease:{epoch}' if epoch else run_id
+                config = {"configurable": {"thread_id": thread_id}, "max_concurrency": 2, "recursion_limit": 100}
                 snapshot = graph.get_state(config)
                 if resume is None and run["status"] == "approved":
                     with self.store.sessions() as session:
                         approval = session.scalar(select(Approval).where(Approval.run_id == run_id))
                         resume = {"approval_id": approval.id} if approval else None
+                if resume and not snapshot.values:
+                    graph.invoke({'run_id': run_id, 'generation': 0, 'results': {}}, config)
+                    snapshot = graph.get_state(config)
                 value = Command(resume=resume) if resume else (None if snapshot.values else {
                     "run_id": run_id, "generation": 0, "results": {}})
                 graph.invoke(value, config)
+        except LeaseLost:
+            return
         except Exception as exc:  # noqa: BLE001 -- worker boundary must persist unexpected failures
             cancelled = self.store.get_run(run_id)["cancel_requested"]
             error = str(exc)[:2000]

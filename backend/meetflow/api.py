@@ -41,6 +41,7 @@ from .sales_api import sales_router
 from .sales_workflow import SalesDriver
 from .store import Store
 from .workspace import WorkspaceService, workspace_router
+from .workspace_lock import workspace_lock
 
 
 class ProjectInput(BaseModel):
@@ -64,19 +65,43 @@ def create_app(settings=None, provider=None, sales_provider=None):
 
     @asynccontextmanager
     async def lifespan(app):
-        if settings.auth_enabled:
-            workspace.index_existing_uploads()
-            quality.suspend_private()
-        if settings.start_worker:
-            driver.recover()
-            sales_driver.recover()
+        with workspace_lock(settings.data_dir):
+            async with service_lifespan():
+                yield
+
+    @asynccontextmanager
+    async def service_lifespan():
+        stop_recovery = asyncio.Event()
+        async def recover_work():
+            while not stop_recovery.is_set():
+                try:
+                    await asyncio.wait_for(stop_recovery.wait(), timeout=15)
+                except TimeoutError:
+                    if not (settings.data_dir / 'maintenance.lock').exists():
+                        await asyncio.to_thread(driver.recover)
+                        await asyncio.to_thread(sales_driver.recover)
+        recovery = None
+        try:
             if settings.auth_enabled:
-                quality.recover()
-                business.recover()
-        yield
-        driver.close()
-        sales_driver.close()
-        engine.dispose()
+                workspace.index_existing_uploads()
+                quality.suspend_private()
+            if settings.start_worker:
+                driver.recover()
+                sales_driver.recover()
+                if settings.auth_enabled:
+                    quality.recover()
+                    business.recover()
+            recovery = asyncio.create_task(recover_work()) if settings.start_worker else None
+            yield
+        finally:
+            stop_recovery.set()
+            try:
+                if recovery:
+                    await recovery
+            finally:
+                driver.close()
+                sales_driver.close()
+                engine.dispose()
 
     app = FastAPI(title="MeetFlow", version="0.2.0", lifespan=lifespan)
     app.state.store, app.state.driver = store, driver
@@ -96,6 +121,9 @@ def create_app(settings=None, provider=None, sales_provider=None):
     @app.middleware("http")
     async def protect_legacy(request, call_next):
         path = request.url.path
+        if path.startswith('/api/') and path != '/api/health' and (settings.data_dir / 'maintenance.lock').exists():
+            return JSONResponse({'detail': '系统正在备份维护，请稍后重试；资料已保留'}, status_code=503,
+                                headers={'Retry-After': '5'})
         if settings.auth_enabled and path.startswith("/api/") and path != "/api/health" and not path.startswith(
                 ("/api/auth/", "/api/admin/", "/api/workspace/")):
             # Legacy projects have no account/team ownership. Never silently expose them in account mode.
@@ -402,4 +430,15 @@ def create_app(settings=None, provider=None, sales_provider=None):
     return app
 
 
-app = create_app()
+class LazyApplication:
+    """Keep imports/tests read-only; initialize the default deployment at ASGI startup."""
+    def __init__(self):
+        self.application = None
+
+    async def __call__(self, scope, receive, send):
+        if self.application is None:
+            self.application = create_app()
+        await self.application(scope, receive, send)
+
+
+app = LazyApplication()

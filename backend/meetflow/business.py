@@ -93,6 +93,8 @@ class BusinessService:
             row = session.get(PersonalRecording if kind == "personal" else Submission, key)
             if not row or row.deleted:
                 return
+            if kind == 'personal':
+                self.store.fence(session, row.run_id)
             if kind == "personal":
                 report = self.store.latest_report(row.run_id)
                 if not report or self.store.get_run(row.run_id)["status"] not in {"waiting_review", "completed"}:

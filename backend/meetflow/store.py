@@ -5,6 +5,7 @@ import time
 from sqlalchemy import select, update
 
 from .database import (
+    AgentConversation,
     Artifact,
     Audit,
     Meeting,
@@ -18,6 +19,7 @@ from .database import (
     row_dict,
 )
 from .domain import DomainError, MeetingInput, SourceInput, digest, now, uid
+from .leases import current_lease
 
 
 class Store:
@@ -105,7 +107,8 @@ class Store:
         manifest = {"contact": self.meeting_dict(session, meeting),
                     "sources": [row_dict(source) for source in sources],
                     "tasks": [row_dict(task) for task in tasks], "title": meeting.title,
-                    "meeting_time": meeting.meeting_time, "timezone": meeting.timezone}
+                    "meeting_time": meeting.meeting_time, "timezone": meeting.timezone,
+                    "workflow": self.settings.meeting_workflow}
         run = Run(id=uid("r_"), meeting_id=meeting.id, project_id=meeting.project_id, mode=mode,
                   manifest=manifest)
         session.add(run)
@@ -122,13 +125,18 @@ class Store:
 
     def event(self, run_id, kind, message, payload=None):
         with self.sessions.begin() as session:
+            self.fence(session, run_id)
             session.add(RunEvent(run_id=run_id, kind=kind, message=message, payload=payload or {}))
 
     def update_run(self, run_id, **values):
         with self.sessions.begin() as session:
+            self.fence(session, run_id)
             session.execute(update(Run).where(Run.id == run_id).values(**values, updated_at=now()))
 
     def check_active(self, run_id):
+        lease = current_lease()
+        if lease and lease.key == f'meeting:{run_id}':
+            lease.check()
         run = self.get_run(run_id)
         if run["cancel_requested"]:
             raise DomainError("处理已停止", 409)
@@ -138,11 +146,18 @@ class Store:
             raise DomainError("本次执行达到时间预算，可恢复处理；累计调用预算仍保留", 409)
         return run
 
+    @staticmethod
+    def fence(session, run_id):
+        lease = current_lease()
+        if lease and lease.key == f'meeting:{run_id}':
+            lease.fence(session)
+
     def reserve(self, run_id, kind):
         self.check_active(run_id)
         field = Run.model_calls if kind == "model" else Run.tool_calls
         limit = self.settings.max_model_calls if kind == "model" else self.settings.max_tool_calls
         with self.sessions.begin() as session:
+            self.fence(session, run_id)
             result = session.execute(update(Run).where(Run.id == run_id, field < limit,
                                                        Run.cancel_requested.is_(False))
                                      .values({field: field + 1, Run.updated_at: now()}))
@@ -151,6 +166,7 @@ class Store:
 
     def add_usage(self, run_id, usage):
         with self.sessions.begin() as session:
+            self.fence(session, run_id)
             session.execute(update(Run).where(Run.id == run_id).values(
                 input_tokens=Run.input_tokens + usage.get("prompt_tokens", 0),
                 output_tokens=Run.output_tokens + usage.get("completion_tokens", 0)))
@@ -160,8 +176,29 @@ class Store:
             return [row_dict(row) for row in session.scalars(
                 select(Artifact).where(Artifact.run_id == run_id).order_by(Artifact.created_at))]
 
+    def conversation(self, run_id, task_key, fingerprint):
+        with self.sessions() as session:
+            row = session.get(AgentConversation, f'{run_id}:{task_key}')
+            if row and row.fingerprint != fingerprint:
+                raise DomainError('Agent输入或契约已变更，请基于同一原文新建分析版本，不复用旧消息', 409)
+            return row_dict(row) if row else None
+
+    def save_conversation(self, run_id, task_key, fingerprint, messages, steps):
+        with self.sessions.begin() as session:
+            self.fence(session, run_id)
+            key = f'{run_id}:{task_key}'
+            row = session.get(AgentConversation, key)
+            if row is None:
+                session.add(AgentConversation(id=key, run_id=run_id, task_key=task_key, fingerprint=fingerprint,
+                                               messages=messages, steps=steps))
+            else:
+                if row.fingerprint != fingerprint:
+                    raise DomainError('Agent消息版本冲突', 409)
+                row.messages, row.steps = messages, steps
+
     def commit_artifact(self, run_id, task_key, role, body):
         with self.sessions.begin() as session:
+            self.fence(session, run_id)
             existing = session.scalar(select(Artifact).where(Artifact.run_id == run_id,
                                                              Artifact.task_key == task_key))
             if existing:
@@ -184,6 +221,7 @@ class Store:
         if current and current["content_hash"] == digest(body):
             return current
         with self.sessions.begin() as session:
+            self.fence(session, run_id)
             report = Report(id=uid("rep_"), run_id=run_id,
                             revision=current["revision"] + 1 if current else 1,
                             body=body, content_hash=digest(body))

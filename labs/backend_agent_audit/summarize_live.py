@@ -14,6 +14,8 @@ def summarize(folder):
     profile = manifest.get('profile', 'ollama')
     if manifest['scope'] == 'meeting':
         phase = 'meeting_protocol'
+    elif manifest.get('workflow') == 'evidence_v1':
+        phase = 'typed_evidence_graph'
     elif profile == 'ollama':
         phase = 'original_native_graph'
     elif 'role_result_model' in source['backend/meetflow/agents.py']:
@@ -21,7 +23,8 @@ def summarize(folder):
     else:
         phase = 'L1_structured_graph'
     model = json.loads((folder / 'model.json').read_text(encoding='utf-8'))
-    return {'run': folder.name, 'phase': phase, 'model': manifest['model'], 'profile': profile,
+    return {'run': folder.name, 'phase': phase, 'workflow': manifest.get('workflow', 'dynamic'),
+            'model': manifest['model'], 'profile': profile,
             'server': manifest['server'], 'limits': manifest['limits'], 'status': manifest['status'],
             'model_digest': next((m['digest'] for m in manifest['models']['models'] if m['name'] == manifest['model']), None),
             'template_sha256': hashlib.sha256(model.get('template', '').encode()).hexdigest(),
@@ -41,14 +44,23 @@ def main():
     folders = sorted((ROOT / 'test-results/backend-agent-audit/live-workflow').glob('*'))
     runs = [summarize(f) for f in folders if (f / 'results.json').exists()]
     target = ROOT / 'labs/backend_agent_audit/results/live_workflow_summary.json'
-    target.write_text(json.dumps({'scope': 'L1/L2 authored development integration diagnostics',
+    envelope = {'scope': 'L1/L2 authored development integration diagnostics',
         'limitations': ['Three graph cases are authored development cases, not independent business gold.',
                         'Meeting protocol probes used smaller budgets and earlier source revisions.',
                         'Graph iterations are adaptive development, not independent trials or framework rankings.',
                         'Narrow checks include exact title keywords and do not replace semantic support review.',
                         'tool_calls count read gateway calls and exclude submit_result in the meeting runner.',
                         'Token counters may omit a malformed response if provider parsing failed; do not infer paid cost.'],
-        'runs': runs}, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        'runs': [r for r in runs if r['phase'] != 'typed_evidence_graph']}
+    target.write_text(json.dumps(envelope, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    typed = [r for r in runs if r['phase'] == 'typed_evidence_graph']
+    for run in typed:
+        for result in run['results']:
+            if 'checks' in result and 'dynamic_roles' in result['checks']:
+                result['checks']['required_roles'] = result['checks'].pop('dynamic_roles')
+    (target.parent / 'typed_workflow_summary.json').write_text(json.dumps({
+        'scope': 'Adaptive typed pipeline development; every cohort kept, only three authored cases',
+        'limitations': envelope['limitations'], 'runs': typed}, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(json.dumps({'output': str(target.relative_to(ROOT)), 'runs': len(runs)}, ensure_ascii=True))
 
 

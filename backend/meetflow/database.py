@@ -1,6 +1,7 @@
 from sqlalchemy import (
     JSON,
     Boolean,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -425,6 +426,27 @@ class Correction(Base):
     created_at: Mapped[str] = mapped_column(default=now)
 
 
+class WorkLease(Base):
+    __tablename__ = 'work_leases'
+    id: Mapped[str] = mapped_column(String(160), primary_key=True)
+    owner: Mapped[str | None] = mapped_column(String(120))
+    generation: Mapped[int] = mapped_column(default=0)
+    checkpoint_epoch: Mapped[int] = mapped_column(default=0)
+    expires_at: Mapped[float] = mapped_column(Float, default=0)
+    attempts: Mapped[int] = mapped_column(default=0)
+
+
+class AgentConversation(Base):
+    __tablename__ = 'agent_conversations'
+    __table_args__ = (UniqueConstraint('run_id', 'task_key'),)
+    id: Mapped[str] = mapped_column(String(240), primary_key=True)
+    run_id: Mapped[str] = mapped_column(ForeignKey('runs.id'), index=True)
+    task_key: Mapped[str]
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    steps: Mapped[int]
+    messages: Mapped[list] = mapped_column(JSON)
+
+
 def make_database(settings):
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     connect_args = {"check_same_thread": False, "timeout": 30} if settings.db_url.startswith("sqlite") else {}
@@ -434,7 +456,10 @@ def make_database(settings):
         def sqlite_setup(connection, _):
             connection.execute("PRAGMA foreign_keys=ON")
             connection.execute("PRAGMA journal_mode=WAL")
-    Base.metadata.create_all(engine)
+    from .schema import migrate
+    from .workspace_lock import workspace_lock
+    with workspace_lock(settings.data_dir):
+        migrate(engine)
     return engine, sessionmaker(engine, expire_on_commit=False)
 
 

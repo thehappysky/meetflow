@@ -15,6 +15,7 @@ from .database import (
     row_dict,
 )
 from .domain import DomainError, digest, now, uid
+from .leases import current_lease
 from .sales_domain import LABELS, ConversationInput, parse_transcript, score, scored_decisions
 
 
@@ -160,10 +161,12 @@ class SalesService:
 
     def change(self, analysis_id, **values):
         with self.sessions.begin() as session:
+            self.fence(session, analysis_id)
             session.execute(update(SalesAnalysis).where(SalesAnalysis.id == analysis_id).values(**values))
 
     def event(self, analysis_id, message):
         with self.lock, self.sessions.begin() as session:
+            self.fence(session, analysis_id)
             row = session.get(SalesAnalysis, analysis_id)
             row.events = [*row.events, {"message": message, "at": now()}][-150:]
 
@@ -171,6 +174,7 @@ class SalesService:
         field = SalesAnalysis.model_calls if kind == "model" else SalesAnalysis.tool_calls
         limit = self.settings.max_model_calls if kind == "model" else self.settings.max_tool_calls
         with self.sessions.begin() as session:
+            self.fence(session, analysis_id)
             result = session.execute(update(SalesAnalysis).where(SalesAnalysis.id == analysis_id,
                 SalesAnalysis.cancel_requested.is_(False), field < limit).values({field.key: field + 1}))
             if result.rowcount != 1:
@@ -178,14 +182,22 @@ class SalesService:
 
     def artifact(self, analysis_id, key, result):
         with self.lock, self.sessions.begin() as session:
+            self.fence(session, analysis_id)
             row = session.get(SalesAnalysis, analysis_id)
             row.artifacts = {**row.artifacts, key: result}
 
     def usage(self, analysis_id, usage):
         with self.sessions.begin() as session:
+            self.fence(session, analysis_id)
             session.execute(update(SalesAnalysis).where(SalesAnalysis.id == analysis_id).values(
                 input_tokens=SalesAnalysis.input_tokens + max(0, int(usage.get("prompt_tokens", 0))),
                 output_tokens=SalesAnalysis.output_tokens + max(0, int(usage.get("completion_tokens", 0)))))
+
+    @staticmethod
+    def fence(session, analysis_id):
+        lease = current_lease()
+        if lease and lease.key == f'quality:{analysis_id}':
+            lease.fence(session)
 
     def review(self, analysis_id, value):
         request_hash = digest(value.model_dump())

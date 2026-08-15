@@ -13,6 +13,7 @@ from sqlalchemy import select
 
 from .database import SalesAnalysis, SalesConversation
 from .domain import DomainError, digest
+from .leases import LeaseLost, LeaseManager, current_lease
 from .orchestration import merge_refs
 from .providers import LiveProvider, tool_call
 from .sales_domain import (
@@ -121,6 +122,7 @@ class SalesDriver:
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="sales-quality")
         self.lock, self.active = threading.Lock(), set()
         self.deadlines = {}
+        self.leases = LeaseManager(service.sessions, service.settings.data_dir)
 
     def submit(self, key, audio=False):
         with self.lock:
@@ -137,6 +139,9 @@ class SalesDriver:
                 self.active.discard(key)
 
     def check(self, analysis_id):
+        lease = current_lease()
+        if lease:
+            lease.check()
         if self.service.get(analysis_id)["cancel_requested"]:
             raise DomainError("已请求停止", 409)
         if time.monotonic() > self.deadlines.get(analysis_id, float("inf")):
@@ -281,6 +286,11 @@ class SalesDriver:
         return graph.compile(checkpointer=saver)
 
     def process(self, analysis_id):
+        with self.leases.own(f'quality:{analysis_id}') as lease:
+            if lease is not None:
+                self._process_owned(analysis_id)
+
+    def _process_owned(self, analysis_id):
         row = self.service.get(analysis_id)
         if row["status"] in {"waiting_review", "reviewed", "cancelled"}:
             return
@@ -290,10 +300,14 @@ class SalesDriver:
             self.service.change(analysis_id, status="running", phase="专业角色协作", error=None)
             with SqliteSaver.from_conn_string(str(self.service.settings.data_dir / "sales-checkpoints.db")) as saver:
                 graph = self.graph(saver)
-                config = {"configurable": {"thread_id": analysis_id}, "max_concurrency": 3, "recursion_limit": 30}
+                epoch = current_lease().checkpoint_epoch
+                thread_id = f'{analysis_id}:lease:{epoch}' if epoch else analysis_id
+                config = {"configurable": {"thread_id": thread_id}, "max_concurrency": 3, "recursion_limit": 30}
                 previous = graph.get_state(config)
                 graph.invoke(None if previous.values else {"analysis_id": analysis_id, "generation": 0,
                              "results": {}}, config)
+        except LeaseLost:
+            return
         except Exception as exc:  # noqa: BLE001 -- persist worker failures, never fake success
             cancelled = self.service.get(analysis_id)["cancel_requested"]
             self.service.change(analysis_id, status="cancelled" if cancelled else "failed",
@@ -302,6 +316,11 @@ class SalesDriver:
             self.deadlines.pop(analysis_id, None)
 
     def transcribe(self, conversation_id):
+        with self.leases.own(f'audio:{conversation_id}') as lease:
+            if lease is not None:
+                self._transcribe_owned(conversation_id)
+
+    def _transcribe_owned(self, conversation_id):
         from .audio import audio_available, load_model
         try:
             if not audio_available(self.service.settings):
@@ -321,13 +340,17 @@ class SalesDriver:
             if not spans:
                 raise DomainError("未检测到可识别语音")
             with self.service.sessions.begin() as session:
+                current_lease().fence(session)
                 row = session.get(SalesConversation, conversation_id)
                 row.body = {**row.body, "spans": spans, "complete": False}
                 row.version += 1
                 row.status, row.error = "needs_speakers", None
                 self.service.store.audit(session, "sales.audio_transcribed", row.id, {"segments": len(spans)})
+        except LeaseLost:
+            return
         except Exception as exc:  # noqa: BLE001 -- audio must fail explicitly
             with self.service.sessions.begin() as session:
+                current_lease().fence(session)
                 row = session.get(SalesConversation, conversation_id)
                 row.status, row.error = "audio_failed", str(exc)[:1500]
 

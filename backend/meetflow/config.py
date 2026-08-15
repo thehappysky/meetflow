@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     model_api_profile: Literal["openai", "ollama", "ollama_json"] = "openai"
     model_context_window: int = 8192
     model_timeout: float = 60
+    meeting_workflow: Literal['dynamic', 'evidence_v1'] = 'dynamic'
     max_model_calls: int = 48
     max_tool_calls: int = 100
     max_agent_steps: int = 10

@@ -40,6 +40,7 @@ def ensure_transcript(store, run_id):
     if not spans:
         raise DomainError("未检测到可识别的语音，未生成会议内容", 422)
     with store.sessions.begin() as session:
+        store.fence(session, run_id)
         existing = session.scalar(select(Source).where(Source.meeting_id == meeting.id, Source.kind == "transcript"))
         source = existing or store.add_source(session, run["project_id"],
             SourceInput(title=meeting.title, kind="transcript", spans=spans), meeting.id)

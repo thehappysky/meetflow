@@ -12,6 +12,7 @@
     {
       "run": "20261113T000448959395Z",
       "phase": "meeting_protocol",
+      "workflow": "dynamic",
       "model": "qwen3:4b",
       "profile": "ollama",
       "server": {
@@ -77,6 +78,7 @@
     {
       "run": "20261113T000619726147Z",
       "phase": "meeting_protocol",
+      "workflow": "dynamic",
       "model": "qwen2.5:7b",
       "profile": "ollama",
       "server": {
@@ -142,6 +144,7 @@
     {
       "run": "20261113T000738164323Z",
       "phase": "original_native_graph",
+      "workflow": "dynamic",
       "model": "qwen2.5:7b",
       "profile": "ollama",
       "server": {
@@ -245,6 +248,7 @@
     {
       "run": "20261113T001504587576Z",
       "phase": "meeting_protocol",
+      "workflow": "dynamic",
       "model": "qwen2.5:7b",
       "profile": "ollama_json",
       "server": {
@@ -311,6 +315,7 @@
     {
       "run": "20261113T001555959660Z",
       "phase": "meeting_protocol",
+      "workflow": "dynamic",
       "model": "qwen3:4b",
       "profile": "ollama_json",
       "server": {
@@ -381,6 +386,7 @@
     {
       "run": "20261113T001703634503Z",
       "phase": "L1_structured_graph",
+      "workflow": "dynamic",
       "model": "qwen2.5:7b",
       "profile": "ollama_json",
       "server": {
@@ -486,6 +492,7 @@
     {
       "run": "20261113T002525830063Z",
       "phase": "L2_role_schema_graph",
+      "workflow": "dynamic",
       "model": "qwen2.5:7b",
       "profile": "ollama_json",
       "server": {
