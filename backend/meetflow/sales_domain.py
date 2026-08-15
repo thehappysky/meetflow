@@ -111,6 +111,7 @@ class AnalyzeInput(Contract):
 class Decision(Contract):
     rule_id: str
     status: Judgment
+    reason_title: str = Field(default="", max_length=60)
     reason: str = Field(min_length=1, max_length=2000)
     evidence: list[str] = Field(default_factory=list, max_length=20)
     guidance: str = Field(default="", max_length=1500)

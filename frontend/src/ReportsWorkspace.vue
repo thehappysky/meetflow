@@ -276,7 +276,9 @@ onBeforeUnmount(() => {
           <p v-if="!candidates.length">
             此范围暂无已整理的会谈，可先上传录音，或调整日期。
           </p>
-          <p v-if="selected.length > 50" class="wk-note">一份报告最多纳入 50 场，请取消部分会谈或缩短期间。</p>
+          <p v-if="selected.length > 50" class="wk-note">
+            一份报告最多纳入 50 场，请取消部分会谈或缩短期间。
+          </p>
           <button
             class="wk-primary"
             :disabled="
@@ -368,41 +370,46 @@ onBeforeUnmount(() => {
               {{ e.title }} · {{ e.meeting_date || "时间待确认，单列展示" }} ·
               来源 v{{ e.revision }}
             </p>
-            <label
-              >会谈摘要<textarea
-                v-model="e.summary"
-                rows="4"
-                :readonly="confirmed"
-                maxlength="12000"
-              /></label
-            ><label
-              >后续安排与反馈<textarea
-                v-model="e.next_steps"
-                rows="4"
-                :readonly="confirmed"
-                maxlength="12000"
-              /></label
-            ><label
-              >风险与待确认<textarea
-                v-model="e.risks"
-                rows="3"
-                :readonly="confirmed"
-                maxlength="12000"
-              /></label
-            ><label
-              >本人补充<textarea
-                v-model="e.note"
-                rows="2"
-                :readonly="confirmed"
-                maxlength="3000"
-                placeholder="可空，例如需要主管提供的支持；不会自动当作客户承诺。"
-              />
-            </label>
-            <details>
-              <summary>核对原文依据</summary>
-              <p v-for="(span, key) in e.evidence" :key="key">
-                [{{ key }}] {{ span.text }}
-              </p>
+            <details :open="!confirmed">
+              <summary>
+                {{ confirmed ? "展开本场报告内容" : "核对本场填入内容" }}
+              </summary>
+              <label
+                >会谈摘要<textarea
+                  v-model="e.summary"
+                  rows="4"
+                  :readonly="confirmed"
+                  maxlength="12000"
+                /></label
+              ><label
+                >后续安排与反馈<textarea
+                  v-model="e.next_steps"
+                  rows="4"
+                  :readonly="confirmed"
+                  maxlength="12000"
+                /></label
+              ><label
+                >风险与待确认<textarea
+                  v-model="e.risks"
+                  rows="3"
+                  :readonly="confirmed"
+                  maxlength="12000"
+                /></label
+              ><label
+                >本人补充<textarea
+                  v-model="e.note"
+                  rows="2"
+                  :readonly="confirmed"
+                  maxlength="3000"
+                  placeholder="可空，例如需要主管提供的支持；不会自动当作客户承诺。"
+                />
+              </label>
+              <details>
+                <summary>核对原文依据</summary>
+                <p v-for="(span, key) in e.evidence" :key="key">
+                  [{{ key }}] {{ span.text }}
+                </p>
+              </details>
             </details>
           </article>
           <label

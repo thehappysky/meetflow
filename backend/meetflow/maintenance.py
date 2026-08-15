@@ -76,9 +76,10 @@ def maintenance_router(workspace):
                 QualityCase.source_id == key)).all()
             followups = session.scalars(select(Followup.id).where(Followup.source_kind == kind,
                 Followup.source_id == key)).all()
-            return {"version": row.version if kind == "personal" else row.revision, "quality_versions": len(quality),
+            return {"version": row.version if kind == "personal" else row.revision,
+                **({"quality_versions": len(quality)} if user["role"] in {"manager","boss"} and kind == "center" else {}),
                 "followup_versions": len(followups),
-                "notice": "移除后不再参与当前工作台、客户和质检汇总；历史保留，可在回收站恢复。个人副本和已确认报告不被级联删除。"}
+                "notice": "移除后不再参与当前工作台和客户跟进；历史保留，可在回收站恢复。个人副本和已确认报告不被级联删除。"}
 
     @router.get("/{kind}/{key}/activity")
     def activity(kind: Literal["personal", "center"], key: str, user=current_user):

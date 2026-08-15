@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, reactive, ref } from "vue";
+import {
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  reactive,
+  ref,
+  nextTick,
+} from "vue";
 import { api, post, NETWORK_ERROR } from "./api";
 type Row = Record<string, any>;
 const props = defineProps<{
@@ -7,9 +14,6 @@ const props = defineProps<{
   source?: { kind: string; id: string } | null;
 }>();
 const emit = defineEmits<{ meeting: [kind: string, id: string] }>();
-const scope = ref(
-  props.source?.kind || (props.user.role === "sales" ? "personal" : "center"),
-);
 const rows = ref<Row[]>([]),
   groups = ref<Row[]>([]),
   detail = ref<Row | null>(null);
@@ -17,32 +21,34 @@ const busy = ref(false),
   error = ref(""),
   notice = ref(""),
   search = ref("");
+const expanded = ref<string[]>([]),
+  evidenceOpen = ref(false),
+  allTranscript = ref(false),
+  activeRule = ref("");
 const contextOpen = ref(false),
   reviewOpen = ref(false),
-  feedbackOpen = ref(false);
-const stage = ref("通用复盘"),
+  stage = ref("通用复盘"),
   complete = ref(false),
   reason = ref(""),
   note = ref("");
 const speakers = reactive<Row>({}),
-  reviewEdits = reactive<Row>({});
-const selected = ref<string[]>([]),
+  reviewEdits = reactive<Row>({}),
+  selected = ref<string[]>([]),
   highlighted = ref(""),
-  audioUrl = ref("");
-const audio = ref<HTMLAudioElement | null>(null),
   historical = ref("");
-const feedback = reactive({ rule_id: "", reason: "" });
+const audioUrl = ref(""),
+  audio = ref<HTMLAudioElement | null>(null),
+  evidencePanel = ref<HTMLElement | null>(null);
 let timer: number | undefined,
-  generation = 0,
+  sequence = 0,
   dead = false,
   polling = false;
-const stages = ["通用复盘", "需求沟通", "产品演示", "方案报价", "决策签约"];
 const labels: Row = {
   met: "达标",
   partial: "部分达标",
   unmet: "未达标",
-  not_applicable: "不适用",
   unknown: "无法判断",
+  not_applicable: "不适用",
 };
 const statuses: Row = {
   needs_speakers: "待核对说话人",
@@ -53,6 +59,7 @@ const statuses: Row = {
   failed: "处理失败",
   cancelled: "已停止",
 };
+const stages = ["通用复盘", "需求沟通", "产品演示", "方案报价", "决策签约"];
 const speakerNames: Row = {
   sales: "销售",
   customer: "客户",
@@ -65,99 +72,188 @@ const visible = computed(() =>
       .includes(search.value),
   ),
 );
-const decisions = computed<Row[]>(
-  () =>
-    detail.value?.review?.decisions || detail.value?.report?.decisions || [],
-);
-const canContext = computed(
-  () =>
-    detail.value &&
-    !detail.value.stale &&
-    !detail.value.historical &&
-    (scope.value === "personal" || props.user.role === "manager"),
-);
-const canReview = computed(
+const decisions = computed<Row[]>(() => detail.value?.decisions || []);
+const canManage = computed(
   () =>
     props.user.role === "manager" &&
-    detail.value?.source_kind === "center" &&
-    detail.value?.report &&
+    detail.value &&
     !detail.value.stale &&
     !detail.value.historical,
 );
-const canFeedback = computed(
-  () =>
-    props.user.role === "sales" &&
-    detail.value?.source_kind === "center" &&
-    detail.value?.report &&
-    !detail.value.stale &&
-    !detail.value.historical,
-);
+const evidenceSpans = computed<Row[]>(() => {
+  const spans = detail.value?.spans || [];
+  if (allTranscript.value || contextOpen.value || reviewOpen.value)
+    return spans;
+  const refs =
+    decisions.value.find((d) => d.rule_id === activeRule.value)?.evidence || [];
+  return spans.filter((s: Row) => refs.includes(s.id));
+});
+function title(d: Row) {
+  return (
+    d.title ||
+    detail.value?.rules?.find((r: Row) => r.id === d.rule_id)?.title ||
+    d.rule_id
+  );
+}
+function shortReason(d: Row) {
+  if (detail.value?.mode === "demo" && !d.review_reason)
+    return d.status === "partial"
+      ? "演示仅字面命中，原因待核对"
+      : "依据不足，暂不评价";
+  return (
+    d.reason_title ||
+    `${title(d)}：${{ met: "满足要求", partial: "部分满足要求", unmet: "未满足要求", unknown: "依据不足，待确认", not_applicable: "本场不适用" }[d.status as string] || "待核对"}`
+  );
+}
+function displayStage(value: string) {
+  return value === "通用复盘" ? "通用质检（阶段待确认）" : value;
+}
+function deductionLabel(d: Row) {
+  const possible = detail.value?.metrics?.evaluated_weight;
+  if (d.deduction == null || !possible) return "不计分";
+  if (!d.deduction) return "未扣分";
+  return `折算扣 ${Math.round((1000 * d.deduction) / possible) / 10} 分`;
+}
 function clearAudio() {
   if (audioUrl.value) URL.revokeObjectURL(audioUrl.value);
   audioUrl.value = "";
 }
-async function perform(work: () => Promise<void>) {
+async function perform(fn: () => Promise<void>) {
   if (busy.value) return;
   busy.value = true;
   error.value = "";
   notice.value = "";
   try {
-    await work();
+    await fn();
   } catch (e) {
     error.value = e instanceof Error ? e.message : "操作失败";
   } finally {
     busy.value = false;
   }
 }
-async function readDetail(id: string, analysis = "") {
-  const token = ++generation;
+async function readDetail(id: string, analysis = "", view = "summary") {
+  const token = ++sequence;
   const result = await api(
-    `/workspace/quality/cases/${id}${analysis ? `?analysis_id=${encodeURIComponent(analysis)}` : ""}`,
+    `/workspace/quality/cases/${id}?view=${view}${analysis ? "&analysis_id=" + encodeURIComponent(analysis) : ""}`,
   );
-  if (dead || token !== generation) return;
+  if (dead || sequence !== token) return;
   detail.value = result;
+}
+async function ensureView(view: string) {
+  const rank: Row = { summary: 0, details: 1, full: 2 };
+  if (rank[detail.value?.view || "summary"] >= rank[view]) return;
+  await readDetail(detail.value!.id, historical.value, view);
 }
 async function choose(row: Row, analysis = "") {
   clearAudio();
-  contextOpen.value = reviewOpen.value = feedbackOpen.value = false;
+  expanded.value = [];
+  evidenceOpen.value =
+    allTranscript.value =
+    contextOpen.value =
+    reviewOpen.value =
+      false;
   selected.value = [];
   highlighted.value = "";
   historical.value = analysis;
   await readDetail(row.id, analysis);
 }
 async function refresh(initial = false) {
-  const requestedScope = scope.value;
-  const data = await api(`/workspace/quality/cases?scope=${requestedScope}`);
-  if (dead || requestedScope !== scope.value) return;
-  rows.value = data.cases;
+  const result = await api("/workspace/quality/cases?scope=center");
+  if (dead) return;
+  rows.value = result.cases;
+  groups.value = result.summary;
   if (error.value === NETWORK_ERROR) error.value = "";
-  groups.value = data.summary;
   if ((initial || !detail.value) && props.source) {
-    const item = rows.value.find(
-      (r) =>
-        r.source_id === props.source!.id &&
-        r.source_kind === props.source!.kind,
+    const row = rows.value.find(
+      (r) => r.source_id === props.source!.id && r.source_kind === "center",
     );
-    if (item) await choose(item);
-  } else if (detail.value) await readDetail(detail.value.id, historical.value);
+    if (row) await choose(row);
+  } else if (detail.value)
+    await readDetail(detail.value.id, historical.value, detail.value.view);
 }
-async function switchScope(value: string) {
-  generation++;
-  detail.value = null;
-  clearAudio();
-  scope.value = value;
-  rows.value = [];
-  groups.value = [];
-  await perform(() => refresh());
+async function toggleReason(d: Row) {
+  if (expanded.value.includes(d.rule_id)) {
+    expanded.value = expanded.value.filter((id) => id !== d.rule_id);
+    if (
+      activeRule.value === d.rule_id &&
+      !reviewOpen.value &&
+      !contextOpen.value
+    ) {
+      evidenceOpen.value = false;
+      clearAudio();
+    }
+    return;
+  }
+  await perform(async () => {
+    await ensureView("details");
+    expanded.value = [...expanded.value, d.rule_id];
+  });
 }
-function editContext() {
-  stage.value = detail.value!.stage;
-  complete.value = detail.value!.complete;
-  reason.value = "";
-  selected.value = [];
-  for (const s of detail.value!.spans) speakers[s.id] = s.speaker;
-  contextOpen.value = true;
-  reviewOpen.value = feedbackOpen.value = false;
+async function showEvidence(d: Row) {
+  await perform(async () => {
+    await ensureView("full");
+    activeRule.value = d.rule_id;
+    evidenceOpen.value = true;
+    allTranscript.value = false;
+    highlighted.value = "";
+    await nextTick();
+    evidencePanel.value?.focus({ preventScroll: true });
+    evidencePanel.value?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+async function loadAudio() {
+  if (audioUrl.value) return;
+  const id = detail.value!.id,
+    token = sequence;
+  const response = await fetch(
+    `/api/workspace/center/${detail.value!.source_id}/audio`,
+    {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("meetflow-token")}`,
+      },
+    },
+  );
+  if (!response.ok) throw new Error("录音不可用或无权访问");
+  const blob = await response.blob();
+  if (dead || sequence !== token || detail.value?.id !== id) return;
+  audioUrl.value = URL.createObjectURL(blob);
+}
+async function seek(id: string) {
+  highlighted.value = id;
+  await nextTick();
+  document
+    .getElementById(`quality-span-${id}`)
+    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const span = detail.value?.spans?.find((s: Row) => s.id === id);
+  if (!detail.value?.has_audio || span?.start == null) {
+    notice.value = "已定位文字；本段没有已对齐的音频时间点。";
+    return;
+  }
+  await perform(async () => {
+    await loadAudio();
+    const set = () => {
+      if (audio.value) audio.value.currentTime = span.start;
+    };
+    if (audio.value?.readyState) set();
+    else audio.value?.addEventListener("loadedmetadata", set, { once: true });
+    notice.value = `已定位到 ${Math.floor(span.start)} 秒，点播放回听。`;
+  });
+}
+async function editContext() {
+  await perform(async () => {
+    await ensureView("full");
+    stage.value = detail.value!.stage;
+    complete.value = detail.value!.complete;
+    reason.value = "";
+    selected.value = [];
+    for (const s of detail.value!.spans) speakers[s.id] = s.speaker;
+    contextOpen.value = true;
+    reviewOpen.value = false;
+    evidenceOpen.value = allTranscript.value = true;
+    await nextTick();
+    evidencePanel.value?.focus({ preventScroll: true });
+    evidencePanel.value?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 }
 function assign(role: string) {
   for (const id of selected.value) speakers[id] = role;
@@ -175,66 +271,28 @@ async function saveContext() {
       reason: reason.value,
     });
     contextOpen.value = false;
+    evidenceOpen.value = false;
     historical.value = "";
+    await readDetail(detail.value!.id);
     await refresh();
-    notice.value = "背景已保存，系统继续质检；旧分析保留。";
+    notice.value = "背景已更新，旧分析保留。";
   });
 }
-async function loadAudio() {
-  if (audioUrl.value) return;
-  const id = detail.value!.id,
-    token = generation;
-  const path =
-    detail.value!.source_kind === "personal" ? "recordings" : "center";
-  const response = await fetch(
-    `/api/workspace/${path}/${detail.value!.source_id}/audio`,
-    {
-      headers: {
-        Authorization: `Bearer ${sessionStorage.getItem("meetflow-token")}`,
-      },
-    },
-  );
-  if (response.status === 401) {
-    sessionStorage.removeItem("meetflow-token");
-    window.dispatchEvent(new Event("meetflow-session-expired"));
-  }
-  if (!response.ok) throw new Error("录音不可用或无权访问");
-  const blob = await response.blob();
-  if (dead || generation !== token || detail.value?.id !== id) return;
-  audioUrl.value = URL.createObjectURL(blob);
-}
-async function seek(id: string) {
-  highlighted.value = id;
-  document
-    .getElementById(`quality-span-${id}`)
-    ?.scrollIntoView({ behavior: "smooth", block: "center" });
-  const span = detail.value?.spans.find((s: Row) => s.id === id);
-  if (!detail.value?.has_audio || span?.start == null) {
-    notice.value = "已定位到文字依据；该片段没有可回听时间。";
-    return;
-  }
+async function startReview() {
   await perform(async () => {
-    await loadAudio();
-    const setTime = () => {
-      if (audio.value) audio.value.currentTime = span.start;
-    };
-    if (audio.value?.readyState) setTime();
-    else
-      audio.value?.addEventListener("loadedmetadata", setTime, { once: true });
-    notice.value = `已定位到 ${Math.floor(span.start)} 秒，点播放即可回听。`;
+    await ensureView("full");
+    reviewOpen.value = true;
+    contextOpen.value = false;
+    selected.value = [];
+    note.value = "";
+    for (const d of decisions.value)
+      reviewEdits[d.rule_id] = {
+        status: d.status,
+        reason: "",
+        evidence: [...d.evidence],
+      };
+    expanded.value = decisions.value.map((d) => d.rule_id);
   });
-}
-function startReview() {
-  reviewOpen.value = true;
-  contextOpen.value = feedbackOpen.value = false;
-  selected.value = [];
-  note.value = "";
-  for (const d of decisions.value)
-    reviewEdits[d.rule_id] = {
-      status: d.status,
-      reason: "",
-      evidence: [...d.evidence],
-    };
 }
 async function saveReview() {
   await perform(async () => {
@@ -255,54 +313,40 @@ async function saveReview() {
     });
     reviewOpen.value = false;
     await refresh();
-    notice.value = "复核已保存，机器结果和历次复核均保留。";
+    notice.value = "主管复核已保存，原判断与版本保留。";
   });
 }
-function startFeedback(d: Row) {
-  feedbackOpen.value = true;
-  contextOpen.value = reviewOpen.value = false;
-  feedback.rule_id = d.rule_id;
-  feedback.reason = "";
-  selected.value = [...d.evidence];
-}
-async function saveFeedback() {
+async function retry() {
   await perform(async () => {
-    await post(`/workspace/quality/cases/${detail.value!.id}/feedback`, {
-      version: detail.value!.version,
-      report_hash: detail.value!.report_hash,
-      ...feedback,
-      evidence: selected.value,
-    });
-    feedbackOpen.value = false;
+    await post(`/workspace/quality/cases/${detail.value!.id}/retry`);
     await refresh();
-    notice.value = "异议已提交，由负责团队主管处理。";
   });
+}
+async function loadHistory() {
+  await perform(async () => ensureView("full"));
 }
 onMounted(async () => {
+  if (!["manager", "boss"].includes(props.user.role)) {
+    error.value = "此工作区仅供主管和老板使用";
+    return;
+  }
   await perform(() => refresh(true));
   timer = window.setInterval(async () => {
-    if (
-      busy.value ||
-      polling ||
-      dead ||
-      contextOpen.value ||
-      reviewOpen.value ||
-      feedbackOpen.value
-    )
+    if (busy.value || polling || dead || contextOpen.value || reviewOpen.value)
       return;
     polling = true;
     try {
       await refresh();
     } catch (e) {
-      error.value = e instanceof Error ? e.message : "读取进度失败";
+      error.value = e instanceof Error ? e.message : "读取失败";
     } finally {
       polling = false;
     }
-  }, 3500);
+  }, 5000);
 });
 onBeforeUnmount(() => {
   dead = true;
-  generation++;
+  sequence++;
   window.clearInterval(timer);
   clearAudio();
 });
@@ -310,87 +354,51 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="quality">
-    <header class="quality-heading">
+    <header class="q-heading">
       <div>
-        <p class="eyebrow">
-          {{
-            user.role === "sales"
-              ? "每次会谈，都能复盘"
-              : "基于已上报会谈的培训复盘"
-          }}
-        </p>
-        <h1>
-          {{
-            user.role === "sales"
-              ? "我的复盘质检"
-              : user.role === "boss"
-                ? "公司质检概览"
-                : "团队销售质检"
-          }}
-        </h1>
+        <p>已上报资料的管理质检</p>
+        <h1>{{ user.role === "boss" ? "公司质检概览" : "团队销售质检" }}</h1>
       </div>
       <button @click="perform(() => refresh())" :disabled="busy">
         刷新质检
       </button>
     </header>
-    <div v-if="error" class="q-error" role="alert">{{ error }}</div>
-    <div v-if="notice" class="q-notice" role="status">{{ notice }}</div>
-    <div v-if="user.role === 'sales'" class="q-tabs" aria-label="质检资料范围">
-      <button
-        :class="{ active: scope === 'personal' }"
-        @click="switchScope('personal')"
-      >
-        个人复盘</button
-      ><button
-        :class="{ active: scope === 'center' }"
-        @click="switchScope('center')"
-      >
-        我的上报质检
-      </button>
-    </div>
+    <p v-if="error" role="alert" class="q-error">{{ error }}</p>
+    <p v-if="notice" role="status" class="q-notice">{{ notice }}</p>
     <div class="q-stats">
       <span
         >当前范围 <b>{{ rows.length }}</b> 场</span
+      ><span
+        >主管已复核
+        <b>{{ rows.filter((r) => r.status === "reviewed").length }}</b></span
       ><span
         >待核对身份
         <b>{{
           rows.filter((r) => r.status === "needs_speakers").length
         }}</b></span
-      ><span
-        >主管已复核
-        <b>{{ rows.filter((r) => r.status === "reviewed").length }}</b></span
-      ><span
-        >待处理异议
-        <b>{{ rows.reduce((n, r) => n + r.pending_feedback, 0) }}</b></span
       >
     </div>
     <p class="q-muted">
-      {{
-        scope === "personal"
-          ? "未上报资料仅自己可见。上传一次，纪要与质检共用原文。"
-          : "仅包含有权限的已上报来源，个人区后续修改不会覆盖中心依据。"
-      }}
+      只评价已上报的授权资料。先看分数与扣分概览，展开条目看具体原因，再查看原文或回听依据。
     </p>
-    <div v-if="rows.some((r) => r.mode === 'demo')" class="q-notice">
-      当前含规则演示数据，未调用大模型；演示分数仅用于验证流程，不作为实际销售评价。
-    </div>
-    <details v-if="groups.length" class="q-groups">
-      <summary>查看分组统计 · 不同规则版本与分析模式分开</summary>
+    <p v-if="rows.some((r) => r.mode === 'demo')" class="q-notice">
+      当前含规则演示，未调用大模型；演示分数不用于真实人员评价。
+    </p>
+    <details v-if="groups.length">
+      <summary>展开分组统计</summary>
       <p v-for="g in groups" :key="`${g.policy.id}-${g.mode}-${g.reviewed}`">
         {{ g.policy.name }} v{{ g.policy.version }} ·
         {{ g.mode === "demo" ? "规则演示" : "模型分析" }} ·
-        {{ g.reviewed ? "已复核" : "待复核／有异议" }} · {{ g.samples }} 场 ·
-        可评项均分 {{ g.average_score ?? "无法计算" }}
+        {{ g.reviewed ? "已复核" : "待复核" }} · {{ g.samples }} 场 · 可评项均分
+        {{ g.average_score ?? "无法计算" }}
       </p>
     </details>
-    <div class="q-workbench">
+    <div class="q-workbench" :class="{ 'with-evidence': evidenceOpen }">
       <aside class="q-rail">
         <label
           >查找会谈<input v-model="search" placeholder="客户、会谈、销售"
         /></label>
-        <p v-if="!visible.length" class="q-muted">
-          暂无质检。会谈整理完成后会自动准备，身份不明时先保留待确认。
-        </p>
+        <p v-if="!visible.length">暂无已上报质检。</p>
         <button
           v-for="r in visible"
           :key="r.id"
@@ -401,235 +409,140 @@ onBeforeUnmount(() => {
         >
           <strong>{{ r.metadata.title }}</strong
           ><span>{{ r.owner }} · {{ r.metadata.customer || "客户待归属" }}</span
-          ><span
-            >{{ statuses[r.status]
-            }}{{ r.pending_feedback ? " · 有异议" : "" }}</span
-          ><span v-if="r.mode" class="q-mode">{{
-            r.mode === "demo" ? "规则演示 · 非真实评价" : "模型分析"
-          }}</span
-          ><b
-            >{{
-              r.metrics?.score == null
-                ? "尚无可评分数"
-                : `${r.metrics.score} 分`
-            }}
-            <small v-if="r.metrics"
-              >覆盖 {{ r.metrics.coverage ?? "—" }}%</small
-            ></b
-          >
+          ><span>{{ statuses[r.status] }}</span
+          ><b>{{
+            r.metrics?.score == null ? "尚无可评分数" : `${r.metrics.score} 分`
+          }}</b>
         </button>
       </aside>
-      <template v-if="detail">
-        <main class="q-evidence">
-          <div class="q-section-head">
-            <div>
-              <h2>{{ detail.metadata.title }}</h2>
-              <p>
-                {{ detail.owner }} ·
-                {{ detail.metadata.customer || "客户待归属" }} · 来源 v{{
-                  detail.source_revision
-                }}
-              </p>
-            </div>
-            <button
-              @click="emit('meeting', detail.source_kind, detail.source_id)"
-            >
-              查看会谈纪要
-            </button>
-          </div>
-          <div v-if="detail.stale || detail.historical" class="q-notice">
-            正在查看旧版，不能覆盖当前结果。
-          </div>
-          <div v-if="detail.has_audio" class="q-player">
-            <button
-              v-if="!audioUrl"
-              @click="perform(loadAudio)"
-              :disabled="busy"
-            >
-              加载本场录音</button
-            ><audio v-else ref="audio" :src="audioUrl" controls />
-          </div>
-          <div class="q-section-head">
-            <h3>原文与说话人</h3>
-            <button
-              v-if="canContext && !contextOpen"
-              @click="editContext"
-              :disabled="busy || ['queued', 'running'].includes(detail.status)"
-            >
-              核对说话人与背景
-            </button>
-          </div>
-          <form
-            v-if="contextOpen"
-            class="q-context"
-            @submit.prevent="saveContext"
-          >
+      <section v-if="detail" class="q-findings">
+        <div class="q-heading">
+          <div>
+            <h2>{{ detail.metadata.title }}</h2>
             <p>
-              按转写中的明确角色前缀识别身份；真实音频尚无自动说话人分离。只需核对不明确的片段。
+              {{ detail.owner }} · {{ detail.metadata.customer }} · 来源 v{{
+                detail.source_revision
+              }}
             </p>
-            <label
-              >会谈阶段<select v-model="stage">
-                <option v-for="s in stages" :key="s">{{ s }}</option>
-              </select></label
-            >
-            <p class="q-muted">
-              不确定阶段时保留通用复盘，不强行推测销售进度。
-            </p>
-            <label class="q-check"
-              ><input
-                type="checkbox"
-                v-model="complete"
-              />我确认录音完整覆盖本次会谈</label
-            ><label v-if="scope === 'center'"
-              >背景更正原因<textarea v-model="reason" required />
-            </label>
-            <div class="q-actions">
-              <button
-                type="button"
-                @click="assign('sales')"
-                :disabled="!selected.length"
-              >
-                所选发言设为销售</button
-              ><button
-                type="button"
-                @click="assign('customer')"
-                :disabled="!selected.length"
-              >
-                设为客户</button
-              ><button class="q-primary" :disabled="busy">
-                保存背景并继续质检
-              </button>
-            </div>
-          </form>
-          <div class="q-transcript">
-            <article
-              v-for="s in detail.spans"
-              :key="s.id"
-              :id="`quality-span-${s.id}`"
-              :class="{ highlight: highlighted === s.id }"
-            >
-              <header>
-                <label
-                  v-if="contextOpen || feedbackOpen || reviewOpen"
-                  class="q-check"
-                  ><input
-                    type="checkbox"
-                    :value="s.id"
-                    v-model="selected"
-                  />选择此段</label
-                ><select
-                  v-if="contextOpen"
-                  v-model="speakers[s.id]"
-                  :aria-label="`${s.id}说话人`"
-                >
-                  <option value="unknown">身份待确认</option>
-                  <option value="sales">销售</option>
-                  <option value="customer">客户</option></select
-                ><span v-else class="q-speaker">{{
-                  speakerNames[s.speaker]
-                }}</span
-                ><button class="q-time" @click="seek(s.id)">
-                  {{ s.start == null ? s.id : `${Math.floor(s.start)}秒` }}
-                </button>
-              </header>
-              <p>{{ s.text }}</p>
-            </article>
           </div>
-        </main>
-        <aside class="q-findings">
-          <div class="q-score">
-            <span>{{ statuses[detail.status] }}</span
-            ><strong
-              >{{ detail.metrics?.score ?? "—" }}<small> / 100</small></strong
-            >
-            <p>
-              可评覆盖率 {{ detail.metrics?.coverage ?? "—" }}% ·
-              {{ detail.stage }}
-            </p>
-            <small>无法判断不当零分，不适用不进入分母。</small>
-          </div>
-          <div v-if="detail.mode === 'demo'" class="q-notice">
-            规则演示，未调用大模型。字面命中只演示流程，分数不代表真实销售评价。
-          </div>
-          <p v-if="detail.policy" class="q-muted">
-            {{ detail.policy.name }} · v{{ detail.policy.version }}
-          </p>
-          <p v-if="detail.status === 'needs_speakers'" class="q-notice">
-            尚无法识别销售发言。请核对说话人后继续；纪要已可使用。
-          </p>
-          <p v-if="detail.error" class="q-error">{{ detail.error }}</p>
-          <button
-            v-if="detail.status === 'failed' && canContext"
-            @click="
-              perform(async () => {
-                await post(`/workspace/quality/cases/${detail!.id}/retry`);
-                await refresh();
-              })
-            "
-          >
-            恢复失败的质检
+          <button @click="emit('meeting', 'center', detail.source_id)">
+            查看会谈纪要
           </button>
-          <p v-if="detail.report && !detail.complete" class="q-muted">
-            录音完整性未确认，不据缺少发言认定销售未执行。
-          </p>
+        </div>
+        <p v-if="detail.stale || detail.historical" class="q-notice">
+          正在查看旧版，只能追溯，不能覆盖当前结果。
+        </p>
+        <div class="q-score">
+          <span>{{ statuses[detail.status] }}</span
+          ><strong
+            >{{ detail.metrics?.score ?? "—" }}<small> / 100</small></strong
+          ><span
+            >可评覆盖 {{ detail.metrics?.coverage ?? "—" }}% ·
+            {{ displayStage(detail.stage) }}</span
+          >
+        </div>
+        <p v-if="detail.error" class="q-error">{{ detail.error }}</p>
+        <p v-if="detail.status === 'needs_speakers'">
+          先由主管核对说话人；身份不明时不评价销售表现。
+        </p>
+        <div class="q-actions">
           <button
-            v-if="canReview && !reviewOpen"
-            class="q-primary"
+            v-if="canManage && !reviewOpen"
+            @click="editContext"
+            :disabled="busy || ['queued', 'running'].includes(detail.status)"
+          >
+            核对说话人与背景</button
+          ><button
+            v-if="canManage && detail.has_report && !reviewOpen"
             @click="startReview"
+            :disabled="busy"
           >
-            {{ detail.status === "reviewed" ? "补充主管复核" : "复核本场质检" }}
+            复核本场质检</button
+          ><button
+            v-if="canManage && detail.status === 'failed'"
+            @click="retry"
+            :disabled="busy"
+          >
+            恢复失败质检
           </button>
-          <article v-for="d in decisions" :key="d.rule_id" class="q-rule">
-            <header>
-              <strong>{{
-                detail.rules.find((r: Row) => r.id === d.rule_id)?.title
-              }}</strong
-              ><span :class="`judgment-${d.status}`">{{
-                labels[d.status]
-              }}</span>
-            </header>
-            <p>{{ d.reason }}</p>
-            <p v-if="d.review_reason" class="q-review-note">
-              主管说明：{{ d.review_reason }}
-            </p>
-            <small
-              >权重 {{ d.weight }} · 得分 {{ d.points ?? "不计分" }} · 扣分
-              {{ d.deduction ?? "不计分" }}</small
+        </div>
+        <article v-for="d in decisions" :key="d.rule_id" class="q-rule">
+          <button
+            class="q-summary"
+            :aria-expanded="expanded.includes(d.rule_id)"
+            :aria-controls="`quality-reason-${d.rule_id}`"
+            @click="toggleReason(d)"
+            :disabled="busy"
+          >
+            <span
+              ><strong>{{ title(d) }}</strong
+              ><small>{{ shortReason(d) }}</small></span
+            ><span
+              >{{ deductionLabel(d)
+              }}<small
+                >{{ labels[d.status] }} ·
+                {{
+                  expanded.includes(d.rule_id) ? "收起原因" : "展开原因"
+                }}</small
+              ></span
             >
-            <div class="q-refs">
-              <button v-for="id in d.evidence" :key="id" @click="seek(id)">
-                依据 {{ id }}
-              </button>
-            </div>
+          </button>
+          <div
+            v-if="expanded.includes(d.rule_id)"
+            :id="`quality-reason-${d.rule_id}`"
+            class="q-reason"
+            :aria-label="`${title(d)}具体原因`"
+          >
+            <h3>具体原因</h3>
+            <p v-if="d.points != null">
+              本项原始得分 {{ d.points }} / {{ d.weight }}，原始扣分
+              {{ d.deduction }}；按可评权重折算为上方百分制扣分。
+            </p>
+            <p>
+              {{
+                d.review_reason && d.review_reason !== "保留机器判断"
+                  ? d.review_reason
+                  : d.reason
+              }}
+            </p>
+            <details
+              v-if="d.review_reason && d.review_reason !== '保留机器判断'"
+            >
+              <summary>查看原自动判断说明</summary>
+              <p>{{ d.reason }}</p>
+              <p v-if="d.guidance">原管理辅导建议：{{ d.guidance }}</p>
+            </details>
+            <p v-else-if="d.guidance">管理辅导建议：{{ d.guidance }}</p>
             <details>
-              <summary>培训要求与评分依据</summary>
+              <summary>查看本项培训要求与评分口径</summary>
               <p>
                 {{
-                  detail.rules.find((r: Row) => r.id === d.rule_id)?.criterion
+                  detail.rules?.find((r: Row) => r.id === d.rule_id)?.criterion
                 }}
               </p>
               <p>
-                适用：{{
-                  detail.rules.find((r: Row) => r.id === d.rule_id)
+                适用条件：{{
+                  detail.rules?.find((r: Row) => r.id === d.rule_id)
                     ?.applicability
                 }}
               </p>
               <p>
                 达标：{{
-                  detail.rules.find((r: Row) => r.id === d.rule_id)?.pass_anchor
+                  detail.rules?.find((r: Row) => r.id === d.rule_id)
+                    ?.pass_anchor
                 }}
               </p>
               <p>
                 部分达标：{{
-                  detail.rules.find((r: Row) => r.id === d.rule_id)
+                  detail.rules?.find((r: Row) => r.id === d.rule_id)
                     ?.partial_anchor
                 }}
               </p>
             </details>
-            <p v-if="d.guidance" class="q-guidance">
-              复盘建议：{{ d.guidance }}
-            </p>
-            <div v-if="reviewOpen" class="q-review-edit">
+            <button @click="showEvidence(d)" :disabled="busy">
+              查看证据与回听：{{ title(d) }}
+            </button>
+            <section v-if="reviewOpen" class="q-edit">
               <label
                 >复核判断<select
                   v-model="reviewEdits[d.rule_id].status"
@@ -652,198 +565,232 @@ onBeforeUnmount(() => {
                 @click="reviewEdits[d.rule_id].evidence = [...selected]"
                 :disabled="!selected.length"
               >
-                使用选中的原文依据</button
-              ><small
-                >拟采用：{{
-                  reviewEdits[d.rule_id].evidence.join("、") || "无"
-                }}</small
+                使用选中的原文依据
+              </button>
+              <p>
+                拟采用 {{ reviewEdits[d.rule_id].evidence.join("、") || "无" }}
+              </p>
+            </section>
+          </div>
+        </article>
+        <form v-if="reviewOpen" class="q-panel" @submit.prevent="saveReview">
+          <label
+            >主管复核说明<textarea
+              v-model="note"
+              :required="detail.pending_feedback > 0"
+            /></label
+          ><button class="q-primary" :disabled="busy">确认保存主管复核</button
+          ><button type="button" @click="reviewOpen = false">取消复核</button>
+        </form>
+        <details class="q-panel">
+          <summary>评分说明与版本记录</summary>
+          <p>
+            无法判断不扣分，不适用不进入分母。总分按可评权重折算至 100
+            分，各条扣分使用同一折算分母，与总分对应；四舍五入可能有 0.1
+            分尾差。展开原因可看原始权重分。
+          </p>
+          <p v-if="detail.policy">
+            {{ detail.policy.name }} v{{ detail.policy.version }}
+          </p>
+          <button @click="loadHistory" :disabled="busy">
+            加载历次分析和主管复核</button
+          ><template v-if="detail.view === 'full'"
+            ><details v-if="detail.review_history?.length">
+              <summary>历次主管复核</summary>
+              <p v-for="r in detail.review_history" :key="r.id">
+                {{ r.actor }} · {{ r.body.metrics.score ?? "无法评分" }} 分 ·
+                {{ r.body.note || "保留原判断" }}
+              </p>
+            </details>
+            <details v-if="detail.feedback?.length">
+              <summary>历史遗留反馈</summary>
+              <p v-for="f in detail.feedback" :key="f.id">
+                {{ f.body.reason }} · {{ f.resolution || "待处理" }}
+              </p>
+            </details>
+            <details v-if="detail.source_history?.length > 1">
+              <summary>来源修订历史</summary>
+              <button
+                v-for="h in detail.source_history"
+                :key="h.id"
+                @click="perform(() => choose(h))"
               >
-            </div>
-            <button
-              v-if="canFeedback && !feedbackOpen"
-              class="q-link"
-              @click="startFeedback(d)"
-            >
-              反馈这条判断
-            </button>
-          </article>
-          <form v-if="reviewOpen" class="q-panel" @submit.prevent="saveReview">
-            <label
-              >复核与异议处理说明<textarea
-                v-model="note"
-                :required="detail.pending_feedback > 0"
-              /></label
-            ><button class="q-primary" :disabled="busy">确认保存主管复核</button
-            ><button type="button" @click="reviewOpen = false">取消复核</button>
-          </form>
-          <form
-            v-if="feedbackOpen"
-            class="q-panel"
-            @submit.prevent="saveFeedback"
+                来源 v{{ h.source_revision }} · {{ h.title }}
+              </button>
+            </details>
+            <details v-if="detail.history?.length > 1">
+              <summary>历次分析</summary>
+              <button @click="perform(() => choose(detail!))">
+                查看当前分析</button
+              ><button
+                v-for="(h, index) in detail.history"
+                :key="h.id"
+                @click="perform(() => choose(detail!, h.id))"
+              >
+                第 {{ Number(index) + 1 }} 次分析
+              </button>
+            </details></template
           >
-            <h3>向主管反馈判断</h3>
-            <p>可在原文区勾选补充依据。</p>
-            <label
-              >异议原因<textarea
-                v-model="feedback.reason"
-                minlength="2"
-                required
-              /></label
-            ><button class="q-primary" :disabled="busy">提交质检异议</button
-            ><button type="button" @click="feedbackOpen = false">取消</button>
-          </form>
-          <section v-if="detail.feedback.length" class="q-panel">
-            <h3>销售反馈与处理</h3>
-            <article v-for="f in detail.feedback" :key="f.id">
-              <strong>{{
-                f.status === "pending"
-                  ? "待主管处理"
-                  : f.status === "resolved"
-                    ? "已处理"
-                    : "已更新背景重新分析"
-              }}</strong>
-              <p>{{ f.body.reason }}</p>
-              <p v-if="f.resolution">主管处理：{{ f.resolution }}</p>
-            </article>
-          </section>
-          <details v-if="detail.review_history.length" class="q-panel">
-            <summary>
-              历次主管复核（{{ detail.review_history.length }}）
-            </summary>
-            <p v-for="r in detail.review_history" :key="r.id">
-              {{ r.actor }} · {{ r.body.metrics.score ?? "无法评分" }} 分 ·
-              {{ r.body.note || "保留原判断" }}
-            </p>
-          </details>
-          <details v-if="detail.source_history.length > 1" class="q-panel">
-            <summary>
-              来源修订历史（{{ detail.source_history.length }}）
-            </summary>
-            <button
-              v-for="h in detail.source_history"
-              :key="h.id"
-              @click="perform(() => choose(h))"
-            >
-              来源 v{{ h.source_revision }} · {{ h.title
-              }}{{ h.feedback_count ? ` · ${h.feedback_count}条反馈` : "" }}
-            </button>
-          </details>
-          <details v-if="detail.history.length > 1" class="q-panel">
-            <summary>历次分析（{{ detail.history.length }}）</summary>
-            <button @click="perform(() => choose(detail!))">查看当前分析</button
-            ><button
-              v-for="(h, i) in detail.history"
-              :key="h.id"
-              @click="perform(() => choose(detail!, h.id))"
-            >
-              第 {{ Number(i) + 1 }} 次分析
-            </button>
-          </details>
-        </aside>
-      </template>
-      <div v-else class="q-placeholder">
-        从左侧选择一场会谈，结合原文查看做对的地方、待改进点和评分依据。
-      </div>
+        </details>
+      </section>
+      <p v-else class="q-panel">选择会谈后先查看评分和扣分概览。</p>
+      <section
+        v-if="evidenceOpen && detail"
+        ref="evidencePanel"
+        tabindex="-1"
+        class="q-evidence"
+        aria-label="质检证据依据"
+      >
+        <div class="q-heading">
+          <h2>{{ contextOpen ? "核对质检背景" : "原文与音频依据" }}</h2>
+          <button
+            @click="
+              evidenceOpen = contextOpen = false;
+              clearAudio();
+            "
+          >
+            收起证据
+          </button>
+        </div>
+        <p v-if="!contextOpen">
+          {{ allTranscript ? "完整会谈原文" : "当前条目引用的原文" }} ·
+          未引用的片段不会自动当作支持依据。
+        </p>
+        <div v-if="detail.has_audio">
+          <button v-if="!audioUrl" @click="perform(loadAudio)" :disabled="busy">
+            加载本场录音</button
+          ><audio v-else ref="audio" :src="audioUrl" controls />
+        </div>
+        <form v-if="contextOpen" @submit.prevent="saveContext">
+          <p>
+            实际音频尚无自动说话人分离，按已确认身份核对；信息不足保留未知。
+          </p>
+          <label
+            >会谈阶段<select v-model="stage">
+              <option v-for="s in stages" :key="s" :value="s">
+                {{ displayStage(s) }}
+              </option>
+            </select></label
+          ><label
+            ><input
+              type="checkbox"
+              v-model="complete"
+            />我确认资料完整覆盖会谈</label
+          ><label>背景更正原因<textarea v-model="reason" required /></label
+          ><button
+            type="button"
+            @click="assign('sales')"
+            :disabled="!selected.length"
+          >
+            所选发言设为销售</button
+          ><button
+            type="button"
+            @click="assign('customer')"
+            :disabled="!selected.length"
+          >
+            所选发言设为客户</button
+          ><button class="q-primary" :disabled="busy">
+            保存背景并继续质检
+          </button>
+        </form>
+        <button
+          v-if="!allTranscript && !contextOpen"
+          @click="allTranscript = true"
+        >
+          展开完整会谈原文
+        </button>
+        <p v-if="!evidenceSpans.length">
+          该条目没有可引用原文，不能据此补造证据。
+        </p>
+        <div class="q-transcript">
+          <article
+            v-for="s in evidenceSpans"
+            :key="s.id"
+            :id="`quality-span-${s.id}`"
+            :class="{ highlight: highlighted === s.id }"
+          >
+            <header>
+              <label v-if="contextOpen || reviewOpen"
+                ><input
+                  type="checkbox"
+                  v-model="selected"
+                  :value="s.id"
+                />选择此段</label
+              ><select
+                v-if="contextOpen"
+                v-model="speakers[s.id]"
+                :aria-label="`${s.id}说话人`"
+              >
+                <option value="sales">销售</option>
+                <option value="customer">客户</option>
+                <option value="unknown">身份待确认</option></select
+              ><span v-else>{{ speakerNames[s.speaker] }}</span
+              ><button @click="seek(s.id)">
+                {{
+                  s.start == null
+                    ? "定位文字"
+                    : `回听 ${Math.floor(s.start)} 秒`
+                }}
+              </button>
+            </header>
+            <p>{{ s.text }}</p>
+          </article>
+        </div>
+      </section>
     </div>
   </section>
 </template>
-
 <style scoped>
 .quality {
   color: #203b33;
 }
-.quality-heading,
-.q-section-head {
+.quality h1 {
+  margin: 4px 0 16px;
+}
+.q-heading,
+.q-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.quality-heading h1 {
-  margin: 0 0 12px;
-}
-.eyebrow {
-  color: #627b70;
-  margin: 0;
+.q-heading p,
+.q-muted {
+  color: #6a7c72;
   font-size: 12px;
-  letter-spacing: 1px;
-}
-.quality button {
-  cursor: pointer;
-  border: 1px solid #d7e1db;
-  background: #fff;
-  color: #244c3e;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font: inherit;
-}
-.quality button:disabled {
-  opacity: 0.5;
-  cursor: wait;
-}
-.quality input,
-.quality select,
-.quality textarea {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #d0dcd4;
-  border-radius: 6px;
-  font: inherit;
-  background: #fff;
-  box-sizing: border-box;
-}
-.quality label {
-  display: block;
-  font-size: 12px;
-}
-.quality textarea {
-  min-height: 70px;
-}
-.q-tabs {
-  display: flex;
-  gap: 8px;
-  margin: 12px 0;
-}
-.q-tabs .active,
-.quality .q-primary {
-  background: #254f40;
-  color: #fff;
 }
 .q-stats {
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
-  background: #e9efe8;
   padding: 14px 18px;
-  border-radius: 10px;
+  background: #e8eee5;
+  border-radius: 9px;
 }
 .q-stats b {
-  font-size: 20px;
-  margin-left: 8px;
-}
-.q-muted {
-  color: #738077;
-  font-size: 12px;
-}
-.q-error {
-  color: #8a2f2c;
-  background: #fff0ed;
-  padding: 12px;
+  font-size: 22px;
 }
 .q-notice {
   background: #eff3e7;
-  color: #5b6143;
   padding: 12px;
   border-radius: 8px;
   font-size: 12px;
-  margin: 10px 0;
+}
+.q-error {
+  color: #8a3525;
+  background: #f9e9e6;
+  padding: 12px;
 }
 .q-workbench {
   display: grid;
-  grid-template-columns: 210px minmax(250px, 1fr) 330px;
-  gap: 16px;
+  grid-template-columns: 230px minmax(0, 1fr);
+  gap: 18px;
   align-items: start;
   margin-top: 18px;
+}
+.q-workbench.with-evidence {
+  grid-template-columns: 200px minmax(0, 1fr) minmax(300px, 0.9fr);
 }
 .q-rail {
   position: sticky;
@@ -851,240 +798,152 @@ onBeforeUnmount(() => {
   max-height: 80vh;
   overflow: auto;
 }
-.q-rail .q-call {
+.q-call {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   text-align: left;
   width: 100%;
-  margin-top: 10px;
-  padding: 14px;
+  margin: 10px 0;
+  padding: 14px !important;
 }
-.q-call span,
-.q-call small {
-  font-size: 11px;
-  color: #738077;
+.q-call span {
+  font-size: 12px;
+  color: #657b6e;
 }
 .q-call.selected {
-  border-color: #46765d;
-  background: #edf3ed;
+  background: #eaf1e6 !important;
+  border-color: #477158 !important;
 }
+.q-findings,
 .q-evidence,
-.q-findings {
+.q-panel {
   min-width: 0;
+  background: #fff;
+  padding: 20px;
+  border: 1px solid #dce5da;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.q-evidence h2,
+.q-findings h2 {
+  font-size: 18px;
 }
 .q-evidence {
-  margin: 0;
-  width: auto;
-  background: #fff;
-  border: 1px solid #e0e7df;
-  border-radius: 12px;
-  padding: 18px;
-}
-.q-section-head h2 {
-  font-size: 17px;
-  margin: 0;
-}
-.q-section-head p {
-  font-size: 12px;
-  color: #738077;
-}
-.q-section-head h3 {
-  font-size: 14px;
-}
-.q-player {
   position: sticky;
-  top: 0;
-  background: #f3f6f1;
-  padding: 10px;
-  border-radius: 8px;
-  z-index: 1;
+  top: 12px;
+  scroll-margin-top: 12px;
 }
-.q-player audio {
-  width: 100%;
-  height: 40px;
-}
-.q-transcript {
-  max-height: 70vh;
-  overflow: auto;
-  padding-right: 6px;
-}
-.q-transcript article {
-  border-bottom: 1px solid #edf0ec;
-  padding: 14px 6px;
-  scroll-margin-top: 90px;
-}
-.q-transcript article.highlight {
-  background: #fff4d6;
-  border-left: 3px solid #bd9654;
-}
-.q-transcript article header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-}
-.q-transcript article p {
-  margin: 8px 0 0;
-  white-space: pre-wrap;
-}
-.q-transcript select {
-  width: 120px;
-}
-.q-speaker {
-  border-radius: 5px;
-  background: #eef4ee;
-  padding: 2px 6px;
-}
-.quality .q-time {
-  margin-left: auto;
-  border: 0;
-  padding: 0;
-  color: #698477;
+.q-evidence h3,
+.q-findings h3 {
+  font-size: 15px;
 }
 .q-score {
-  background: #234c3e;
-  border-radius: 12px;
   padding: 20px;
-  color: #fff;
+  border-radius: 10px;
+  background: #244b3d;
+  color: white;
+  margin: 18px 0;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
 }
-.q-score > span {
-  font-size: 12px;
-}
-.q-score > strong {
-  display: block;
-  font-size: 42px;
-  line-height: 1.4;
+.q-score strong {
+  font-size: 38px;
 }
 .q-score small {
-  font-size: 11px;
-  opacity: 0.8;
+  font-size: 13px;
 }
-.q-score p {
-  margin: 4px 0;
-  font-size: 12px;
-}
-.q-rule,
-.q-panel {
-  background: #fff;
-  padding: 15px;
-  border: 1px solid #e1e7df;
-  border-radius: 10px;
-  margin-top: 12px;
-  font-size: 12px;
-}
-.q-rule header {
+.q-summary {
+  width: 100%;
   display: flex;
   justify-content: space-between;
-  gap: 8px;
+  gap: 18px;
+  text-align: left;
+  padding: 16px !important;
+  background: #fafcf8 !important;
 }
-.q-rule header strong {
-  font-size: 14px;
-}
-.q-rule p {
-  margin: 10px 0;
-}
-.q-rule > small {
-  color: #798477;
-}
-.judgment-unmet {
-  color: #a04c3c;
-}
-.judgment-met {
-  color: #247347;
-}
-.judgment-unknown {
-  color: #8d805d;
-}
-.q-refs {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  margin: 9px 0;
-}
-.quality .q-refs button {
-  padding: 3px 7px;
-  font-size: 11px;
-}
-.q-guidance {
-  background: #f3f6ee;
-  padding: 9px;
-}
-.q-review-note {
-  color: #546b86;
-}
-.q-link {
-  margin-top: 10px;
-}
-.q-panel button {
-  margin: 7px 5px 0 0;
-}
-.q-review-edit label {
-  margin: 8px 0;
-}
-.q-review-edit small {
+.q-summary small {
   display: block;
-  margin-top: 5px;
-}
-.q-context {
-  padding: 12px;
-  border: 1px dashed #a2b6a7;
-  border-radius: 8px;
   font-size: 12px;
+  margin-top: 6px;
 }
-.q-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 12px;
+.q-rule {
+  margin: 14px 0;
 }
-.quality .q-check {
+.q-reason {
+  padding: 18px;
+  background: #f7f9f4;
+  border: 1px solid #e0e7dc;
+  border-top: 0;
+}
+.q-reason p {
+  white-space: pre-wrap;
+}
+.q-transcript {
+  max-height: 65vh;
+  overflow: auto;
+}
+.q-transcript article {
+  padding: 14px 5px;
+  border-bottom: 1px solid #e3e9df;
+  scroll-margin-top: 25px;
+}
+.q-transcript header {
   display: flex;
+  gap: 10px;
   align-items: center;
-  gap: 6px;
+  flex-wrap: wrap;
 }
-.quality .q-check input {
-  width: auto;
+.q-transcript p {
+  white-space: pre-wrap;
 }
-.q-placeholder {
-  grid-column: span 2;
-  background: #fff;
-  border-radius: 12px;
-  padding: 50px 25px;
-  color: #7c887e;
+.q-transcript .highlight {
+  background: #fff1c5;
 }
-.q-groups {
-  font-size: 12px;
+.q-transcript select {
+  max-width: 140px;
 }
-@media (max-width: 1150px) {
-  .q-workbench {
-    grid-template-columns: 170px minmax(220px, 1fr) 290px;
-    gap: 10px;
+.q-evidence audio {
+  width: 100%;
+  margin: 14px 0;
+}
+.q-primary {
+  background: #315c43 !important;
+  color: white !important;
+}
+.q-edit {
+  border-top: 1px solid #dce5da;
+  margin-top: 18px;
+  padding-top: 8px;
+}
+.q-panel {
+  margin-top: 18px;
+}
+@media (max-width: 1200px) {
+  .q-workbench.with-evidence {
+    grid-template-columns: 220px minmax(0, 1fr);
   }
   .q-evidence {
-    padding: 12px;
+    grid-column: 2;
   }
 }
-@media (max-width: 850px) {
-  .q-workbench {
-    grid-template-columns: 1fr;
+@media (max-width: 780px) {
+  .q-workbench,
+  .q-workbench.with-evidence {
+    grid-template-columns: minmax(0, 1fr);
   }
   .q-rail {
     position: static;
-    max-height: 230px;
+    max-height: 250px;
   }
-  .q-placeholder {
-    grid-column: auto;
+  .q-evidence {
+    grid-column: 1;
   }
-  .q-transcript {
-    max-height: 50vh;
-  }
-  .q-stats {
-    gap: 14px;
-  }
-  .q-section-head,
-  .quality-heading {
-    flex-wrap: wrap;
+  .q-findings,
+  .q-evidence {
+    padding: 16px;
   }
 }
 </style>

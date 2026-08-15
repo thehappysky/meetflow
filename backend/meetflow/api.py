@@ -72,6 +72,7 @@ def create_app(settings=None, provider=None, sales_provider=None):
     async def lifespan(app):
         if settings.auth_enabled:
             workspace.index_existing_uploads()
+            quality.suspend_private()
         if settings.start_worker:
             driver.recover()
             sales_driver.recover()

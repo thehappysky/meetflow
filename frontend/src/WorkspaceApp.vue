@@ -443,6 +443,7 @@ function navigate(next: string, refreshData = true) {
   if (refreshData && !busy.value) void perform(refresh);
 }
 function enterQuality(kind?: string, id?: string) {
+  if (!user.value || !["manager", "boss"].includes(user.value.role)) return;
   qualitySource.value = kind && id ? { kind, id } : null;
   navigate("quality");
 }
@@ -884,14 +885,11 @@ onBeforeUnmount(() => {
               {{ user.role === "sales" ? "我的上报" : "中心会谈" }}
             </button>
             <button @click="navigate('corrections')">更正申请</button>
-            <button @click="enterQuality()">
-              {{
-                user.role === "sales"
-                  ? "复盘质检"
-                  : user.role === "boss"
-                    ? "质检概览"
-                    : "销售质检"
-              }}
+            <button
+              v-if="['manager', 'boss'].includes(user.role)"
+              @click="enterQuality()"
+            >
+              {{ user.role === "boss" ? "质检概览" : "销售质检" }}
             </button>
             <button @click="navigate('business')">客户与跟进</button>
             <button v-if="user.role === 'sales'" @click="navigate('reports')">
@@ -932,7 +930,9 @@ onBeforeUnmount(() => {
         />
         <MaintenanceWorkspace v-else-if="page === 'maintenance'" :user="user" />
         <QualityWorkspace
-          v-else-if="page === 'quality' && user.role !== 'admin'"
+          v-else-if="
+            page === 'quality' && ['manager', 'boss'].includes(user.role)
+          "
           :user="user"
           :source="qualitySource"
           @meeting="meetingFromQuality"
@@ -1040,12 +1040,16 @@ onBeforeUnmount(() => {
               修订转写文字
             </button>
             <button
-              v-if="report"
+              v-if="
+                report &&
+                centralDetail &&
+                ['manager', 'boss'].includes(user.role)
+              "
               @click="
                 enterQuality(centralDetail ? 'center' : 'personal', detail.id)
               "
             >
-              查看本场复盘质检
+              查看本场销售质检
             </button>
           </div>
           <form
@@ -1174,34 +1178,36 @@ onBeforeUnmount(() => {
             <section class="wk-panel">
               <h2>会谈纪要</h2>
               <p class="wk-summary">{{ report.summary || "暂无摘要" }}</p>
-              <h3 v-if="report.claims?.length">讨论结论与决策</h3>
-              <article
-                v-for="(c, i) in report.claims"
-                :key="`claim-${i}`"
-                class="wk-finding"
-              >
-                <strong>{{
-                  (
-                    {
-                      fact: "信息",
-                      decision: "决策",
-                      commitment: "承诺",
-                      suggestion: "建议",
-                      condition: "条件",
-                      unresolved: "未决",
-                    } as Row
-                  )[c.kind] || "信息"
-                }}</strong>
-                <p>{{ c.text }}</p>
-                <button
-                  v-for="id in c.evidence"
-                  :key="id"
-                  class="wk-link"
-                  @click="seekEvidence(id)"
+              <details v-if="report.claims?.length">
+                <summary>讨论结论与决策（{{ report.claims.length }}）</summary>
+                <article
+                  v-for="(c, i) in report.claims"
+                  :key="`claim-${i}`"
+                  class="wk-finding"
                 >
-                  查看原文依据
-                </button>
-              </article>
+                  <strong>{{
+                    (
+                      {
+                        fact: "信息",
+                        decision: "决策",
+                        commitment: "承诺",
+                        suggestion: "建议",
+                        condition: "条件",
+                        unresolved: "未决",
+                      } as Row
+                    )[c.kind] || "信息"
+                  }}</strong>
+                  <p>{{ c.text }}</p>
+                  <button
+                    v-for="id in c.evidence"
+                    :key="id"
+                    class="wk-link"
+                    @click="seekEvidence(id)"
+                  >
+                    查看原文依据
+                  </button>
+                </article>
+              </details>
               <h3>后续事项</h3>
               <p v-for="a in report.actions" :key="a.id">
                 {{ a.title }} · {{ a.owner || "负责人待确认" }} ·
@@ -1216,22 +1222,24 @@ onBeforeUnmount(() => {
                 </button>
               </p>
               <p v-if="!report.actions?.length">本次未提取到明确后续事项。</p>
-              <h3 v-if="report.risks?.length">风险与未决条件</h3>
-              <article
-                v-for="(risk, i) in report.risks"
-                :key="`risk-${i}`"
-                class="wk-finding"
-              >
-                <p>{{ risk.text }}</p>
-                <button
-                  v-for="id in risk.evidence"
-                  :key="id"
-                  class="wk-link"
-                  @click="seekEvidence(id)"
+              <details v-if="report.risks?.length">
+                <summary>风险与未决条件（{{ report.risks.length }}）</summary>
+                <article
+                  v-for="(risk, i) in report.risks"
+                  :key="`risk-${i}`"
+                  class="wk-finding"
                 >
-                  核对风险依据
-                </button>
-              </article>
+                  <p>{{ risk.text }}</p>
+                  <button
+                    v-for="id in risk.evidence"
+                    :key="id"
+                    class="wk-link"
+                    @click="seekEvidence(id)"
+                  >
+                    核对风险依据
+                  </button>
+                </article>
+              </details>
               <h3 v-if="report.questions?.length">需要补充的疑点</h3>
               <form
                 v-if="report.questions?.length"

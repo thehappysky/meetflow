@@ -198,16 +198,12 @@ class QualityWorkspace:
         return spans
 
     def ensure(self, kind, key):
+        if kind != "center":
+            return None  # Management grading starts only after explicit submission.
         with self.sessions() as session:
             source, revision, meta, evidence, audio, inherited = self.source(session, kind, key)
             company_id, owner_id, team_id = source.company_id, source.owner_id, source.team_id
             owner_name = session.get(Account, owner_id).name
-            if kind == "personal" and not inherited:
-                previous = session.scalar(select(QualityCase).where(QualityCase.source_kind == kind,
-                    QualityCase.source_id == key, QualityCase.source_revision < revision)
-                    .order_by(QualityCase.source_revision.desc()))
-                if previous:
-                    inherited = self.freeze(session, kind, key, previous.source_revision)
         policy = self.policy(company_id)
         with self.lock, self.sessions.begin() as session:
             if self.settings.db_url.startswith("sqlite"):
@@ -275,32 +271,40 @@ class QualityWorkspace:
             self.driver.submit(analysis_id)
 
     def on_run_ready(self, run_id):
-        with self.sessions() as session:
-            key = session.scalar(select(PersonalRecording.id).where(
-                PersonalRecording.run_id == run_id, PersonalRecording.deleted.is_(False)))
-        if key:
-            self.ensure("personal", key)
+        return None
+
+    def suspend_private(self):
+        with self.sessions.begin() as session:
+            ids = [key for case in session.scalars(select(QualityCase).where(
+                QualityCase.source_kind == "personal")) for key in case.analysis_ids]
+            for analysis in session.scalars(select(SalesAnalysis).where(
+                    SalesAnalysis.id.in_(ids), SalesAnalysis.status.in_(["queued", "running"]))):
+                analysis.cancel_requested = True
+                analysis.status, analysis.phase = "cancelled", "个人资料不执行管理质检"
+                self.store.audit(session, "quality.private_suspended", analysis.id)
 
     def recover(self):
         with self.sessions() as session:
-            private = session.scalars(select(PersonalRecording).where(PersonalRecording.deleted.is_(False))).all()
             central = session.scalars(select(Submission.id).where(Submission.deleted.is_(False))).all()
-        for row in private:
-            if self.store.get_run(row.run_id)["status"] in READY:
-                self.ensure("personal", row.id)
         for key in central:
             self.ensure("center", key)
 
     def case(self, session, key, user, write=False):
+        self.manager_reader(user)
         case = session.get(QualityCase, key)
-        if not case or case.company_id != user["company_id"]:
+        if not case or case.source_kind != "center" or case.company_id != user["company_id"]:
             raise DomainError("质检不存在或无权访问", 404)
         _, revision, _, _, _, _ = self.source(session, case.source_kind, case.source_id, user)
         if write and revision != case.source_revision:
             raise DomainError("来源已有新版本，请查看当前质检", 409)
         return case, revision
 
-    def serialize(self, session, case, current_revision, full=False, analysis_id=None):
+    @staticmethod
+    def manager_reader(user):
+        if user["role"] not in {"manager", "boss"}:
+            raise DomainError("销售质检仅供主管和老板查看", 403)
+
+    def serialize(self, session, case, current_revision, full=False, analysis_id=None, view="full"):
         selected = analysis_id or case.active_analysis_id
         if selected and selected not in case.analysis_ids:
             raise DomainError("报告不属于本场质检", 404)
@@ -342,11 +346,28 @@ class QualityWorkspace:
                                            "at": r.created_at, "body": r.body} for r in session.scalars(
                               select(QualityReview).where(QualityReview.case_id == case.id)
                               .order_by(QualityReview.created_at.desc()))])
+            effective = (review.body if review else analysis.report).get("decisions", []) if analysis and analysis.report else []
+            rules = {r["id"]:r for r in result["rules"]}
+            labels = {"met":"满足要求", "partial":"部分满足要求", "unmet":"未满足要求",
+                      "unknown":"依据不足，待确认", "not_applicable":"本场不适用"}
+            result["has_report"] = bool(analysis and analysis.report)
+            result["view"] = view
+            result["decisions"] = effective
+            if view == "summary":
+                result["decisions"] = [{"rule_id":d["rule_id"], "title":rules[d["rule_id"]]["title"],
+                    "status":d["status"], "weight":d["weight"], "points":d.get("points"), "deduction":d.get("deduction"),
+                    "reason_title": d.get("reason_title") or f"{rules[d['rule_id']]['title']}：{labels[d['status']]}"}
+                    for d in effective]
+                for key in ("report", "review", "spans", "rules", "feedback", "review_history", "report_hash"):
+                    result.pop(key, None)
+            elif view == "details":
+                result.pop("spans", None)
         return result
 
     def listing(self, user, scope):
-        if scope == "personal" and user["role"] != "sales":
-            raise DomainError("个人复盘仅本人可见", 403)
+        self.manager_reader(user)
+        if scope != "center":
+            raise DomainError("质检仅分析已上报的中心资料", 403)
         with self.sessions() as session:
             rows = session.scalars(select(QualityCase).where(QualityCase.company_id == user["company_id"],
                 QualityCase.source_kind == scope).order_by(QualityCase.created_at.desc())).all()
@@ -378,7 +399,7 @@ class QualityWorkspace:
                 session.connection().exec_driver_sql("BEGIN IMMEDIATE")
             case, _ = self.case(session, key, user, write=True)
             if case.source_kind == "center" and (user["role"] != "manager" or user["team_id"] != case.team_id):
-                raise DomainError("中心质检背景由负责主管核对；销售可提交异议", 403)
+                raise DomainError("中心质检背景由负责主管核对", 403)
             if case.version != value.version:
                 raise DomainError("质检已更新，请刷新", 409)
             if case.source_kind == "center" and not value.reason.strip():
@@ -442,6 +463,8 @@ class QualityWorkspace:
                     raise DomainError("达标或部分达标必须有已确认销售身份的依据")
                 if decision.status == "unmet" and (not case.body["complete"] or any(s["speaker"] == "unknown" for s in spans.values())):
                     raise DomainError("录音不完整或有未知身份，不能据此认定销售未执行")
+                if decision.status != item["status"] or refs != item["evidence"] or decision.reason:
+                    item["reason_title"] = ""  # A superseded machine headline must not describe a new judgment.
                 item.update(status=decision.status, evidence=refs, review_reason=decision.reason or item.get("review_reason", "保留机器判断"))
             rules = analysis.snapshot["playbook"]["body"]["rules"]
             body = {"decisions": scored_decisions(rules, list(decisions.values())),
@@ -461,8 +484,13 @@ class QualityWorkspace:
 
 
 def quality_router(service):
-    router = APIRouter(prefix="/api/workspace/quality", tags=["account-quality"])
-    current_user = Depends(service.workspace.auth.identity)
+    authentication = Depends(service.workspace.auth.identity)
+    def quality_identity(user=authentication):
+        if user["role"] not in {"manager", "boss", "admin"}:
+            raise DomainError("销售账号不能访问管理质检", 403)
+        return user
+    router = APIRouter(prefix="/api/workspace/quality", tags=["account-quality"], dependencies=[Depends(quality_identity)])
+    current_user = Depends(quality_identity)
 
     @router.get("/policy")
     def policy(user=current_user):
@@ -478,10 +506,11 @@ def quality_router(service):
         return service.listing(user, scope)
 
     @router.get("/cases/{key}")
-    def detail(key: str, analysis_id: str | None = None, user=current_user):
+    def detail(key: str, analysis_id: str | None = None,
+               view: Literal["summary", "details", "full"] = "full", user=current_user):
         with service.sessions() as session:
             case, revision = service.case(session, key, user)
-            return service.serialize(session, case, revision, full=True, analysis_id=analysis_id)
+            return service.serialize(session, case, revision, full=True, analysis_id=analysis_id, view=view)
 
     @router.post("/cases/{key}/context")
     def context(key: str, value: ContextInput, user=current_user):
@@ -512,31 +541,5 @@ def quality_router(service):
 
     @router.post("/cases/{key}/feedback", status_code=201)
     def feedback(key: str, value: FeedbackInput, user=current_user):
-        with service.lock, service.sessions.begin() as session:
-            case, _ = service.case(session, key, user, write=True)
-            if case.source_kind != "center" or user["role"] != "sales" or case.owner_id != user["id"]:
-                raise DomainError("仅来源销售可对本人已上报质检提出异议", 403)
-            if case.version != value.version or not case.active_analysis_id:
-                raise DomainError("报告已变化，请刷新", 409)
-            analysis = session.get(SalesAnalysis, case.active_analysis_id)
-            if not analysis.report or analysis.report_hash != value.report_hash:
-                raise DomainError("报告已变化或尚未完成", 409)
-            rules = {r["rule_id"] for r in analysis.report["decisions"]}
-            if value.rule_id not in rules or not set(value.evidence) <= {s["id"] for s in case.body["spans"]}:
-                raise DomainError("规则或依据不属于本场质检")
-            if not value.reason.strip():
-                raise DomainError("请填写异议原因")
-            if session.scalar(select(QualityFeedback.id).where(QualityFeedback.case_id == key,
-                    QualityFeedback.analysis_id == analysis.id, QualityFeedback.status == "pending")):
-                raise DomainError("已有待处理反馈，请等待主管处理", 409)
-            row = QualityFeedback(id=uid("qf_"), case_id=key, analysis_id=analysis.id,
-                                  requester_id=user["id"], body=value.model_dump(exclude={"version", "report_hash"}))
-            session.add(row)
-            analysis.status = "waiting_review"
-            case.version += 1
-            case.updated_at = now()
-            session.flush()
-            service.store.audit(session, "quality.feedback_created", key, {"actor": user["id"]})
-            return {"id": row.id}
-
+        raise DomainError("此入口已停用；管理质检由负责主管版本化复核", 403)
     return router

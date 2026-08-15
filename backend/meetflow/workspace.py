@@ -274,8 +274,6 @@ class WorkspaceService:
                     "owner_name": user["name"], "report": report["body"],
                     "evidence": self.store.source_map(row.run_id), "run_id": row.run_id,
                     "audio_path": meeting.audio_path, "recording_version": row.version}
-                if self.quality:
-                    snapshot["quality_context"] = self.quality.freeze(session, "personal", key, row.version)
                 snapshot["clarifications"] = self.clarifications(session, key)
                 result = Submission(id=uid("sub_"), recording_id=key, owner_id=user["id"],
                     company_id=user["company_id"], team_id=row.team_id, snapshot=snapshot,
@@ -592,7 +590,7 @@ def workspace_router(service):
                     raise DomainError("请先完成个人新版整理再申请中心更正", 409)
                 proposed["replacement"] = {"report": report["body"], "evidence": service.store.source_map(personal.run_id),
                     "run_id": personal.run_id, "recording_version": personal.version,
-                    "quality_context": service.quality.freeze(session,"personal", personal.id,personal.version) if service.quality else {},
+                    "quality_context": {},
                     "clarifications": service.clarifications(session, personal.id)}
             request = Correction(id=uid("cor_"), submission_id=key, requester_id=user["id"],
                 base_revision=value.base_revision, proposed=proposed,
@@ -616,6 +614,9 @@ def workspace_router(service):
                 before = next((h["snapshot"] for h in s.history if h["revision"] == c.base_revision), s.snapshot)
                 result.append({**row_dict(c), "before": before["metadata"], "before_summary": before["report"]["summary"],
                     "before_evidence": before["evidence"]})
+                if user["role"] == "sales" and "replacement" in result[-1]["proposed"]:
+                    result[-1]["proposed"] = copy.deepcopy(result[-1]["proposed"])
+                    result[-1]["proposed"]["replacement"].pop("quality_context", None)
             return result
 
     @router.post("/corrections/{key}/review")
