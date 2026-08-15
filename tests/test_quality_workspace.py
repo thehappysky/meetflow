@@ -13,7 +13,7 @@ from meetflow.database import (
     row_dict,
 )
 from meetflow.domain import DomainError
-from sqlalchemy import func, select
+from sqlalchemy import event, func, select
 from test_access import PASSWORD, recording, submitted
 from test_access import access as access  # noqa: PLC0414 -- shared authenticated fixture
 
@@ -64,6 +64,41 @@ def test_score_subject_is_the_submitting_sales_account_in_all_views(access):
     assert listing(a)[0]['subject']==subject
     for view in ('summary','details','full'):
         assert detail(a,case['id'],'boss','?view='+view)['subject']==subject
+
+
+def test_list_is_one_scoped_projection_and_matches_case_summary(access):
+    a=access;_,_,first=central(a)
+    submitted(a,'sales.b','other-team-projection')
+    service=a.app.state.quality
+    with service.sessions() as session:
+        manager=session.scalar(select(Account).where(Account.username=='manager.a'))
+        user={key:getattr(manager,key) for key in ('id','role','company_id','team_id')}
+        row=session.get(QualityCase,first['id'])
+        expected=service.serialize(session,row,row.source_revision)
+    statements=[];engine=service.sessions.kw['bind']
+    def collect(_conn,_cursor,statement,*_):
+        statements.append(statement)
+    event.listen(engine,'before_cursor_execute',collect)
+    try:
+        result=service.listing(user,'center')
+    finally:
+        event.remove(engine,'before_cursor_execute',collect)
+    assert len(statements)==1
+    assert result['cases']==[expected]
+
+
+def test_derived_failure_preserves_minutes_and_is_recorded_once(access):
+    a=access
+    def fail(_run_id):
+        raise RuntimeError('injected derived-work failure')
+    a.app.state.driver.on_report=fail
+    rec=recording(a)
+    assert a.app.state.store.latest_report(rec['run_id'])
+    assert a.app.state.store.get_run(rec['run_id'])['status']=='waiting_review'
+    from meetflow.database import RunEvent
+    with a.app.state.store.sessions() as session:
+        events=session.scalars(select(RunEvent).where(RunEvent.run_id==rec['run_id'],RunEvent.kind=='derived_prepare_failed')).all()
+        assert len(events)==1 and events[0].payload['error']=='injected derived-work failure'
 
 
 def test_sales_cannot_read_or_operate_any_quality_entry_even_with_real_ids(access):

@@ -1,0 +1,1581 @@
+{
+  "status": "development audit, no independent business gold or holdout",
+  "environment_snapshot": {
+    "captured_utc": "2026-11-12T13:23:27.997924+00:00",
+    "scope": "post-run environment snapshot; no packages or Ollama service upgraded during audit",
+    "python": "3.12.6 (tags/v3.12.6:a4a2d2b, Sep  6 2024, 20:11:23) [MSC v.1940 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "packages": {
+      "fastapi": "0.162.0",
+      "sqlalchemy": "2.1.6",
+      "pydantic": "2.14.1",
+      "httpx": "0.28.1",
+      "langgraph": "1.2.16",
+      "langgraph-checkpoint-sqlite": "3.1.2"
+    },
+    "ollama_version": {
+      "version": "0.11.5"
+    }
+  },
+  "agents": [
+    {
+      "directory": "test-results\\backend-agent-audit\\agents\\20261112T124305Z-qwen2.5-7b",
+      "model": "qwen2.5:7b",
+      "status": "completed",
+      "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
+      "plan_sha256": "aa2c55ce49c2498ad092f6d69d05c956dc94c8cf32914c9f191cd7947bf977e9",
+      "raw_metrics": {
+        "one_pass": {
+          "cases": 12,
+          "successful": 12,
+          "all_slots_correct": 3,
+          "invented_actions": 0,
+          "p50_seconds": 3.025771549990168,
+          "p95_seconds": 3.6343100999947637,
+          "input_tokens": 4469,
+          "output_tokens": 600,
+          "model_calls": 12,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 3,
+            "owner": 5,
+            "due": 10,
+            "status": 9
+          },
+          "evidence": {
+            "tp": 17,
+            "fp": 1,
+            "fn": 4,
+            "f1": 0.8717948717948718
+          },
+          "conditions": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 1,
+            "f1": 0.8
+          }
+        },
+        "single_selfcheck": {
+          "cases": 12,
+          "successful": 12,
+          "all_slots_correct": 2,
+          "invented_actions": 0,
+          "p50_seconds": 5.8373844000161625,
+          "p95_seconds": 7.262659900006838,
+          "input_tokens": 10042,
+          "output_tokens": 1156,
+          "model_calls": 24,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 3,
+            "owner": 3,
+            "due": 8,
+            "status": 9
+          },
+          "evidence": {
+            "tp": 17,
+            "fp": 1,
+            "fn": 4,
+            "f1": 0.8717948717948718
+          },
+          "conditions": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 1,
+            "f1": 0.8
+          }
+        },
+        "two_experts_audit": {
+          "cases": 12,
+          "successful": 11,
+          "all_slots_correct": 4,
+          "invented_actions": 0,
+          "p50_seconds": 8.395572650042595,
+          "p95_seconds": 10.576692799979355,
+          "input_tokens": 14183,
+          "output_tokens": 1609,
+          "model_calls": 34,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 4,
+            "owner": 5,
+            "due": 9,
+            "status": 9
+          },
+          "evidence": {
+            "tp": 16,
+            "fp": 1,
+            "fn": 5,
+            "f1": 0.8421052631578947
+          },
+          "conditions": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.5
+          }
+        }
+      },
+      "additional_diagnostics": {
+        "one_pass": {
+          "trials": 12,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 2,
+          "contradictory_fields": 8,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 0,
+          "core_net_repair_rate": null
+        },
+        "single_selfcheck": {
+          "trials": 12,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 1,
+          "contradictory_fields": 8,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 4,
+          "core_net_repair_rate": -0.08333333333333333
+        },
+        "two_experts_audit": {
+          "trials": 12,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 3,
+          "contradictory_fields": 6,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 3,
+          "core_net_repair_rate": -0.0625
+        }
+      },
+      "prediction_sha256": "de491ebba6de4b3b9a3aaf4bdb0c8abfce8ee4cadf33e62794a3293723d934c1"
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\agents\\20261112T124942Z-qwen2.5-7b",
+      "model": "qwen2.5:7b",
+      "status": "completed",
+      "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
+      "plan_sha256": "b04512e2fe3f040f6e9994ba8451103d71c9d1ac7020a3fc101530eb859c03c6",
+      "raw_metrics": {
+        "one_pass": {
+          "cases": 24,
+          "successful": 24,
+          "all_slots_correct": 8,
+          "invented_actions": 0,
+          "p50_seconds": 3.121804049995262,
+          "p95_seconds": 3.428971800021827,
+          "input_tokens": 16354,
+          "output_tokens": 1168,
+          "model_calls": 24,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 22,
+            "owner": 12,
+            "due": 18,
+            "status": 20
+          },
+          "evidence": {
+            "tp": 30,
+            "fp": 2,
+            "fn": 12,
+            "f1": 0.8108108108108109
+          },
+          "conditions": {
+            "tp": 4,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.8
+          }
+        },
+        "single_selfcheck": {
+          "cases": 24,
+          "successful": 24,
+          "all_slots_correct": 8,
+          "invented_actions": 0,
+          "p50_seconds": 5.5763313499919605,
+          "p95_seconds": 6.948778800026048,
+          "input_tokens": 34884,
+          "output_tokens": 2136,
+          "model_calls": 48,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 22,
+            "owner": 12,
+            "due": 18,
+            "status": 20
+          },
+          "evidence": {
+            "tp": 24,
+            "fp": 2,
+            "fn": 18,
+            "f1": 0.7058823529411765
+          },
+          "conditions": {
+            "tp": 4,
+            "fp": 0,
+            "fn": 2,
+            "f1": 0.8
+          }
+        },
+        "two_experts_audit": {
+          "cases": 24,
+          "successful": 20,
+          "all_slots_correct": 8,
+          "invented_actions": 0,
+          "p50_seconds": 7.927027800003998,
+          "p95_seconds": 10.277010200021323,
+          "input_tokens": 49160,
+          "output_tokens": 3000,
+          "model_calls": 68,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 20,
+            "owner": 8,
+            "due": 18,
+            "status": 20
+          },
+          "evidence": {
+            "tp": 22,
+            "fp": 2,
+            "fn": 20,
+            "f1": 0.6666666666666666
+          },
+          "conditions": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 6,
+            "f1": 0.0
+          }
+        }
+      },
+      "additional_diagnostics": {
+        "one_pass": {
+          "trials": 24,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 0,
+          "contradictory_fields": 2,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 0,
+          "core_net_repair_rate": null
+        },
+        "single_selfcheck": {
+          "trials": 24,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 0,
+          "contradictory_fields": 2,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 0,
+          "core_net_repair_rate": 0.0
+        },
+        "two_experts_audit": {
+          "trials": 24,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 0,
+          "contradictory_fields": 0,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 12,
+          "core_net_repair_rate": -0.125
+        }
+      },
+      "prediction_sha256": "2fc38aaffb3f19fa057198010a6767c7ce6212be42a7b738496a878e99f48b2b"
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\agents\\20261112T125716Z-qwen2.5-7b",
+      "model": "qwen2.5:7b",
+      "status": "completed",
+      "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
+      "plan_sha256": "b541f9b4d493d11ef3fbcb46efa07b779e40f4550a43fd8b39b413f5640ac4d5",
+      "raw_metrics": {
+        "one_pass": {
+          "cases": 24,
+          "successful": 20,
+          "all_slots_correct": 6,
+          "invented_actions": 0,
+          "p50_seconds": 2.6226285999873653,
+          "p95_seconds": 3.130236500001047,
+          "input_tokens": 14362,
+          "output_tokens": 996,
+          "model_calls": 24,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 16,
+            "owner": 8,
+            "due": 18,
+            "status": 16
+          },
+          "evidence": {
+            "tp": 26,
+            "fp": 2,
+            "fn": 16,
+            "f1": 0.7428571428571429
+          },
+          "conditions": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 6,
+            "f1": 0.0
+          }
+        }
+      },
+      "additional_diagnostics": {
+        "one_pass": {
+          "trials": 24,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 2,
+          "contradictory_fields": 2,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 0,
+          "core_net_repair_rate": null
+        }
+      },
+      "prediction_sha256": "eaf6c9a426374990b72b059efcbfd45c5799693aa10a45d723220171157ac8c2"
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\agents\\20261112T131203Z-qwen3-4b",
+      "model": "qwen3:4b",
+      "status": "completed",
+      "data_sha256": "44c3951de78c3a1c68144dcffad91bb0fe5d4b7125ca2b729301c80403f47546",
+      "plan_sha256": "7fd3f1617964be0a65fd061c4488d9f2001d18858f8a4871267894feb9d2cabf",
+      "raw_metrics": {
+        "one_pass": {
+          "cases": 24,
+          "successful": 22,
+          "all_slots_correct": 17,
+          "invented_actions": 1,
+          "p50_seconds": 1.1074449000007007,
+          "p95_seconds": 1.2917879999731667,
+          "input_tokens": 16402,
+          "output_tokens": 1216,
+          "model_calls": 24,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 19,
+            "owner": 21,
+            "due": 17,
+            "status": 19
+          },
+          "evidence": {
+            "tp": 28,
+            "fp": 2,
+            "fn": 14,
+            "f1": 0.7777777777777778
+          },
+          "conditions": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 6,
+            "f1": 0.0
+          }
+        },
+        "single_selfcheck": {
+          "cases": 24,
+          "successful": 22,
+          "all_slots_correct": 18,
+          "invented_actions": 0,
+          "p50_seconds": 2.280323849990964,
+          "p95_seconds": 2.5723728999728337,
+          "input_tokens": 33496,
+          "output_tokens": 2322,
+          "model_calls": 46,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 20,
+            "owner": 22,
+            "due": 18,
+            "status": 20
+          },
+          "evidence": {
+            "tp": 29,
+            "fp": 2,
+            "fn": 13,
+            "f1": 0.7945205479452054
+          },
+          "conditions": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 6,
+            "f1": 0.0
+          }
+        },
+        "two_experts_audit": {
+          "cases": 24,
+          "successful": 22,
+          "all_slots_correct": 18,
+          "invented_actions": 0,
+          "p50_seconds": 3.4459630500059575,
+          "p95_seconds": 4.03505430003861,
+          "input_tokens": 49598,
+          "output_tokens": 3424,
+          "model_calls": 68,
+          "cost": null,
+          "slot_correct": {
+            "action_present": 20,
+            "owner": 22,
+            "due": 18,
+            "status": 20
+          },
+          "evidence": {
+            "tp": 26,
+            "fp": 2,
+            "fn": 16,
+            "f1": 0.7428571428571429
+          },
+          "conditions": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 6,
+            "f1": 0.0
+          }
+        }
+      },
+      "additional_diagnostics": {
+        "one_pass": {
+          "trials": 24,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 12,
+          "contradictory_fields": 0,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 0,
+          "core_net_repair_rate": null
+        },
+        "single_selfcheck": {
+          "trials": 24,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 12,
+          "contradictory_fields": 0,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 0,
+          "core_net_repair_rate": 0.0
+        },
+        "two_experts_audit": {
+          "trials": 24,
+          "distinct_cases": 12,
+          "fully_exact_including_evidence_conditions": 10,
+          "contradictory_fields": 0,
+          "core_slots_repaired": 0,
+          "core_slots_damaged": 0,
+          "core_net_repair_rate": 0.0
+        }
+      },
+      "prediction_sha256": "a40a8562a7b738c80f8a1965b800ebaaf204623475b80e29a7e999d823abc745"
+    }
+  ],
+  "queries": [
+    {
+      "directory": "test-results\\backend-agent-audit\\queries\\20261112T124655Z",
+      "manifest": {
+        "status": "completed",
+        "args": {
+          "baseline_revision": "e0fa85a",
+          "sizes": [
+            10,
+            100,
+            500
+          ],
+          "repeats": 7,
+          "output": "test-results/backend-agent-audit/queries"
+        },
+        "baseline_source_sha256": "b9620d8c83dbd65ed5d85b1ca359829009f1e62dc11b5d28809e51764e8b6118",
+        "candidate_source_sha256": "0a64edf111335b3cbc1975606a95f72b8400f08bde31999d25324f4e590451b0",
+        "script_sha256": "0358b01d4a658a20e7077c8555b75c6fcf3a972dfca2f046cb81bf84a019d979",
+        "plan_sha256": "aa2c55ce49c2498ad092f6d69d05c956dc94c8cf32914c9f191cd7947bf977e9",
+        "platform": "Windows-11-10.0.22631-SP0",
+        "python": "3.12.6 (tags/v3.12.6:a4a2d2b, Sep  6 2024, 20:11:23) [MSC v.1940 64 bit (AMD64)]",
+        "backend": "SQLite WAL, isolated synthetic fixture",
+        "git_head": "e0fa85ac9139d50da944032542f6c159ec44fa43",
+        "failures": 0
+      },
+      "metrics": [
+        {
+          "size": 10,
+          "actor": "manager.a",
+          "strategy": "baseline",
+          "samples": 7,
+          "p50_ms": 11.7461999761872,
+          "p95_ms": 15.937899996060878,
+          "selects": [
+            31
+          ],
+          "bytes": 4529,
+          "returned": 5
+        },
+        {
+          "size": 10,
+          "actor": "manager.a",
+          "strategy": "bulk_projection",
+          "samples": 7,
+          "p50_ms": 4.473100008908659,
+          "p95_ms": 6.273999984841794,
+          "selects": [
+            1
+          ],
+          "bytes": 4529,
+          "returned": 5
+        },
+        {
+          "size": 10,
+          "actor": "boss",
+          "strategy": "baseline",
+          "samples": 7,
+          "p50_ms": 17.25470001110807,
+          "p95_ms": 18.4921000036411,
+          "selects": [
+            51
+          ],
+          "bytes": 8496,
+          "returned": 10
+        },
+        {
+          "size": 10,
+          "actor": "boss",
+          "strategy": "bulk_projection",
+          "samples": 7,
+          "p50_ms": 5.635200010146946,
+          "p95_ms": 6.851900019682944,
+          "selects": [
+            1
+          ],
+          "bytes": 8496,
+          "returned": 10
+        },
+        {
+          "size": 100,
+          "actor": "manager.a",
+          "strategy": "baseline",
+          "samples": 7,
+          "p50_ms": 130.78919996041805,
+          "p95_ms": 144.65480000944808,
+          "selects": [
+            301
+          ],
+          "bytes": 40036,
+          "returned": 50
+        },
+        {
+          "size": 100,
+          "actor": "manager.a",
+          "strategy": "bulk_projection",
+          "samples": 7,
+          "p50_ms": 19.888700044248253,
+          "p95_ms": 21.45639999071136,
+          "selects": [
+            1
+          ],
+          "bytes": 40036,
+          "returned": 50
+        },
+        {
+          "size": 100,
+          "actor": "boss",
+          "strategy": "baseline",
+          "samples": 7,
+          "p50_ms": 182.06179997650906,
+          "p95_ms": 190.07749995216727,
+          "selects": [
+            501
+          ],
+          "bytes": 79508,
+          "returned": 100
+        },
+        {
+          "size": 100,
+          "actor": "boss",
+          "strategy": "bulk_projection",
+          "samples": 7,
+          "p50_ms": 38.93260000040755,
+          "p95_ms": 45.80210003769025,
+          "selects": [
+            1
+          ],
+          "bytes": 79508,
+          "returned": 100
+        },
+        {
+          "size": 500,
+          "actor": "manager.a",
+          "strategy": "baseline",
+          "samples": 7,
+          "p50_ms": 666.8527000001632,
+          "p95_ms": 699.2898000171408,
+          "selects": [
+            1501
+          ],
+          "bytes": 197835,
+          "returned": 250
+        },
+        {
+          "size": 500,
+          "actor": "manager.a",
+          "strategy": "bulk_projection",
+          "samples": 7,
+          "p50_ms": 90.70200001588091,
+          "p95_ms": 99.05100002652034,
+          "selects": [
+            1
+          ],
+          "bytes": 197835,
+          "returned": 250
+        },
+        {
+          "size": 500,
+          "actor": "boss",
+          "strategy": "baseline",
+          "samples": 7,
+          "p50_ms": 947.7850999683142,
+          "p95_ms": 965.3381000389345,
+          "selects": [
+            2501
+          ],
+          "bytes": 395112,
+          "returned": 500
+        },
+        {
+          "size": 500,
+          "actor": "boss",
+          "strategy": "bulk_projection",
+          "samples": 7,
+          "p50_ms": 187.61219998123124,
+          "p95_ms": 266.49089995771646,
+          "selects": [
+            1
+          ],
+          "bytes": 395112,
+          "returned": 500
+        }
+      ]
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\queries\\20261112T125729Z",
+      "manifest": {
+        "status": "completed",
+        "args": {
+          "baseline_revision": "e0fa85a",
+          "sizes": [
+            500
+          ],
+          "repeats": 7,
+          "output": "test-results/backend-agent-audit/queries"
+        },
+        "baseline_source_sha256": "b9620d8c83dbd65ed5d85b1ca359829009f1e62dc11b5d28809e51764e8b6118",
+        "candidate_source_sha256": "3291a1e77bcd944e013d8db34bae5a86d08ac5a3f07ad3123b6d6e6edf57daef",
+        "script_sha256": "a94252e7446699a9733ce9336ec3a3602841478dd4b41157c7fad1c78a4c1b58",
+        "plan_sha256": "b541f9b4d493d11ef3fbcb46efa07b779e40f4550a43fd8b39b413f5640ac4d5",
+        "platform": "Windows-11-10.0.22631-SP0",
+        "python": "3.12.6 (tags/v3.12.6:a4a2d2b, Sep  6 2024, 20:11:23) [MSC v.1940 64 bit (AMD64)]",
+        "backend": "SQLite WAL, isolated synthetic fixture",
+        "git_head": "e0fa85ac9139d50da944032542f6c159ec44fa43",
+        "failures": 0
+      },
+      "metrics": [
+        {
+          "size": 500,
+          "actor": "manager.a",
+          "strategy": "baseline",
+          "samples": 7,
+          "p50_ms": 1004.3375000241213,
+          "p95_ms": 1077.8952999971807,
+          "selects": [
+            1501
+          ],
+          "bytes": 197835,
+          "returned": 250
+        },
+        {
+          "size": 500,
+          "actor": "manager.a",
+          "strategy": "bulk_projection",
+          "samples": 7,
+          "p50_ms": 146.03370003169402,
+          "p95_ms": 166.90230002859607,
+          "selects": [
+            1
+          ],
+          "bytes": 197835,
+          "returned": 250
+        },
+        {
+          "size": 500,
+          "actor": "boss",
+          "strategy": "baseline",
+          "samples": 7,
+          "p50_ms": 1475.3187000169419,
+          "p95_ms": 1622.7590999915265,
+          "selects": [
+            2501
+          ],
+          "bytes": 395112,
+          "returned": 500
+        },
+        {
+          "size": 500,
+          "actor": "boss",
+          "strategy": "bulk_projection",
+          "samples": 7,
+          "p50_ms": 300.92599999625236,
+          "p95_ms": 321.59690000116825,
+          "selects": [
+            1
+          ],
+          "bytes": 395112,
+          "returned": 500
+        }
+      ]
+    }
+  ],
+  "production_graph_diagnostics": [
+    {
+      "directory": "test-results\\backend-agent-audit\\current-graph\\20261112T125854Z",
+      "manifest": {
+        "mode": "real local model, actual product graph, one development case",
+        "model": "qwen2.5:7b",
+        "generation_cap_per_call": 512,
+        "max_model_calls": 18,
+        "run_timeout": 180,
+        "controlled_cross_architecture_comparison": false,
+        "schema": "production AgentResult",
+        "source_hashes": {
+          "orchestration.py": "95eee9b39dd0ccbac6f8d1297ae2f27e43261667b476cd413f79d5d72bf1765e",
+          "agents.py": "fa1c7afbe979ff8db279e36ef908d47867fd9343dc8f25eb1c7c76b247d59e3d",
+          "providers.py": "c6c81f90e84d9ef99c932f38879f1a1a73afd1f860d7ce21e3429200c7f3d8e0"
+        }
+      },
+      "result": {
+        "status": "failed",
+        "error": "计划须包含一个审查任务和执行规划任务",
+        "wall_seconds": 39.78684370004339,
+        "model_calls": 5,
+        "tool_calls": 4,
+        "input_tokens": 8898,
+        "output_tokens": 602,
+        "roles": {
+          "coordinator": 5
+        },
+        "report": null
+      },
+      "observed_completion_counts": [
+        16,
+        47,
+        222,
+        69,
+        248
+      ],
+      "calls_above_requested_generation_cap": 0
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\current-graph\\20261112T130229Z",
+      "manifest": {
+        "mode": "real local model, actual product graph, one development case",
+        "model": "qwen2.5:7b",
+        "generation_cap_per_call": 512,
+        "max_model_calls": 18,
+        "run_timeout": 180,
+        "controlled_cross_architecture_comparison": false,
+        "schema": "production AgentResult",
+        "static_coordinator": true,
+        "static_plan_calls_are_not_model_inference": true,
+        "source_hashes": {
+          "orchestration.py": "95eee9b39dd0ccbac6f8d1297ae2f27e43261667b476cd413f79d5d72bf1765e",
+          "agents.py": "fa1c7afbe979ff8db279e36ef908d47867fd9343dc8f25eb1c7c76b247d59e3d",
+          "providers.py": "c6c81f90e84d9ef99c932f38879f1a1a73afd1f860d7ce21e3429200c7f3d8e0"
+        }
+      },
+      "result": {
+        "status": "failed",
+        "error": "会议理解达到迭代上限，未伪造成功产物",
+        "wall_seconds": 43.049291700008325,
+        "model_calls": 6,
+        "tool_calls": 3,
+        "input_tokens": 10869,
+        "output_tokens": 662,
+        "roles": {
+          "meeting": 6
+        },
+        "report": null
+      },
+      "observed_completion_counts": [
+        20,
+        72,
+        20,
+        127,
+        140,
+        283
+      ],
+      "calls_above_requested_generation_cap": 0
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\current-graph\\20261112T132109Z",
+      "manifest": {
+        "mode": "real local model, actual product graph, one development case",
+        "model": "qwen3:4b",
+        "generation_cap_per_call": 512,
+        "max_model_calls": 18,
+        "run_timeout": 180,
+        "controlled_cross_architecture_comparison": false,
+        "schema": "production AgentResult",
+        "static_coordinator": false,
+        "static_plan_calls_are_not_model_inference": true,
+        "source_hashes": {
+          "orchestration.py": "95eee9b39dd0ccbac6f8d1297ae2f27e43261667b476cd413f79d5d72bf1765e",
+          "agents.py": "fa1c7afbe979ff8db279e36ef908d47867fd9343dc8f25eb1c7c76b247d59e3d",
+          "providers.py": "c6c81f90e84d9ef99c932f38879f1a1a73afd1f860d7ce21e3429200c7f3d8e0",
+          "tools.py": "4c85ba105d1bd6d21df1b14f6d8e21b5c60a5e06f6f4322b432d8f7a1e21ca55"
+        },
+        "thinking_mode": "provider default; this integration probe is NOT a matched-thinking comparison"
+      },
+      "result": {
+        "status": "failed",
+        "error": "协作协调达到迭代上限，未伪造成功产物",
+        "wall_seconds": 123.31010100001004,
+        "model_calls": 6,
+        "tool_calls": 3,
+        "input_tokens": 15535,
+        "output_tokens": 5694,
+        "roles": {
+          "coordinator": 6
+        },
+        "report": null
+      },
+      "observed_completion_counts": [
+        207,
+        428,
+        2139,
+        1236,
+        624,
+        1060
+      ],
+      "calls_above_requested_generation_cap": 4
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\current-graph\\20261112T133009Z",
+      "manifest": {
+        "mode": "real local model, actual product graph, one development case",
+        "model": "qwen3:4b",
+        "generation_cap_per_call": 512,
+        "max_model_calls": 18,
+        "run_timeout": 180,
+        "provider_profile": "ollama",
+        "context_window": 8192,
+        "controlled_cross_architecture_comparison": false,
+        "schema": "production AgentResult",
+        "static_coordinator": false,
+        "static_plan_calls_are_not_model_inference": true,
+        "source_hashes": {
+          "orchestration.py": "95eee9b39dd0ccbac6f8d1297ae2f27e43261667b476cd413f79d5d72bf1765e",
+          "agents.py": "fa1c7afbe979ff8db279e36ef908d47867fd9343dc8f25eb1c7c76b247d59e3d",
+          "providers.py": "359d5cd616fcb7086a74bb30230159df7c07584c66f12827fd0b40a592a96a2c",
+          "tools.py": "4c85ba105d1bd6d21df1b14f6d8e21b5c60a5e06f6f4322b432d8f7a1e21ca55"
+        },
+        "thinking_mode": "false"
+      },
+      "result": {
+        "status": "failed",
+        "error": "协作协调达到迭代上限，未伪造成功产物",
+        "wall_seconds": 85.55099670001073,
+        "model_calls": 6,
+        "tool_calls": 2,
+        "input_tokens": 15978,
+        "output_tokens": 2705,
+        "roles": {
+          "coordinator": 6
+        },
+        "report": null
+      },
+      "observed_completion_counts": [
+        321,
+        336,
+        512,
+        512,
+        512,
+        512
+      ],
+      "calls_above_requested_generation_cap": 0
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\current-graph\\20261112T133157Z",
+      "manifest": {
+        "mode": "real local model, actual product graph, one development case",
+        "model": "qwen3:4b",
+        "generation_cap_per_call": 512,
+        "max_model_calls": 18,
+        "run_timeout": 180,
+        "provider_profile": "ollama",
+        "context_window": 8192,
+        "controlled_cross_architecture_comparison": false,
+        "schema": "production AgentResult",
+        "static_coordinator": true,
+        "static_plan_calls_are_not_model_inference": true,
+        "source_hashes": {
+          "orchestration.py": "95eee9b39dd0ccbac6f8d1297ae2f27e43261667b476cd413f79d5d72bf1765e",
+          "agents.py": "fa1c7afbe979ff8db279e36ef908d47867fd9343dc8f25eb1c7c76b247d59e3d",
+          "providers.py": "359d5cd616fcb7086a74bb30230159df7c07584c66f12827fd0b40a592a96a2c",
+          "tools.py": "4c85ba105d1bd6d21df1b14f6d8e21b5c60a5e06f6f4322b432d8f7a1e21ca55"
+        },
+        "thinking_mode": "false"
+      },
+      "result": {
+        "status": "failed",
+        "error": "会议理解达到迭代上限，未伪造成功产物",
+        "wall_seconds": 81.8976810000022,
+        "model_calls": 6,
+        "tool_calls": 2,
+        "input_tokens": 15664,
+        "output_tokens": 2686,
+        "roles": {
+          "meeting": 6
+        },
+        "report": null
+      },
+      "observed_completion_counts": [
+        512,
+        236,
+        402,
+        512,
+        512,
+        512
+      ],
+      "calls_above_requested_generation_cap": 0
+    }
+  ],
+  "protocol_simulation": {
+    "mode": "rule simulation of actual graph, NOT model accuracy or provider token usage",
+    "status": "waiting_review",
+    "wall_seconds": 0.6439306999673136,
+    "model_protocol_roundtrips": 14,
+    "per_role": {
+      "coordinator": 2,
+      "meeting": 3,
+      "planner": 3,
+      "risk": 3,
+      "auditor": 3
+    },
+    "tool_calls": {
+      "list_sources": 5,
+      "read_upstream": 5,
+      "read_tasks": 4,
+      "read_source": 4
+    },
+    "full_source_reads": 4,
+    "unique_full_sources": 1,
+    "message_characters": 26630,
+    "tool_schema_characters": 76947,
+    "model_input_tokens": null,
+    "model_output_tokens": null,
+    "calls": [
+      {
+        "role": "coordinator",
+        "message_characters": 428,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "coordinator",
+        "message_characters": 1321,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "meeting",
+        "message_characters": 397,
+        "tool_schema_characters": 5343
+      },
+      {
+        "role": "meeting",
+        "message_characters": 1679,
+        "tool_schema_characters": 5343
+      },
+      {
+        "role": "meeting",
+        "message_characters": 2484,
+        "tool_schema_characters": 5343
+      },
+      {
+        "role": "planner",
+        "message_characters": 497,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "risk",
+        "message_characters": 384,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "risk",
+        "message_characters": 2457,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "risk",
+        "message_characters": 3262,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "planner",
+        "message_characters": 2570,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "planner",
+        "message_characters": 3375,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "auditor",
+        "message_characters": 409,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "auditor",
+        "message_characters": 3281,
+        "tool_schema_characters": 5538
+      },
+      {
+        "role": "auditor",
+        "message_characters": 4086,
+        "tool_schema_characters": 5538
+      }
+    ]
+  },
+  "schema_inventory": {
+    "tables": 34,
+    "json_columns": [
+      "sources.body",
+      "runs.manifest",
+      "artifacts.body",
+      "run_events.payload",
+      "reports.body",
+      "tasks.conditions",
+      "tasks.evidence",
+      "approvals.body",
+      "project_events.body",
+      "audit_log.body",
+      "sales_playbooks.body",
+      "sales_conversations.body",
+      "sales_analyses.snapshot",
+      "sales_analyses.artifacts",
+      "sales_analyses.events",
+      "sales_analyses.report",
+      "sales_reviews.body",
+      "workspace_recordings.body",
+      "workspace_submissions.snapshot",
+      "workspace_submissions.history",
+      "workspace_opportunities.history",
+      "workspace_followups.body",
+      "workspace_followups.history",
+      "workspace_sales_reports.body",
+      "workspace_meeting_clarifications.body",
+      "workspace_quality_policies.cards",
+      "workspace_quality_cases.body",
+      "workspace_quality_cases.analysis_ids",
+      "workspace_quality_reviews.body",
+      "workspace_quality_feedback.body",
+      "workspace_corrections.proposed"
+    ],
+    "foreign_keys": 70,
+    "unique_constraints": 17,
+    "modules": {
+      "agents.py": 126,
+      "api.py": 411,
+      "audio.py": 52,
+      "auth.py": 278,
+      "business.py": 318,
+      "config.py": 32,
+      "database.py": 442,
+      "demo.py": 49,
+      "domain.py": 135,
+      "maintenance.py": 140,
+      "orchestration.py": 250,
+      "providers.py": 156,
+      "quality_workspace.py": 590,
+      "reports_workspace.py": 299,
+      "report_export.py": 130,
+      "reviews.py": 119,
+      "sales.py": 337,
+      "sales_api.py": 159,
+      "sales_domain.py": 218,
+      "sales_workflow.py": 344,
+      "store.py": 199,
+      "tools.py": 94,
+      "workspace.py": 654,
+      "__init__.py": 1
+    }
+  },
+  "capacity": {
+    "mode": "hypothetical sensitivity, not measured ASR/queue capacity",
+    "scope": "one company,20-100 salespeople; user has not fixed recording duration",
+    "excluded": [
+      "LLM latency",
+      "burst arrivals",
+      "network upload",
+      "retries",
+      "ASR quality",
+      "backups",
+      "audio transcoding"
+    ],
+    "scenarios": [
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 12.5,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 0.625,
+        "asr_workers_for_8h_at_60pct": 1,
+        "storage_gb_per_30_days_at_128kbps": 21.599999999999998
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 12.5,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 2.5,
+        "asr_workers_for_8h_at_60pct": 1,
+        "storage_gb_per_30_days_at_128kbps": 21.599999999999998
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 12.5,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 6.25,
+        "asr_workers_for_8h_at_60pct": 2,
+        "storage_gb_per_30_days_at_128kbps": 21.599999999999998
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 25.0,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 1.25,
+        "asr_workers_for_8h_at_60pct": 1,
+        "storage_gb_per_30_days_at_128kbps": 43.199999999999996
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 25.0,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 5.0,
+        "asr_workers_for_8h_at_60pct": 2,
+        "storage_gb_per_30_days_at_128kbps": 43.199999999999996
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 25.0,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 12.5,
+        "asr_workers_for_8h_at_60pct": 3,
+        "storage_gb_per_30_days_at_128kbps": 43.199999999999996
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 50.0,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 2.5,
+        "asr_workers_for_8h_at_60pct": 1,
+        "storage_gb_per_30_days_at_128kbps": 86.39999999999999
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 50.0,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 10.0,
+        "asr_workers_for_8h_at_60pct": 3,
+        "storage_gb_per_30_days_at_128kbps": 86.39999999999999
+      },
+      {
+        "recordings_per_day": 50,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 50.0,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 25.0,
+        "asr_workers_for_8h_at_60pct": 6,
+        "storage_gb_per_30_days_at_128kbps": 86.39999999999999
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 25.0,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 1.25,
+        "asr_workers_for_8h_at_60pct": 1,
+        "storage_gb_per_30_days_at_128kbps": 43.199999999999996
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 25.0,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 5.0,
+        "asr_workers_for_8h_at_60pct": 2,
+        "storage_gb_per_30_days_at_128kbps": 43.199999999999996
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 25.0,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 12.5,
+        "asr_workers_for_8h_at_60pct": 3,
+        "storage_gb_per_30_days_at_128kbps": 43.199999999999996
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 50.0,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 2.5,
+        "asr_workers_for_8h_at_60pct": 1,
+        "storage_gb_per_30_days_at_128kbps": 86.39999999999999
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 50.0,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 10.0,
+        "asr_workers_for_8h_at_60pct": 3,
+        "storage_gb_per_30_days_at_128kbps": 86.39999999999999
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 50.0,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 25.0,
+        "asr_workers_for_8h_at_60pct": 6,
+        "storage_gb_per_30_days_at_128kbps": 86.39999999999999
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 100.0,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 5.0,
+        "asr_workers_for_8h_at_60pct": 2,
+        "storage_gb_per_30_days_at_128kbps": 172.79999999999998
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 100.0,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 20.0,
+        "asr_workers_for_8h_at_60pct": 5,
+        "storage_gb_per_30_days_at_128kbps": 172.79999999999998
+      },
+      {
+        "recordings_per_day": 100,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 100.0,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 50.0,
+        "asr_workers_for_8h_at_60pct": 11,
+        "storage_gb_per_30_days_at_128kbps": 172.79999999999998
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 75.0,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 3.75,
+        "asr_workers_for_8h_at_60pct": 1,
+        "storage_gb_per_30_days_at_128kbps": 129.60000000000002
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 75.0,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 15.0,
+        "asr_workers_for_8h_at_60pct": 4,
+        "storage_gb_per_30_days_at_128kbps": 129.60000000000002
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 15,
+        "audio_hours_per_day": 75.0,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 37.5,
+        "asr_workers_for_8h_at_60pct": 8,
+        "storage_gb_per_30_days_at_128kbps": 129.60000000000002
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 150.0,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 7.5,
+        "asr_workers_for_8h_at_60pct": 2,
+        "storage_gb_per_30_days_at_128kbps": 259.20000000000005
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 150.0,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 30.0,
+        "asr_workers_for_8h_at_60pct": 7,
+        "storage_gb_per_30_days_at_128kbps": 259.20000000000005
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 30,
+        "audio_hours_per_day": 150.0,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 75.0,
+        "asr_workers_for_8h_at_60pct": 16,
+        "storage_gb_per_30_days_at_128kbps": 259.20000000000005
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 300.0,
+        "assumed_rtf": 0.05,
+        "asr_worker_hours": 15.0,
+        "asr_workers_for_8h_at_60pct": 4,
+        "storage_gb_per_30_days_at_128kbps": 518.4000000000001
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 300.0,
+        "assumed_rtf": 0.2,
+        "asr_worker_hours": 60.0,
+        "asr_workers_for_8h_at_60pct": 13,
+        "storage_gb_per_30_days_at_128kbps": 518.4000000000001
+      },
+      {
+        "recordings_per_day": 300,
+        "minutes_per_recording": 60,
+        "audio_hours_per_day": 300.0,
+        "assumed_rtf": 0.5,
+        "asr_worker_hours": 150.0,
+        "asr_workers_for_8h_at_60pct": 32,
+        "storage_gb_per_30_days_at_128kbps": 518.4000000000001
+      }
+    ]
+  },
+  "sqlite_writes": [
+    {
+      "directory": "test-results\\backend-agent-audit\\sqlite-writes\\20261112T131144Z",
+      "manifest": {
+        "status": "exploratory; initial script hash not captured"
+      },
+      "results": [
+        {
+          "writers": 1,
+          "repeat": 2,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.5657590999617241,
+          "writes_per_second": 452.48940762476366,
+          "p50_ms": 2.2581999946851283,
+          "p95_ms": 3.698199987411499
+        },
+        {
+          "writers": 4,
+          "repeat": 1,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.5769356999662705,
+          "writes_per_second": 443.72362468636726,
+          "p50_ms": 2.207050012657419,
+          "p95_ms": 4.522099974565208
+        },
+        {
+          "writers": 16,
+          "repeat": 0,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 1.100299299985636,
+          "writes_per_second": 232.6639669800226,
+          "p50_ms": 2.4874500231817365,
+          "p95_ms": 128.25660000089556
+        },
+        {
+          "writers": 1,
+          "repeat": 0,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.5398628000402823,
+          "writes_per_second": 474.1945545810868,
+          "p50_ms": 2.198600006522611,
+          "p95_ms": 3.316399990580976
+        },
+        {
+          "writers": 1,
+          "repeat": 1,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.5688381000072695,
+          "writes_per_second": 450.04017838595627,
+          "p50_ms": 2.3070499883033335,
+          "p95_ms": 3.370499995071441
+        },
+        {
+          "writers": 4,
+          "repeat": 2,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.6803972999914549,
+          "writes_per_second": 376.2507582014436,
+          "p50_ms": 2.251149999210611,
+          "p95_ms": 5.10109995957464
+        },
+        {
+          "writers": 16,
+          "repeat": 1,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 1.1008114999858662,
+          "writes_per_second": 232.55571004053544,
+          "p50_ms": 2.3685999622102827,
+          "p95_ms": 169.8943999945186
+        },
+        {
+          "writers": 16,
+          "repeat": 2,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 1.2303454999928363,
+          "writes_per_second": 208.07163516385484,
+          "p50_ms": 2.43719998979941,
+          "p95_ms": 162.00640000170097
+        },
+        {
+          "writers": 4,
+          "repeat": 0,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.6591019000043161,
+          "writes_per_second": 388.4073160740753,
+          "p50_ms": 2.368250017752871,
+          "p95_ms": 3.4748000325635076
+        }
+      ]
+    },
+    {
+      "directory": "test-results\\backend-agent-audit\\sqlite-writes\\20261112T131320Z",
+      "manifest": {
+        "status": "completed",
+        "script_sha256": "7a97001ab34089e63549469b64ab910ba7df9e3cd1f1c26d5d2ea52408315e95",
+        "writers": [
+          1,
+          4,
+          16
+        ],
+        "repeats": 3,
+        "transactions_per_trial": 256,
+        "sqlite_busy_timeout_seconds": 30,
+        "scope": "isolated SQLite WAL audit-row inserts; not HTTP or complete application throughput"
+      },
+      "results": [
+        {
+          "writers": 1,
+          "repeat": 2,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.583717199973762,
+          "writes_per_second": 438.5685397166764,
+          "p50_ms": 2.277049992699176,
+          "p95_ms": 3.454799996688962
+        },
+        {
+          "writers": 4,
+          "repeat": 1,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.6029505000333302,
+          "writes_per_second": 424.5788003921528,
+          "p50_ms": 2.2003999911248684,
+          "p95_ms": 3.6478000110946596
+        },
+        {
+          "writers": 16,
+          "repeat": 0,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 1.1231012000353076,
+          "writes_per_second": 227.9402782153131,
+          "p50_ms": 2.4214499862864614,
+          "p95_ms": 133.36849998449907
+        },
+        {
+          "writers": 1,
+          "repeat": 0,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.549665600003209,
+          "writes_per_second": 465.7377139819291,
+          "p50_ms": 2.2595999762415886,
+          "p95_ms": 3.194899996742606
+        },
+        {
+          "writers": 1,
+          "repeat": 1,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.5821844999445602,
+          "writes_per_second": 439.7231462266312,
+          "p50_ms": 2.3839499917812645,
+          "p95_ms": 3.305800026282668
+        },
+        {
+          "writers": 4,
+          "repeat": 2,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.5580672000069171,
+          "writes_per_second": 458.72611756581813,
+          "p50_ms": 2.2280999983195215,
+          "p95_ms": 3.48469999153167
+        },
+        {
+          "writers": 16,
+          "repeat": 1,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 1.2102406999911182,
+          "writes_per_second": 211.52816956319413,
+          "p50_ms": 2.328050002688542,
+          "p95_ms": 126.98060000548139
+        },
+        {
+          "writers": 16,
+          "repeat": 2,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 1.0367818999802694,
+          "writes_per_second": 246.9178908359336,
+          "p50_ms": 2.3579499684274197,
+          "p95_ms": 122.3079000483267
+        },
+        {
+          "writers": 4,
+          "repeat": 0,
+          "attempted": 256,
+          "persisted": 256,
+          "failures": 0,
+          "wall_seconds": 0.6851007999503054,
+          "writes_per_second": 373.66764134353554,
+          "p50_ms": 2.4127500073518604,
+          "p95_ms": 3.590499982237816
+        }
+      ]
+    }
+  ]
+}

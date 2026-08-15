@@ -16,7 +16,8 @@ PASSWORD = "Local-test-password-123!"
 
 @pytest.fixture
 def access(tmp_path):
-    app = create_app(Settings(data_dir=tmp_path, auth_enabled=True, start_worker=False, asr_model=""))
+    app = create_app(Settings(data_dir=tmp_path, database_url=f"sqlite:///{tmp_path / 'meetflow.db'}",
+                              auth_enabled=True, start_worker=False, asr_model="", model_name="", model_api_key=""))
     with app.state.store.sessions.begin() as session:
         session.add_all([Company(id="c1", name="测试公司"), Company(id="c2", name="其他公司")])
         session.flush()

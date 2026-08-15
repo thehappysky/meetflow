@@ -22,6 +22,8 @@ class LiveProvider:
         if not self.settings.live_available:
             raise DomainError("真实模型未配置", 422)
         try:
+            if self.settings.model_api_profile == "ollama":
+                return self._ollama(messages, tools)
             with httpx.Client(timeout=self.settings.model_timeout, transport=self.transport) as client:
                 response = client.post(self.settings.model_base_url.rstrip("/") + "/chat/completions",
                     headers={"Authorization": f"Bearer {self.settings.model_api_key}"},
@@ -37,6 +39,40 @@ class LiveProvider:
             return result, payload.get("usage", {})
         except (httpx.HTTPError, KeyError, ValueError) as exc:
             raise DomainError(f"模型调用失败：{type(exc).__name__}；不会回退为演示结果", 502) from exc
+
+    def _ollama(self, messages, tools):
+        # The native API requires object arguments and tool_name; the runner uses
+        # OpenAI-style string arguments and call IDs internally. Do not mutate history.
+        native_messages = []
+        for original in messages:
+            message = {k: v for k, v in original.items() if k not in {"tool_calls", "tool_call_id", "name"}}
+            if original.get("tool_calls"):
+                message["tool_calls"] = [{"type": "function", "function": {
+                    "name": call["function"]["name"],
+                    "arguments": json.loads(call["function"]["arguments"]),
+                }} for call in original["tool_calls"]]
+            if original["role"] == "tool":
+                message["tool_name"] = original["name"]
+            native_messages.append(message)
+        base = self.settings.model_base_url.rstrip("/").removesuffix("/v1")
+        with httpx.Client(timeout=self.settings.model_timeout, transport=self.transport) as client:
+            response = client.post(base + "/api/chat", json={
+                "model": self.settings.model_name, "messages": native_messages, "tools": tools,
+                "stream": False, "think": False,
+                "options": {"num_predict": self.settings.max_output_tokens,
+                            "num_ctx": self.settings.model_context_window},
+            })
+        if response.is_error:
+            raise DomainError(f"模型服务返回 HTTP {response.status_code}；请检查本地模型及工具调用支持", 502)
+        payload = response.json()
+        message = payload["message"]
+        result = {"role": "assistant", "content": message.get("content")}
+        if message.get("tool_calls"):
+            result["tool_calls"] = [tool_call(call["function"]["name"], call["function"]["arguments"])
+                                    for call in message["tool_calls"]]
+        usage = {target: payload[source] for source, target in (
+            ("prompt_eval_count", "prompt_tokens"), ("eval_count", "completion_tokens")) if source in payload}
+        return result, usage
 
 
 class DemoProvider:

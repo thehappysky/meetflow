@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -10,6 +11,8 @@ class Settings(BaseSettings):
     model_base_url: str = "https://api.openai.com/v1"
     model_api_key: str = ""
     model_name: str = ""
+    model_api_profile: Literal["openai", "ollama"] = "openai"
+    model_context_window: int = 8192
     model_timeout: float = 60
     max_model_calls: int = 48
     max_tool_calls: int = 100
@@ -29,4 +32,4 @@ class Settings(BaseSettings):
 
     @property
     def live_available(self) -> bool:
-        return bool(self.model_api_key and self.model_name)
+        return bool(self.model_name and (self.model_api_profile == "ollama" or self.model_api_key))

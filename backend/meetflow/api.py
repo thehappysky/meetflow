@@ -60,13 +60,7 @@ def create_app(settings=None, provider=None, sales_provider=None):
     workspace.quality = quality
     business = BusinessService(workspace)
     workspace.business = business
-    def on_report(run_id):
-        for service in (quality, business):
-            try:
-                service.on_run_ready(run_id)
-            except Exception as exc:  # noqa: BLE001 -- one derived feature must not block another
-                store.event(run_id, "derived_prepare_failed", "附加整理需要重试", {"error": str(exc)[:1000]})
-    driver.on_report = on_report
+    driver.on_report = business.on_run_ready
 
     @asynccontextmanager
     async def lifespan(app):

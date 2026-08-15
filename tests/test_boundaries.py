@@ -32,6 +32,41 @@ def test_live_http_error_is_error_not_demo_result():
         provider.complete("meeting", [], [], {})
 
 
+def test_native_ollama_budget_and_tool_history_roundtrip():
+    history = [{"role": "assistant", "content": None, "tool_calls": [{"id": "old-call",
+        "type": "function", "function": {"name": "read_source", "arguments": '{"source_id":"s1"}'}}]},
+        {"role": "tool", "name": "read_source", "tool_call_id": "old-call", "content": "source text"}]
+    snapshot = json.dumps(history)
+
+    def respond(request):
+        assert request.url == "http://127.0.0.1:11434/api/chat"
+        assert "authorization" not in request.headers
+        body = json.loads(request.content)
+        assert body["options"] == {"num_predict": 512, "num_ctx": 8192}
+        assert body["think"] is False and body["stream"] is False
+        assert body["messages"][0]["tool_calls"][0]["function"]["arguments"] == {"source_id": "s1"}
+        assert body["messages"][1] == {"role": "tool", "tool_name": "read_source", "content": "source text"}
+        return httpx.Response(200, json={"message": {"content": "", "tool_calls": [{"function": {
+            "name": "submit_result", "arguments": {"summary": "已核对"}}}]},
+            "prompt_eval_count": 37, "eval_count": 12})
+
+    settings = Settings(model_api_profile="ollama", model_name="local-model", model_api_key="",
+                        model_base_url="http://127.0.0.1:11434/v1", max_output_tokens=512)
+    message, usage = LiveProvider(settings, transport=httpx.MockTransport(respond)).complete("meeting", history, [], {})
+    call = message["tool_calls"][0]
+    assert call["id"].startswith("call_")
+    assert json.loads(call["function"]["arguments"]) == {"summary": "已核对"}
+    assert usage == {"prompt_tokens": 37, "completion_tokens": 12}
+    assert json.dumps(history) == snapshot
+
+
+def test_native_ollama_failure_never_falls_back():
+    settings = Settings(model_api_profile="ollama", model_name="local-model", model_api_key="")
+    provider = LiveProvider(settings, transport=httpx.MockTransport(lambda request: httpx.Response(503)))
+    with pytest.raises(DomainError, match="503"):
+        provider.complete("meeting", [], [], {})
+
+
 def test_unconfigured_audio_is_rejected_and_never_creates_transcript(tmp_path):
     app = create_app(Settings(data_dir=tmp_path, start_worker=False))
     with TestClient(app) as client:

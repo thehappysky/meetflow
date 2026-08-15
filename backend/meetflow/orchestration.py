@@ -237,8 +237,8 @@ class RunDriver:
         if self.on_report and self.store.get_run(run_id)["status"] in {"waiting_review", "completed"}:
             try:
                 self.on_report(run_id)
-            except Exception as exc:  # noqa: BLE001 -- quality failure must not erase a completed meeting
-                self.store.event(run_id, "quality_prepare_failed", "纪要已保存，质检启动失败", {"error": str(exc)[:1000]})
+            except Exception as exc:  # noqa: BLE001 -- derived work must not erase a completed meeting
+                self.store.event(run_id, "derived_prepare_failed", "纪要已保存，后续事项整理需要重试", {"error": str(exc)[:1000]})
 
     def recover(self):
         with self.store.sessions() as session:

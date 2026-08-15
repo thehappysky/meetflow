@@ -11,12 +11,10 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends
 from pydantic import Field
-from sqlalchemy import select
+from sqlalchemy import and_, func, select
 
 from .database import (
     Account,
-    Meeting,
-    PersonalRecording,
     Project,
     QualityCase,
     QualityFeedback,
@@ -33,7 +31,6 @@ from .domain import Contract, DomainError, digest, now, uid
 from .sales_domain import QualityRule, ReviewDecision, score, scored_decisions
 
 STAGES = ("通用复盘", "需求沟通", "产品演示", "方案报价", "决策签约")
-READY = {"waiting_review", "completed"}
 
 
 def example_card(stage):
@@ -153,17 +150,8 @@ class QualityWorkspace:
             return {"id": card.id, "version": card.version}
 
     def source(self, session, kind, key, user=None):
-        if kind == "personal":
-            row = session.get(PersonalRecording, key)
-            if not row or row.deleted or user and (row.owner_id != user["id"] or row.company_id != user["company_id"]):
-                raise DomainError("个人会谈不存在或无权访问", 404)
-            run = self.store.get_run(row.run_id)
-            if run["status"] not in READY or not self.store.latest_report(row.run_id):
-                raise DomainError("会谈纪要尚未整理完成", 409)
-            meeting = session.get(Meeting, run["meeting_id"])
-            evidence = {key: span for key, span in self.store.source_map(row.run_id).items()
-                        if span["source_kind"] == "transcript"}
-            return row, row.version, row.body, evidence, bool(meeting.audio_path), {}
+        if kind != "center":
+            raise DomainError("管理质检只读取已上报资料", 403)
         row = session.get(Submission, key)
         if not row or row.deleted or user and not self.workspace.visible(row, user):
             raise DomainError("中心会谈不存在或无权访问", 404)
@@ -271,9 +259,6 @@ class QualityWorkspace:
         if analysis_id and self.settings.start_worker:
             self.driver.submit(analysis_id)
 
-    def on_run_ready(self, run_id):
-        return None
-
     def suspend_private(self):
         with self.sessions.begin() as session:
             ids = [key for case in session.scalars(select(QualityCase).where(
@@ -373,17 +358,57 @@ class QualityWorkspace:
         self.manager_reader(user)
         if scope != "center":
             raise DomainError("质检仅分析已上报的中心资料", 403)
+        visible = select(QualityCase.id, QualityCase.source_kind, QualityCase.source_id,
+            QualityCase.source_revision, QualityCase.version, QualityCase.team_id,
+            QualityCase.owner_id, QualityCase.active_analysis_id, QualityCase.error,
+            QualityCase.created_at, QualityCase.body["metadata"].label("metadata"),
+            QualityCase.body["owner_name"].as_string().label("owner"),
+            QualityCase.body["stage"].as_string().label("stage")).join(Submission,
+                and_(Submission.id == QualityCase.source_id,
+                     Submission.revision == QualityCase.source_revision)).where(
+                QualityCase.company_id == user["company_id"], QualityCase.source_kind == scope,
+                Submission.company_id == user["company_id"], Submission.deleted.is_(False))
+        if user["role"] == "manager":
+            visible = visible.where(Submission.team_id == user["team_id"])
+        visible = visible.cte("visible_quality")
+        reviews = select(QualityReview.analysis_id, QualityReview.id,
+            QualityReview.body["metrics"].label("metrics"),
+            func.row_number().over(partition_by=QualityReview.analysis_id,
+                order_by=QualityReview.created_at.desc()).label("position")).join(
+                    visible, QualityReview.case_id == visible.c.id).subquery()
+        feedback = select(QualityFeedback.case_id, func.count().label("pending")).join(
+            visible, QualityFeedback.case_id == visible.c.id).where(
+                QualityFeedback.status == "pending").group_by(QualityFeedback.case_id).subquery()
+        statement = select(visible, Team.name.label("team_name"), SalesAnalysis.id.label("analysis_id"),
+            SalesAnalysis.status.label("analysis_status"), SalesAnalysis.error.label("analysis_error"),
+            SalesAnalysis.mode, SalesAnalysis.playbook_id,
+            SalesAnalysis.snapshot["conversation"]["body"]["stage"].as_string().label("analysis_stage"),
+            SalesAnalysis.snapshot["playbook"]["body"]["name"].as_string().label("policy_name"),
+            SalesAnalysis.snapshot["playbook"]["version"].as_integer().label("policy_version"),
+            SalesAnalysis.report["metrics"].label("machine_metrics"), reviews.c.id.label("review_id"),
+            reviews.c.metrics.label("review_metrics"), feedback.c.pending).outerjoin(
+                Team, and_(Team.id == visible.c.team_id, Team.company_id == user["company_id"])).outerjoin(
+                SalesAnalysis, SalesAnalysis.id == visible.c.active_analysis_id).outerjoin(
+                reviews, and_(reviews.c.analysis_id == SalesAnalysis.id, reviews.c.position == 1)).outerjoin(
+                feedback, feedback.c.case_id == visible.c.id).order_by(visible.c.created_at.desc())
         with self.sessions() as session:
-            rows = session.scalars(select(QualityCase).where(QualityCase.company_id == user["company_id"],
-                QualityCase.source_kind == scope).order_by(QualityCase.created_at.desc())).all()
             output = []
-            for row in rows:
-                try:
-                    case, revision = self.case(session, row.id, user)
-                    if revision == case.source_revision:
-                        output.append(self.serialize(session, case, revision))
-                except DomainError:
-                    continue
+            for row in session.execute(statement).mappings():
+                has_analysis = row["analysis_id"] is not None
+                output.append({"id": row["id"], "source_kind": row["source_kind"],
+                    "source_id": row["source_id"], "source_revision": row["source_revision"],
+                    "version": row["version"], "stale": False, "owner": row["owner"],
+                    "metadata": row["metadata"],
+                    "subject": {"account_id": row["owner_id"], "name": row["owner"],
+                        "team_id": row["team_id"], "team_name": row["team_name"] or "团队待确认"},
+                    "stage": row["analysis_stage"] if has_analysis else row["stage"],
+                    "status": row["analysis_status"] if has_analysis else "failed" if row["error"] else "needs_speakers",
+                    "pending_feedback": row["pending"] or 0, "mode": row["mode"],
+                    "error": row["analysis_error"] if has_analysis else row["error"],
+                    "metrics": (row["review_metrics"] if row["review_id"] else row["machine_metrics"])
+                        if row["machine_metrics"] is not None else None,
+                    "policy": {"id": row["playbook_id"], "name": row["policy_name"],
+                        "version": row["policy_version"]} if has_analysis else None})
         groups = defaultdict(list)
         for row in output:
             if row["metrics"]:
@@ -403,11 +428,11 @@ class QualityWorkspace:
             if self.settings.db_url.startswith("sqlite"):
                 session.connection().exec_driver_sql("BEGIN IMMEDIATE")
             case, _ = self.case(session, key, user, write=True)
-            if case.source_kind == "center" and (user["role"] != "manager" or user["team_id"] != case.team_id):
+            if user["role"] != "manager" or user["team_id"] != case.team_id:
                 raise DomainError("中心质检背景由负责主管核对", 403)
             if case.version != value.version:
                 raise DomainError("质检已更新，请刷新", 409)
-            if case.source_kind == "center" and not value.reason.strip():
+            if not value.reason.strip():
                 raise DomainError("请说明中心质检背景的更正原因")
             if case.error:
                 raise DomainError(case.error, 422)
@@ -437,7 +462,7 @@ class QualityWorkspace:
             if self.settings.db_url.startswith("sqlite"):
                 session.connection().exec_driver_sql("BEGIN IMMEDIATE")
             case, _ = self.case(session, key, user, write=True)
-            if case.source_kind != "center" or user["role"] != "manager" or case.team_id != user["team_id"]:
+            if user["role"] != "manager" or case.team_id != user["team_id"]:
                 raise DomainError("仅负责团队主管可复核已上报质检", 403)
             previous = session.scalar(select(QualityReview).where(QualityReview.request_hash == request_hash))
             if previous:
@@ -531,7 +556,7 @@ def quality_router(service):
             if service.settings.db_url.startswith("sqlite"):
                 session.connection().exec_driver_sql("BEGIN IMMEDIATE")
             case, _ = service.case(session, key, user, write=True)
-            if case.source_kind == "center" and (user["role"] != "manager" or user["team_id"] != case.team_id):
+            if user["role"] != "manager" or user["team_id"] != case.team_id:
                 raise DomainError("仅负责主管可恢复中心质检", 403)
             analysis = session.get(SalesAnalysis, case.active_analysis_id) if case.active_analysis_id else None
             if not analysis or analysis.status != "failed" or analysis.cancel_requested:
