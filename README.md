@@ -4,6 +4,60 @@ MeetFlow面向企业软件／服务销售：录音上传后自动整理全文、
 
 **项目固定采用多Agent协作；职责划分和协作方式分别做实验。** 当前可运行账号版默认使用规则模拟，ASR已接入；真实本地模型仅用于隔离实验，完整生产图低预算诊断未通过，不宣称真实AI效果或企业容量已达标。
 
+## 后端完成度与前后端联调（2026-11-13）
+
+**主要业务后端已落地并接上UI，可以本地演示；真实大模型完整链路和企业部署尚未完成。** 以下是实际代码及本轮复核结果，不把页面可打开等同于AI质量过关。
+
+| 部分 | 当前完成程度 | 本轮证据／限制 |
+|---|---|---|
+| 登录、邀请码、公司／团队／本人权限 | 已接后端 | 93项产品回归覆盖邀请绑定、注册并发与越权；Chrome三真实身份仍独立 |
+| 会谈、全文、上报、中心版本、更正 | 已接后端与持久数据 | Chrome读取既有29段转写、主管及老板不同范围；写入／更正由隔离回归验证 |
+| 客户推进、承诺跟进、岗位首页 | 已接后端 | 实际读取团队／公司工作台；目前关注线索和提取仍为规则演示 |
+| 简报周报、Word／PDF、维护 | 已接后端 | 读取已确认报告，两种实际文件导出200且内容ID相同；本轮未重做Word逐页排版验收 |
+| 主管／老板质检 | 已接后端 | 5场团队／6场公司范围，评分主体及原因→证据可展开；销售接口403，评分仍为规则演示 |
+| 真实ASR | 已接入且有真实样本走通 | 本轮读已有音频及转写，未重新跑ASR；识别质量和说话人分离仍有缺口 |
+| 真实LLM多Agent完整图 | 尚未通过端到端验收 | 当前live_available=false；此前低预算完整图与单角色诊断有失败，不代表全部正常配置已测 |
+| 数据库 | 已建表、落盘并管理关联／版本 | SQLite WAL，34表／70外键／17模型唯一约束，quick_check=ok、外键违例0 |
+| 企业部署 | 未完成 | 版本化数据库迁移、跨进程任务领取、备份恢复演练、真实负载及部署治理待做；PostgreSQL等仍是待验证候选 |
+
+本轮重新执行93项产品检查全部通过（112.11秒），前端vue-tsc与生产构建通过；运行服务32项HTTP／导出读取检查通过（包含预期403／404）。用户本地Chrome销售／主管／老板页面实际读取正常，采集期三个页面无error日志。测试、API、浏览器和AI效果的证据分别记录，详见[后端／前端／数据库联调验收](docs/30-backend-frontend-database-status.md)。
+
+### 当前本地部署结构
+
+```mermaid
+flowchart TD
+    UI[本地Chrome<br/>Vue账号工作区] --> API[Uvicorn＋FastAPI<br/>页面、API、鉴权与下载]
+    API --> WEB[frontend/dist<br/>构建后的静态页面]
+    API --> BIZ[会谈／中心／客户跟进<br/>质检／报告／维护模块]
+    BIZ --> DB[SQLAlchemy → SQLite WAL<br/>data/meetflow.db]
+    BIZ --> JOB[会谈与质检本地执行器<br/>各1个worker]
+    BIZ --> AUDIO[data/audio<br/>受权限保护的音频文件]
+    BIZ --> EXPORT[确认报告 → Word／PDF<br/>按需生成文件响应]
+    JOB --> ASR[faster-whisper<br/>录音按需转写]
+    JOB --> GRAPH[LangGraph<br/>工具循环与协作图]
+    GRAPH --> CHECK[checkpoints.db<br/>sales-checkpoints.db]
+    GRAPH -.真实模式默认未启用.-> MODEL[大模型接口适配器]
+```
+
+箭头表示访问／调用。录音先转写再分析，已有文字跳过ASR。默认部署是同一服务提供页面和API；Node只用于前端安装／构建，开发模式才另外启动Vite。账号页面使用定时轮询，不是已实现WebSocket；本地执行器也不是Redis／Celery队列。
+
+### 页面、接口、后端代码怎样对应
+
+表中接口均以`/api`开头，入口由[前端api.ts](frontend/src/api.ts)统一附带当前标签页登录令牌。
+
+| 页面／组件 | 主要接口 | 后端模块 | 主要持久数据 |
+|---|---|---|---|
+| 账号／邀请／团队，WorkspaceApp | `/auth/*`、`/admin/*` | auth.py | Account、Team、Invitation、AccessSession |
+| 会谈录音／全文，WorkspaceApp | `/workspace/recordings`、`/workspace/audio`及详情／修订 | workspace.py、store.py、audio.py | PersonalRecording、Run、Source、Report及音频文件 |
+| 我的上报／中心／更正，WorkspaceApp | `/workspace/center`、`/workspace/corrections` | workspace.py | Submission、Correction和旧版快照 |
+| 岗位首页／客户与跟进，BusinessWorkspace | `/workspace/business/*` | business.py | Customer、Opportunity、Followup |
+| 简报周报，ReportsWorkspace | `/workspace/reports/*` | reports_workspace.py | SalesReport、确认版本和来源快照 |
+| 管理质检，QualityWorkspace | `/workspace/quality/cases/*` | quality_workspace.py、sales_workflow.py | QualityCase、SalesAnalysis、QualityReview |
+| 回收站／恢复／停止重试，MaintenanceWorkspace及会谈页 | `/workspace/maintenance/*` | maintenance.py | 软删除标记、版本和Audit |
+| 培训规则，TrainingRules | `/workspace/quality/policy` | quality_workspace.py | QualityPolicy、SalesPlaybook版本 |
+
+默认账号界面由WorkspaceApp组织；旧SalesWorkspace／单用户开发接口不是当前销售使用的质检入口，旧无归属接口在账号模式隔离。
+
 ## 从输入到输出
 
 ```mermaid
@@ -196,6 +250,24 @@ sequenceDiagram
 模块化单体：Python3.12+、FastAPI、Pydantic、SQLAlchemy、SQLite WAL、LangGraph＋SQLite检查点；前端Vue；语音faster-whisper，报告python-docx／ReportLab。后台为本地执行器，不是分布式队列。PostgreSQL、Redis、Celery与外部CRM同步尚未部署。
 
 账号→个人录音→来源／运行版本→报告；上报后固定Submission中心快照，再关联稳定客户／商机、Followup、QualityCase、SalesAnalysis与主管QualityReview。归属、权限、上传／会谈／修订时间分别管理。详见[后端与表间数据流审计](docs/25-backend-architecture-audit.md)。
+
+### 核心数据关联简图
+
+```mermaid
+flowchart TD
+    A[Account／Company／Team<br/>登录身份及数据范围] --> R[PersonalRecording<br/>归属销售、run_id、个人版本]
+    R --> P[Run／Source／Report<br/>冻结输入、片段ID与整理结果]
+    R -->|本人确认上报| S[Submission<br/>中心revision与snapshot]
+    S --> C[Correction<br/>申请、主管审核与旧版历史]
+    S -.来源ID与版本.-> Q[QualityCase／SalesAnalysis<br/>被评销售与分析版本]
+    Q --> V[QualityReview<br/>主管、依据与复核版本]
+    S -.商机ID与来源版本.-> B[Customer／Opportunity／Followup<br/>跨会谈进展及反馈]
+    P -.个人报告来源快照.-> W[SalesReport<br/>草稿与已确认固定内容]
+```
+
+这是业务关联图，不是全量物理ER。部分来源、多态关系和JSON内ID由应用检查，并非全部有数据库外键；70个外键不能代替公司／团队权限验证。主库保存结构化资料和快照，音频是文件，检查点另存两份SQLite文件。建表主要依赖create_all，尚无正式Alembic迁移链；未将回收站恢复当成数据库备份恢复演练。
+
+主库保留24条初轮PyAV19兼容性失败，已与原始失败批次逐ID匹配；修复后另一批24条均有待确认／完成结果。历史失败不删除，waiting_review通常是等待人工确认而非执行异常。当前依赖PyAV16.1.0，详见[真实录音历史测试](docs/15-real-audio-benchmark.md)与[本轮状态核验](docs/30-backend-frontend-database-status.md)。
 
 500场老板质检列表SQL已由2501次降到1次，两轮中位时延约降80%，严格返回等价；这项已纳入产品。AI质量未通过的方案不因查询快而算合格，详见[后端量化结果及失败](docs/26-quantitative-experiments.md)。
 
