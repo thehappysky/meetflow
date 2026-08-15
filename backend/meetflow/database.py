@@ -144,6 +144,62 @@ class Audit(Base):
     created_at: Mapped[str] = mapped_column(default=now)
 
 
+class SalesPlaybook(Base):
+    __tablename__ = "sales_playbooks"
+    __table_args__ = (UniqueConstraint("family_id", "version"),)
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), index=True)
+    family_id: Mapped[str]
+    version: Mapped[int]
+    body: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class SalesConversation(Base):
+    __tablename__ = "sales_conversations"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), index=True)
+    body: Mapped[dict] = mapped_column(JSON)
+    version: Mapped[int] = mapped_column(default=1)
+    status: Mapped[str] = mapped_column(default="ready")
+    error: Mapped[str | None] = mapped_column(Text)
+    audio_path: Mapped[str | None]
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class SalesAnalysis(Base):
+    __tablename__ = "sales_analyses"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(ForeignKey("sales_conversations.id"), index=True)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), index=True)
+    playbook_id: Mapped[str] = mapped_column(ForeignKey("sales_playbooks.id"))
+    snapshot: Mapped[dict] = mapped_column(JSON)
+    mode: Mapped[str]
+    status: Mapped[str] = mapped_column(default="queued")
+    phase: Mapped[str] = mapped_column(default="等待质检")
+    artifacts: Mapped[dict] = mapped_column(JSON, default=dict)
+    events: Mapped[list] = mapped_column(JSON, default=list)
+    report: Mapped[dict | None] = mapped_column(JSON)
+    report_hash: Mapped[str | None]
+    error: Mapped[str | None] = mapped_column(Text)
+    model_calls: Mapped[int] = mapped_column(default=0)
+    tool_calls: Mapped[int] = mapped_column(default=0)
+    input_tokens: Mapped[int] = mapped_column(default=0)
+    output_tokens: Mapped[int] = mapped_column(default=0)
+    cancel_requested: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
+class SalesReview(Base):
+    __tablename__ = "sales_reviews"
+    id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    analysis_id: Mapped[str] = mapped_column(ForeignKey("sales_analyses.id"), unique=True)
+    idempotency_key: Mapped[str] = mapped_column(unique=True)
+    request_hash: Mapped[str]
+    body: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[str] = mapped_column(default=now)
+
+
 def make_database(settings):
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     connect_args = {"check_same_thread": False, "timeout": 30} if settings.db_url.startswith("sqlite") else {}

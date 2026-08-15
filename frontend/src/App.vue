@@ -28,6 +28,7 @@ import {
   X,
 } from "@lucide/vue";
 import { api, post } from "./api";
+import SalesWorkspace from "./SalesWorkspace.vue";
 
 type Row = Record<string, any>;
 const page = ref("meetings");
@@ -445,6 +446,12 @@ onBeforeUnmount(() => subscription?.close());
       <div class="nav-caption">工作空间</div>
       <nav aria-label="主导航">
         <button
+          :class="{ active: page === 'sales' }"
+          @click="changePage('sales')"
+        >
+          <ShieldCheck :size="19" />销售质检
+        </button>
+        <button
           :class="{ active: page === 'meetings' }"
           @click="changePage('meetings')"
         >
@@ -472,7 +479,7 @@ onBeforeUnmount(() => subscription?.close());
       </div>
       <div class="profile">
         <span class="avatar">我</span>
-        <div>本地工作空间<small>单用户开发版本 · v0.1</small></div>
+        <div>本地工作空间<small>单用户开发版本 · v0.2</small></div>
       </div>
     </aside>
     <main>
@@ -482,11 +489,13 @@ onBeforeUnmount(() => subscription?.close());
           {{
             detail
               ? "会议详情"
-              : page === "meetings"
-                ? "会议"
-                : page === "tasks"
-                  ? "任务看板"
-                  : "项目资料"
+              : page === "sales"
+                ? "销售质检"
+                : page === "meetings"
+                  ? "会议"
+                  : page === "tasks"
+                    ? "任务看板"
+                    : "项目资料"
           }}</span
         ><select aria-label="当前项目" v-model="projectId">
           <option
@@ -512,7 +521,13 @@ onBeforeUnmount(() => subscription?.close());
           </button>
         </div>
 
-        <template v-if="detail">
+        <SalesWorkspace
+          v-if="page === 'sales' && projectId"
+          :key="projectId"
+          :project-id="projectId"
+          :health="health"
+        />
+        <template v-else-if="detail">
           <button class="back-button" @click="back">
             <ArrowLeft :size="16" />返回会议
           </button>

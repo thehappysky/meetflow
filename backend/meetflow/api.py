@@ -30,6 +30,9 @@ from .demo import import_demo
 from .domain import DomainError, MeetingInput, ReviewInput, SourceInput, TaskUpdate, now, uid
 from .orchestration import RunDriver
 from .reviews import approve, render_markdown
+from .sales import SalesService
+from .sales_api import sales_router
+from .sales_workflow import SalesDriver
 from .store import Store
 
 
@@ -37,22 +40,27 @@ class ProjectInput(BaseModel):
     name: str = Field(min_length=1, max_length=200)
 
 
-def create_app(settings=None, provider=None):
+def create_app(settings=None, provider=None, sales_provider=None):
     settings = settings or Settings()
     engine, sessions = make_database(settings)
     store = Store(sessions, settings)
     driver = RunDriver(store, provider)
+    sales = SalesService(store)
+    sales_driver = SalesDriver(sales, sales_provider)
 
     @asynccontextmanager
     async def lifespan(app):
         if settings.start_worker:
             driver.recover()
+            sales_driver.recover()
         yield
         driver.close()
+        sales_driver.close()
         engine.dispose()
 
-    app = FastAPI(title="MeetFlow", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="MeetFlow", version="0.2.0", lifespan=lifespan)
     app.state.store, app.state.driver = store, driver
+    app.state.sales, app.state.sales_driver = sales, sales_driver
     app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
                        allow_methods=["GET", "POST", "PATCH"], allow_headers=["Content-Type", "Last-Event-ID"])
 
@@ -70,7 +78,7 @@ def create_app(settings=None, provider=None):
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "version": "0.1.0", "live_available": settings.live_available,
+        return {"status": "ok", "version": "0.2.0", "live_available": settings.live_available,
                 "audio_available": audio_available(settings), "deployment": "local-single-user",
                 "demo_notice": "离线演示使用规则模拟，不调用大模型；真实模式需服务端配置。"}
 
@@ -328,6 +336,7 @@ def create_app(settings=None, provider=None):
         with sessions() as session:
             return [row_dict(row) for row in session.scalars(select(Audit).order_by(Audit.id.desc()).limit(100))]
 
+    app.include_router(sales_router(sales, sales_driver))
     dist = Path(__file__).resolve().parents[2] / "frontend/dist"
     if dist.exists():
         app.mount("/", StaticFiles(directory=dist, html=True), name="web")

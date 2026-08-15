@@ -5,9 +5,19 @@ Push-Location -LiteralPath $taskRoot
 try {
     $taskPython = Join-Path $taskRoot '.venv\Scripts\python.exe'
     if (-not (Test-Path -LiteralPath $taskPython)) {
-        python -m venv .venv
+        if (Get-Command py -ErrorAction SilentlyContinue) {
+            py -3 -c "import sys; assert sys.version_info >= (3,12), 'Python 3.12+ is required'"
+            if ($LASTEXITCODE -ne 0) { throw 'Python 3.12+ is required' }
+            py -3 -m venv .venv
+        } else {
+            python -c "import sys; assert sys.version_info >= (3,12), 'Python 3.12+ is required'"
+            if ($LASTEXITCODE -ne 0) { throw 'Python 3.12+ is required' }
+            python -m venv .venv
+        }
         if ($LASTEXITCODE -ne 0) { throw 'Python 3.12+ is required' }
     }
+    & $taskPython -c "import sys; assert sys.version_info >= (3,12)"
+    if ($LASTEXITCODE -ne 0) { throw 'Virtual environment is unavailable. Preserve it elsewhere, then run this script again to recreate .venv.' }
     if (-not $SkipInstall) {
         & $taskPython -m pip install -r requirements.lock
         if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed' }

@@ -2,6 +2,8 @@
 
 本项目当前目标见 BLUEPRINT.md，用户流程见 docs/11-user-experience.md。
 
+当前新增业务方向为用户选定的方案 A 销售会话质检，具体实施、口径及限制优先参见 docs/13-sales-quality.md。原会议模块保留；方案 B 本轮不开发。不能把旧体验文档中的未实现能力视为当前成品。
+
 - 每个逻辑修改批次都更新 PROGRESS.md 与 CHANGELOG.md，并提交 Git，注明实际验证及剩余限制。不要回写或删除旧变更记录；更正采用新增说明。
 - 每次结束工作前更新当前状态、下一步和恢复开发所需命令，确保下次能继续。
 - 进度按阶段记录。Git 日期按用户要求使用 scripts/commit.ps1 回填，明确参见 docs/COMMIT_METADATA.md，不将其当作真实开发周期。

@@ -1197,8 +1197,17 @@ textarea:disabled {
     margin-top: 12px;
   }
   nav button {
-    padding: 9px 12px;
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+    gap: 5px;
+    white-space: nowrap;
+    padding: 9px 6px;
     font-size: 11px;
+  }
+  nav button svg {
+    width: 16px;
+    flex-shrink: 0;
   }
   .nav-arrow {
     display: none;

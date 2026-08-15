@@ -1,6 +1,7 @@
 .venv-framework-lab/
 **/__pycache__/
 .venv/
+.venv-legacy-313/
 .env
 data/
 *.log
